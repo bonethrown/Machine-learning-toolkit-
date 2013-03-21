@@ -1,0 +1,147 @@
+"""
+Module containing soome helpfull utility functions
+"""
+import re,datetime,time
+from dateutil.parser import parse
+#convert format "13:13" to minutes
+def convertTime(time):
+    timeInSeconds = 0
+    if time.find(":")>0:
+        min,sec = time.split(":")
+    elif time.find("m")>0:
+         min,sec = time.split("m")
+         sec = sec.replace("s","")
+    else:
+        min = 0
+        sec = 0
+    min = int(min)
+    sec = int(sec)       
+    return (min*60)+sec
+    
+def convertDate(toConvert):
+    dateSplit = toConver.split(" ")
+    
+    
+def cleanChars(toClean):
+    
+    badChars = ["\\r","\\t","\\n",":","%",",","(",")"]
+    stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
+    toClean = toClean.lower().strip()
+    for val in badChars:
+        toClean = toClean.replace(val,"")
+    for word in stopWords:
+        toClean = toClean.replace(word,"")    
+    if toClean:
+        return toClean.strip()
+    
+def cleanHtmlTags(strArr):
+    p = re.compile(r'<.*?>')
+    pm = re.compile(r'\([^)]*\)')
+    cleanArr = map(lambda x: p.sub('',x),strArr)
+    return map(lambda x: pm.sub('',x),cleanArr)
+    
+ #TODO finish and test
+ 
+def dateDeltaToIso(dateStr):
+
+    today = datetime.datetime.today()
+    
+    dateTimeDelta = datetime.datetime.today()
+    #we should have ["9","months"]
+    dateNumeric,datePeriod =  dateStr.split(" ")
+    dateNumeric = int(dateNumeric)
+    if datePeriod == "years" or datePeriod == "year" :
+        dateTimeDelta =  datetime.timedelta(days = dateNumeric *366)
+    if datePeriod == "months" or datePeriod == "month":
+        dateTimeDelta =  datetime.timedelta(days = dateNumeric * 30)
+    if datePeriod == "weeks" or datePeriod == "week":
+        dateTimeDelta =  datetime.timedelta(days = dateNumeric *7)
+    if datePeriod == "days" or datePeriod == "days":
+        dateTimeDelta =  datetime.timedelta(days = dateNumeric)
+    if datePeriod == "hours" or datePeriod == "hour":
+	#if today don't worry about it
+    	return today.isoformat()+"Z"
+    
+    newDate = today - dateTimeDelta
+    return newDate.isoformat()+"Z"
+    
+# Ecpected format is "August 15, 2012"
+def convertDateClass(toConv):
+    date =  parse(toConv)
+    return date.isoformat()+"Z"
+
+#return the first in array
+def getFirst(array):
+    if isinstance(array,list):
+            return array.pop()
+    return array
+#return the last item in array
+def getLast(array):
+    if isinstance(array,list):
+        return array[len(array)-1]
+    return array
+
+def convertDateClassOBJ(toConv):
+    date =  parse(toConv)
+    return dat
+def extractSku(string):
+    temp = str(string)
+    temp = re.search(r'[\d]+', temp)
+    temp = temp.group()
+    temp = int(temp)
+    return temp
+
+def extractPrice(string):
+    tempPrice = str(string)
+    tempPrice = re.search(r'[\d.,]+', tempPrice)
+    tempPrice = tempPrice.group().replace(',','.')
+    tempPrice = float(tempPrice)
+
+    return tempPrice
+
+class listMatcher:
+
+    def __init__(self, config):
+        self.lookup = []
+
+        try:
+            fp = open(config,'r')
+            print "loading file"
+            for line in fp.readlines():
+                self.lookup.append(line.lower().strip())
+            fp.close()
+        except Exception, e:
+            print "###ERROR reading file###"
+            print e 
+    
+    def listMatch(self, toMatch):
+        for line in self.lookup: 
+           # reg = "\s?"
+           # regify = reg+"("+line+")"+reg
+           # print regify
+            line = " "+line+" "
+            toMatch = " "+toMatch+" "
+            brand = re.search(line ,toMatch, re.I)
+            if brand:
+                print "match found "+brand.group()
+                return brand.group()
+
+def extractBrand(toConv):
+    toConv  = re.search(r'[\w]+.+', toConv)
+    toConv=toConv.group()
+    return toConv
+def groupItem(toGroup):
+    if toGroup:
+        myGroup = toGroup.group()
+        return myGroup
+    else:
+        print " is not a string none error"
+
+if __name__ == '__main__':
+    print "Testing List matcher"
+    a = "imel Fabulash Waterproof - Cor 22 Black - Revlon"
+    print a
+    m = listMatcher('brandric.list')
+    print m.listMatch(a)
+
+
