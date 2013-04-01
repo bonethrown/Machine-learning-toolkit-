@@ -18,7 +18,7 @@ ITEM_PIPELINES = ['cosme.pipelines.CosmePipeline']
 SPIDER_MODULES = ['cosme.spiders']
 NEWSPIDER_MODULE = 'cosme.spiders'
 USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
-DOWNLOAD_DELAY = 0
+DOWNLOAD_DELAY = 2
 
 
 HTTPCACHE_ENABLED = True

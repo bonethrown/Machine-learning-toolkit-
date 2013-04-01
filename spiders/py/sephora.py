@@ -6,7 +6,7 @@
 
 \f0\fs36 \cf0 IMAGE = "//div[@class=\\'lateralImagemProduto highslide-gallery\\']/img/@src"\
 NAME =  "//div[@class=\\'tituloDescricaoProduto\\']/h1/text()"\
-BRAND = "//null"\
+BRAND = "//ul[@class=\\'breadCrumb\\']/li[1]/a/text()"\
 PRICE = "//span[@class=\\'produtoPrecoVendaPor\\']/text()"\
 STARS="//div[@class=\\'avaliacaoProduto Avaliacao0\\']/text()"\
 DESCRIPTION = "//span[@id=\\'shortdescription\\']/p[1]/text()"\
