@@ -20,13 +20,16 @@ def process(item,spider,matcher):
     if item['price']:
         item['price'] = float(utils.getFirst(item['price']).replace(',','.'))
         
-    if item['brand']:
+    if item['name']:
          temp = item['name']
-        # temp = temp[0]
+         log.msg("match found: %s" %temp, level=log.DEBUG)
          item['brand'] = matcher.listMatch(temp)
-         log.msg("match found: %s" %item['brand'], level=log.DEBUG)
-    
-    # item["raw_data"] = ""
+         #log.msg("match found: %s" %item['brand'], level=log.DEBUG)
+	 log.msg(item['brand'])
+
+    if item['url']:
+	item['url'] = item['url'].lower()
+    # item["raw_data"] = "
     #set our crawl time
     item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
      

@@ -141,7 +141,7 @@ def groupItem(toGroup):
 
 if __name__ == '__main__':
     print "Testing List matcher"
-    a = "imel Fabulash Waterproof - Cor 22 Black - Ulric de Varens"
+    a = "imel Fabulash Waterproof - Cor 22 Black - Revlon Ulric de Varens"
     print a
     m = listMatcher('brandric.list')
     print m.listMatch(a)

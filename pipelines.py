@@ -17,7 +17,7 @@ import os
 #simple pipeline for now. Drop Items with no description!
 class CosmePipeline(object):
     def __init__(self):
-        self.solr_url = "http://localhost:8080/solr/cosme/update?json"
+        self.solr_url = "http://localhost:8080/solr/cosme0/update?json"
         #Lets send to ec2 as well
         self.solr_url_prod = "http://ec2-54-242-158-167.compute-1.amazonaws.com:8080/solr/update?"
         #Set up NonRelDB-Connection
