@@ -72,7 +72,9 @@ class CosmePipeline(object):
                 #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
                 resultDB = self.db.items.insert(dict(cleanItem),safe=True )
                 #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
-                log.msg("Submitting to mongoDB ready to send %s type %s  result %s"%(cleanItem,type(cleanItem),resultDB), level=log.DEBUG)
+                log.msg("Submitting to mongoDB ready to send %s type %s  result %s " %
+                                (cleanItem,type(cleanItem),resultDB), 
+                            level=log.DEBUG)
             except Exception, e:
                 log.msg("ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
                 try:

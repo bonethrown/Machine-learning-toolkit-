@@ -10,6 +10,7 @@ from scrapy.contrib.loader import XPathItemLoader
 
 from xpaths import *
 import sys
+from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 
 #TODO Use SitemapSpider instead for magazineluiza.com.br
 class Cosme(CrawlSpider):
@@ -36,6 +37,8 @@ class Cosme(CrawlSpider):
 	magazine_rule,
 		)
 
+    xpathRegistry = XPathRegistry()
+    
     #not used for now, we will crawl all links
     def drop(self,response):
         pass
@@ -65,10 +68,7 @@ class Cosme(CrawlSpider):
         cosmeItem['site']= self.getDomain(response.url)
         cosmeItem['url'] = response.url
         #Get xpaths that correspond to our domain
-        siteModulePath = "cosme.spiders.xpaths."+cosmeItem['site']
-        
-        #open our xpath for this site
-        siteModule = sys.modules[siteModulePath]
+        siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])        
         
         #Traverse All our fields in our xpath
         for field in siteModule.META.keys():

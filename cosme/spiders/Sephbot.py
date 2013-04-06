@@ -2,9 +2,10 @@ from scrapy.contrib.spiders import CrawlSpider ,Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
 
-import sys
 from cosme.items import CosmeItem
+from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 
+ 
 class Cosme(CrawlSpider):
     name = 'Sbot'
     allowed_domains = ['sephora.com.br']
@@ -19,7 +20,8 @@ class Cosme(CrawlSpider):
              Rule(SgmlLinkExtractor(allow = allow_exts, deny = deny_exts) , follow=True, callback='parse_item'),
              ]
 
-   
+    xpathRegistry = XPathRegistry()
+    
     def getDomain(self, url):
         try:
             urlSeg = url.split('/')
@@ -40,8 +42,7 @@ class Cosme(CrawlSpider):
         cosmeItem = CosmeItem()
         cosmeItem['site'] = self.getDomain(response.url)
         cosmeItem['url'] = response.url
-        siteModulePath = "cosme.spiders.xpaths."+cosmeItem['site']
-        siteModule = sys.modules[siteModulePath]
+        siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
 

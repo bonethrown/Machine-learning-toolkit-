@@ -1,15 +1,8 @@
 from scrapy.contrib.spiders import CrawlSpider ,Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
-from scrapy.utils.response import body_or_str, get_base_url, get_meta_refresh
-from scrapy.http import Request
 from cosme.items import CosmeItem
-from scrapy import log
-from scrapy.contrib.loader import XPathItemLoader
-
-
-from xpaths import *
-import sys
+from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 
 #TODO Use SitemapSpider instead for magazineluiza.com.br
 class Cosme(CrawlSpider):
@@ -27,7 +20,7 @@ class Cosme(CrawlSpider):
     #start_urls = [start[4]]
     deny_exts = ('games','cams','photos','stories','login\.php','signup\.php','tags\.html','categories\.html','upload.html','search' ,'cat','c=','channel','tag','channels','click','pornstar','community')
     for i in start:
-         start_urls.append(i)
+        start_urls.append(i)
 
     magazine_rule = Rule(SgmlLinkExtractor(allow=(magaRegex),unique=True,deny_extensions=('php'),deny=deny_exts ),callback='parse_item',follow=True)
    
@@ -35,7 +28,9 @@ class Cosme(CrawlSpider):
     rules = (
 	magazine_rule,
 		)
-
+    
+    xpathRegistry = XPathRegistry()
+    
     #not used for now, we will crawl all links
     def drop(self,response):
         pass
@@ -64,11 +59,8 @@ class Cosme(CrawlSpider):
         cosmeItem['site']= self.getDomain(response.url)
         cosmeItem['url'] = response.url
         #Get xpaths that correspond to our domain
-        siteModulePath = "cosme.spiders.xpaths."+cosmeItem['site']
-        
-        #open our xpath for this site
-        siteModule = sys.modules[siteModulePath]
-        
+        siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
+                
         #Traverse All our fields in our xpath
         for field in siteModule.META.keys():
             cosmeItem[field] = x.select(siteModule.META[field]).extract()
