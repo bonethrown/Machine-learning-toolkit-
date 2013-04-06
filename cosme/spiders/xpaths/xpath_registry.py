@@ -15,8 +15,8 @@ class XPathRegistry:
         self.xpathDict['laffayette'] = LaffayetteXPath()
         self.xpathDict['magazineluiza'] = MagazineLuizaXPath()
         self.xpathDict['sepha'] = SephaXPath()
-        self.xpathDict['sephora'] = SephoraXPath()
-        self.xpathDict['sephora2'] = Sephora2XPath()
+        self.xpathDict['sephora'] = Sephora2XPath()
+        #self.xpathDict['sephora2'] = Sephora2XPath()
         
     def getXPath(self, site):
         return self.xpathDict[site]        

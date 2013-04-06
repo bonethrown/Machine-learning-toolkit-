@@ -4,14 +4,19 @@ from scrapy.selector import HtmlXPathSelector
 
 from cosme.items import CosmeItem
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
+from scrapy import log
+import sys
+from scrapy.exceptions import CloseSpider
+
 
  
 class Cosme(CrawlSpider):
     name = 'Sbot'
     allowed_domains = ['sephora.com.br']
     #might need to change this this is useless for now
-    start_urls = ["http://www.sephora.com.br"]
-    #start = ('http://www.belezanaweb.com.br/perfumes/',)
+    
+    #start_urls = ["http://www.sephora.com.br"]
+    start_urls = ['http://www.sephora.com.br/site/produto.asp?idproduto=13943']
     
     deny_exts = ('include', 'ajax', 'basket')
     allow_exts = (r'site/produto.asp\?idproduto=\d+',r'site/categoria.asp\?idcategoria=\d+')
@@ -22,6 +27,7 @@ class Cosme(CrawlSpider):
 
     xpathRegistry = XPathRegistry()
     
+        
     def getDomain(self, url):
         try:
             urlSeg = url.split('/')
@@ -45,5 +51,6 @@ class Cosme(CrawlSpider):
         siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-
-        yield cosmeItem
+        self.log(str(cosmeItem),log.INFO)
+        raise CloseSpider('Ad-hoc closing for debugging')
+        #yield cosmeItem

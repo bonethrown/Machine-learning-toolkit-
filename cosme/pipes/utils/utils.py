@@ -1,5 +1,5 @@
 """
-Module containing soome helpfull utility functions
+Module containing some helpful utility functions
 """
 import re,datetime,time
 from dateutil.parser import parse

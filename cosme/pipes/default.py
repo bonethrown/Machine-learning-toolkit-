@@ -11,7 +11,7 @@ class AbstractSite:
     #Do all default processing here before going on to site specific processing.
     def process(self, item,spider):
         if  not item['name']:
-            raise DropItem("Missing name in %s dropping" % item)
+            raise DropItem("Missing name in %s . Dropping" % item)
         #De-array these values. 
         if isinstance(item['description'],list) and len(item['description']) > 0:
             item['description'] = item['description'].pop()
@@ -20,7 +20,7 @@ class AbstractSite:
         if not item['price']:
             item['price'] = 1000
         if not item['brand']:
-            raise DropItem("missing brand in %s dropping this" % item)
+            raise DropItem("missing brand in %s . Dropping this" % item)
     
         
         # item["raw_data"] = ""

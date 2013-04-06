@@ -20,8 +20,12 @@ NEWSPIDER_MODULE = 'cosme.spiders'
 USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
 DOWNLOAD_DELAY = 2
 
+DEPTH_LIMIT=0
 
-HTTPCACHE_ENABLED = True
-HTTPCACHE_DIR = "HTTP_CACHE"
-HTTPCACHE_STORAGE = "scrapy.contrib.downloadermiddleware.httpcache.FilesystemCacheStorage"
+# Debug is Very noisy.
+LOG_LEVEL='INFO'
 
+
+RANDOMIZE_DOWNLOAD_DELAY=True
+DOWNLOAD_DELAY = 0.25  
+CLOSESPIDER_TIMEOUT=1
