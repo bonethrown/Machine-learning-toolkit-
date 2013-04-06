@@ -49,12 +49,11 @@ class Cosme(CrawlSpider):
         cosmeItem = CosmeItem()
         cosmeItem['site'] = self.getDomain(response.url)
         cosmeItem['url'] = response.url
-        print cosmeItem
         siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
+        cosmeItem['comments'] = self.get_comments(hxs)
         self.log(str(cosmeItem),log.INFO)
-        self.get_comments(hxs)
         if COSME_DEBUG:
             raise CloseSpider('Ad-hoc closing for debugging')
         else:
@@ -63,12 +62,8 @@ class Cosme(CrawlSpider):
     def get_comments(self, hxs):
         pattern =  "//ul[@class=\'produtoListaComentarios\']/li"        
         comments = hxs.select(pattern)
-        self.log('Comments : type(hxs)=%s, type(%s), %s' % (type(hxs), type(comments), comments),log.INFO)
-        print ("Total Comments: %s" % len(comments))
-        #print('Comments : type(hxs)=%s, type(%s), %s' % (type(hxs), type(comments), comments))
         result = []
         for comment in comments:
-            print('******************************')
             commentDict = dict()
             commentDict['star'] = self.get_star(comment)
             commentDict['name'] = comment.select('.//h3/span/text()').extract()[0].strip()
@@ -79,7 +74,7 @@ class Cosme(CrawlSpider):
     
     def get_date(self, comment):
         datestr  = ''.join(comment.select('.//h3/text()').extract()).strip()
-        needle= 'em\n'
+        needle= 'em'
         idx = datestr.find(needle)
         if idx > -1:
             return datestr[idx + len(needle):].strip()
