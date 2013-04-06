@@ -1,17 +1,13 @@
-from utils import utils,categorizer
-import re
-from scrapy import log
-from scrapy.exceptions import DropItem
-import datetime
+from utils import utils
 
 def process(item,spider,matcher):
     if item['url']:
-	item['url'] = item['url'].lower()					
+        item['url'] = item['url'].lower()					
 
     if item['price']: 
-   # tempPrice = re.search(r'[\d.,]+',str(item['price']))
-   # tempPrice = tempPrice.group().replace(',','.')
-   # item['price'] = float(tempPrice)
+    # tempPrice = re.search(r'[\d.,]+',str(item['price']))
+    # tempPrice = tempPrice.group().replace(',','.')
+    # item['price'] = float(tempPrice)
         item['price'] = utils.extractPrice(item['price'])
 
     if item['brand']:
