@@ -1,12 +1,7 @@
 from scrapy.contrib.spiders import CrawlSpider ,Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
-from scrapy.utils.response import body_or_str, get_base_url, get_meta_refresh
-from scrapy.http import Request
-from scrapy import log
-from scrapy.contrib.loader import XPathItemLoader
 
-from xpaths import *
 import sys
 from cosme.items import CosmeItem
 

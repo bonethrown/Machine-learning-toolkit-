@@ -30,7 +30,8 @@ class CosmePipeline(object):
         #swithc between pipelines , import module accordingly
         pipeModule = "cosme.pipes."+item['site']
         log.msg("Opening Module %s for parsing"%pipeModule, level=log.INFO)
-        #log.msg("moduels %s"%sys.modules.keys(), level=log.WARNING)
+        
+        log.msg("modules %s"%sys.modules.keys(), level=log.WARNING)
         sitePipe = sys.modules[pipeModule]
         
         #Parse with defualt pipeline first to handle generic stuff.
