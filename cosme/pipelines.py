@@ -10,6 +10,11 @@ from pipes import default
 import json, urllib2
 from  pipes.utils import db,utils
 import os
+from cosme.pipes.belezanaweb import BelezanaWeb
+from cosme.pipes.sephora import SephoraSite
+from cosme.pipes.magazineluiza import MagazineLuizaSite
+from cosme.pipes.infinitabeleza import InfiniteBeleza
+from cosme.pipes.default import AbstractSite
 
 
 
@@ -23,24 +28,30 @@ class CosmePipeline(object):
         self.db = db.getConnection()
         brandsList = os.path.join(os.getcwd(),"cosme","pipes","utils","brandric.list")
         self.matcher = utils.listMatcher(brandsList) 
+        self.siteDict = dict()
+        self.siteDict['belezanaweb'] = BelezanaWeb()
+        self.siteDict['sephora'] = SephoraSite()
+        self.siteDict['magazineluiza'] = MagazineLuizaSite()
+        self.siteDict['inifitebeleza'] = InfiniteBeleza()
+        self.siteDict['default'] = AbstractSite()
+        self.defaultSite = AbstractSite()
 
     def process_item(self, item, spider):
         #Set this to false if you wish to crawl only and not submit to solr 
         commit = True
-        #swithc between pipelines , import module accordingly
+        #switch between pipelines , import module accordingly
         pipeModule = "cosme.pipes."+item['site']
         log.msg("Opening Module %s for parsing"%pipeModule, level=log.INFO)
         
-        log.msg("modules %s"%sys.modules.keys(), level=log.WARNING)
-        sitePipe = sys.modules[pipeModule]
+        sitePipe = self.siteDict[item['site']]
         
-        #Parse with defualt pipeline first to handle generic stuff.
+        #Parse with default pipeline first to handle generic stuff.
         #parse item with custom pipeline
         #print "Parsing item %s",(item)
         cleanItem = sitePipe.process(item,spider,self.matcher)
     
-        cleanItem = default.process(cleanItem,spider)
-        #Seperate Store for raw data
+        cleanItem = self.defaultSite.process(cleanItem,spider)
+        #Separate Store for raw data
         #storeItem  = {}
         #storeItem['url'] = cleanItem['url']
         #storeItem['raw_data'] = cleanItem['raw_data']
