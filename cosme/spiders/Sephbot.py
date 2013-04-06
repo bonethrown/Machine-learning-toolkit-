@@ -7,6 +7,7 @@ from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from scrapy import log
 import sys
 from scrapy.exceptions import CloseSpider
+from cosme.settings import COSME_DEBUG
 
 
  
@@ -48,9 +49,46 @@ class Cosme(CrawlSpider):
         cosmeItem = CosmeItem()
         cosmeItem['site'] = self.getDomain(response.url)
         cosmeItem['url'] = response.url
+        print cosmeItem
         siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
         self.log(str(cosmeItem),log.INFO)
-        raise CloseSpider('Ad-hoc closing for debugging')
-        #yield cosmeItem
+        self.get_comments(hxs)
+        if COSME_DEBUG:
+            raise CloseSpider('Ad-hoc closing for debugging')
+        else:
+            yield cosmeItem
+        
+    def get_comments(self, hxs):
+        pattern =  "//ul[@class=\'produtoListaComentarios\']/li"        
+        comments = hxs.select(pattern)
+        self.log('Comments : type(hxs)=%s, type(%s), %s' % (type(hxs), type(comments), comments),log.INFO)
+        print ("Total Comments: %s" % len(comments))
+        #print('Comments : type(hxs)=%s, type(%s), %s' % (type(hxs), type(comments), comments))
+        result = []
+        for comment in comments:
+            print('******************************')
+            commentDict = dict()
+            commentDict['star'] = self.get_star(comment)
+            commentDict['name'] = comment.select('.//h3/span/text()').extract()[0].strip()
+            result.append(commentDict)
+        return result
+    
+    def get_star(self, comment):
+            star = 0
+            possiblestars  = comment.select('.//div[contains(@class, "avaliacaoProduto")]/@class').extract()
+            if len(possiblestars) == 1:
+                stars = possiblestars[0]
+                if 'Avaliacao40' in stars:
+                    star = 4
+                elif 'Avaliacao50' in stars:
+                    star = 5
+                elif 'Avaliacao30' in stars:
+                    star = 3
+                elif 'Avaliacao20' in stars:
+                    star = 2
+                elif 'Avaliacao10' in stars:
+                    star = 1
+            return star
+
