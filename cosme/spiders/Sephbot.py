@@ -72,9 +72,20 @@ class Cosme(CrawlSpider):
             commentDict = dict()
             commentDict['star'] = self.get_star(comment)
             commentDict['name'] = comment.select('.//h3/span/text()').extract()[0].strip()
+            commentDict['date'] = self.get_date(comment)
+            commentDict['comment'] = comment.select('.//p/text()').extract()[0].strip()
             result.append(commentDict)
         return result
     
+    def get_date(self, comment):
+        datestr  = ''.join(comment.select('.//h3/text()').extract()).strip()
+        needle= 'em\n'
+        idx = datestr.find(needle)
+        if idx > -1:
+            return datestr[idx + len(needle):].strip()
+        else:
+            return datestr
+
     def get_star(self, comment):
             star = 0
             possiblestars  = comment.select('.//div[contains(@class, "avaliacaoProduto")]/@class').extract()
