@@ -16,8 +16,8 @@ class Cosme(CrawlSpider):
     allowed_domains = ['sephora.com.br']
     #might need to change this this is useless for now
     
-    #start_urls = ["http://www.sephora.com.br"]
-    start_urls = ['http://www.sephora.com.br/site/produto.asp?idproduto=13943']
+    start_urls = ["http://www.sephora.com.br"]
+    #start_urls = ['http://www.sephora.com.br/site/produto.asp?idproduto=13943']
     
     deny_exts = ('include', 'ajax', 'basket')
     allow_exts = (r'site/produto.asp\?idproduto=\d+',r'site/categoria.asp\?idcategoria=\d+')
