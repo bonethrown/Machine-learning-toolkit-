@@ -4,6 +4,9 @@ from scrapy.selector import HtmlXPathSelector
 from cosme.items import CosmeItem
 
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
+from scrapy import log
+from scrapy.exceptions import CloseSpider
+from cosme.settings import COSME_DEBUG
 
 class Cosme(CrawlSpider):
     name = 'Megabot'
@@ -48,8 +51,12 @@ class Cosme(CrawlSpider):
         siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])        
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-
-        yield cosmeItem
+        cosmeItem['comments'] = self.get_comments(hxs, siteModule)
+        self.log(str(cosmeItem),log.INFO)
+        if COSME_DEBUG:
+            raise CloseSpider('Ad-hoc closing for debugging')
+        else:
+            yield cosmeItem
 
 
     def get_comments(self, hxs, siteModule):
@@ -57,12 +64,21 @@ class Cosme(CrawlSpider):
         result = []
         for comment in comments:
             commentDict = dict()
-            commentDict['star'] = self.get_star(comment, siteModule.get_comments()['commentStar'])
+            commentDict['star'] = self.get_star(comment, 
+                                                    siteModule.get_comments()['commentStar'],
+                                                    siteModule.get_comments()['commentStar2'])
             if commentDict['star'] is None:
                 continue
-            commentDict['name'] = comment.select(siteModule.get_comments()['commenterName']).extract()[0].strip()
+            commentDict['name'] = comment.select(siteModule.get_comments()['commenterName']).extract()
+            if len(commentDict['name']) == 0:
+                commentDict['name'] = comment.select(siteModule.get_comments()['commenterName2']).extract()
             commentDict['date'] = self.get_date(comment, siteModule.get_comments()['commentDate'])
-            commentDict['comment'] = comment.select(siteModule.get_comments()['commentText']).extract()[0].strip()
+            commentText = comment.select(siteModule.get_comments()['commentText']).extract()
+            if len(commentText) == 0:
+                commentText = comment.select(siteModule.get_comments()['commentText2']).extract()
+            commentDict['comment'] = commentText[0].strip()
+                
+            
             result.append(commentDict)
         return result
     
@@ -75,21 +91,8 @@ class Cosme(CrawlSpider):
         else:
             return datestr
 
-    def get_star(self, comment, pattern):
-            star = 0
+    def get_star(self, comment, pattern, pattern2):
             possiblestars  = comment.select(pattern).extract()
-            if len(possiblestars) == 1:
-                stars = possiblestars[0]
-                if 'level1' == stars:
-                    star = 1
-                elif 'level2' == stars:
-                    star = 2
-                elif 'level3' == stars:
-                    star = 3
-                elif 'level4' == stars:
-                    star = 4
-                elif 'level5' == stars:
-                    star = 5
-            else:
-                star = None
-            return star
+            if len(possiblestars) == 0:
+                possiblestars  = comment.select(pattern2).extract()
+            return len(possiblestars)

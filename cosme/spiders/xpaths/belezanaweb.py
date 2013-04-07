@@ -21,11 +21,14 @@ class BelezanaWebXPath(AbstractXPath):
         return self.META
 
     COMMENTS = {
-       "commentList":  "//div[@id=\'comentarios\']/ul",
-       "commenterName": ".//li[@id=\'star\']/div[@class=\'dados\']/span/text()",
-       "commentText": ".//li[2]/text()",
+       "commentList":  "//div[@class=\"rate\" or @class=\"mainRate\"]",
+       "commenterName": ".//div[@class=\'content\']/div[@class=\'stars\']/span[2]/text()",
+       "commenterName2": ".//div[@class=\'stars\']/span[2]/text()",
+       "commentText": ".//div[@class=\'content\']/div[@class=\'text\']/div/p/text()",
+       "commentText2": ".//div[@class=\'text\']/div/p/text()",
        "commentDate": ".//li[@id=\'star\']/div[@class=\'dados\']/text()",
-       "commentStar": ".//li[@id=\'star\']/div[1]/@class"
+       "commentStar": ".//div[@class=\'content\']/div[@class=\'stars\']/span/img",
+       "commentStar2": ".//div[@class=\'stars\']/span/img"
     }
 
     
