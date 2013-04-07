@@ -6,6 +6,7 @@ from scrapy.http.response.html import HtmlResponse
 from scrapy.selector.lxmlsel import HtmlXPathSelector
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from cosme.spiders.Lafbot import Cosme
+from test.test_comment_extractor import load_file
 
 logging.debug('creating logger')
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ class TestLaffayetteCommentExtract(unittest.TestCase):
         
     def test_comment_extraction(self):
         cosme = Cosme()
-        sephora_html = self.load_file('Laffayette.html')
+        sephora_html = load_file('Laffayette.html')
         url = 'http://www.laffayette.com.br/produto/esmalte-revlon-scented-nail-enamel-14,7ml.html'
         request = Request(url=url)
         response = HtmlResponse(url=url,
@@ -38,6 +39,6 @@ class TestLaffayetteCommentExtract(unittest.TestCase):
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
         '''
-        siteModule = self.xpathRegistry.getXPath('sephora')        
+        siteModule = self.xpathRegistry.getXPath('laffayette')        
         return cosme.get_comments(hxs, siteModule)
         

@@ -13,6 +13,18 @@ from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 logging.debug('creating logger')
 logger = logging.getLogger(__name__)
 
+def load_file(filename):
+    filepath = os.path.join(os.path.dirname(__file__), filename)
+    fh = None
+    contents = None
+    try:
+        fh = open(filepath, 'r')
+        contents = fh.read()
+    except:
+        if fh is not None:
+            fh.close()
+    return contents
+
 class TestCommentExtract(unittest.TestCase):
     
 
@@ -20,7 +32,7 @@ class TestCommentExtract(unittest.TestCase):
         
     def test_comment_extraction(self):
         cosme = Cosme()
-        sephora_html = self.load_file('All is Bright Lip Glaze Set na Sephora.html')
+        sephora_html = load_file('All is Bright Lip Glaze Set na Sephora.html')
         url = 'http://www.sephora.com.br/site/produto.asp?idproduto=13943'
         request = Request(url=url)
         response = HtmlResponse(url=url,
@@ -32,17 +44,6 @@ class TestCommentExtract(unittest.TestCase):
         item = self.my_parse_item(response, cosme)
         print '%s ' % item
         
-    def load_file(self, filename):
-        filepath = os.path.join(os.path.dirname(__file__), filename)
-        fh = None
-        contents = None
-        try:
-            fh = open(filepath, 'r')
-            contents = fh.read()
-        except:
-            if fh is not None:
-                fh.close()
-        return contents
         
         
     def my_parse_item(self, response, cosme):
