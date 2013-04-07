@@ -66,9 +66,9 @@ class Cosme(CrawlSpider):
         for comment in comments:
             commentDict = dict()
             commentDict['star'] = self.get_star(comment, siteModule.get_comments()['commentStar'])
-            commentDict['name'] = comment.select(self.get_comments()['commenterName']).extract()[0].strip()
+            commentDict['name'] = comment.select(siteModule.get_comments()['commenterName']).extract()[0].strip()
             commentDict['date'] = self.get_date(comment, siteModule.get_comments()['commentDate'])
-            commentDict['comment'] = comment.select(siteModule.getcomments()['commentText']).extract()[0].strip()
+            commentDict['comment'] = comment.select(siteModule.get_comments()['commentText']).extract()[0].strip()
             result.append(commentDict)
         return result
     

@@ -53,5 +53,6 @@ class TestCommentExtract(unittest.TestCase):
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
         '''
-        return cosme.get_comments(hxs)
+        siteModule = self.xpathRegistry.getXPath('sephora')        
+        return cosme.get_comments(hxs, siteModule)
         
