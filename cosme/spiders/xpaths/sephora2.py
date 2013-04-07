@@ -11,7 +11,18 @@ class Sephora2XPath(AbstractXPath):
     "category" : "//ul[@class=\'breadCrumb\']/li[4]/a/text()",
     "sku" : "//td[@class=\'refSKU\']/span[@class=\'refSKUNumero\']/text()"
     }
+    
+    COMMENTS = {
+       "commentList":  "//ul[@class=\'produtoListaComentarios\']/li",
+       "commenterName": ".//h3/span/text()",
+       "commentText": ".//p/text()",
+       "commentDate": ".//h3/text()",
+       "commentStar": ".//div[contains(@class, 'avaliacaoProduto')]/@class"
+    }
 
     def get_meta(self):
         return self.META
     
+    
+    def get_comments(self):
+        return self.COMMENTS
