@@ -17,13 +17,13 @@ class Cosme(CrawlSpider):
     #start = ('http://www.belezanaweb.com.br/perfumes/',)
     
     deny_exts = ('site', 'include', 'ajax', 'basket')
-    allow_exts = ('fill in stuff')
+    allow_exts = (r'[\w\/-]+')
     #for i in start:
     #   start_urls.append(i)
     #r'/bios/.\w+\.htm'
         #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
     rules = [
-             Rule(SgmlLinkExtractor(allow = (r'[\w\/-]'), deny = deny_exts) , follow=True, callback='parse_item'),
+             Rule(SgmlLinkExtractor(allow = allow_exts, deny = deny_exts) , follow=True, callback='parse_item'),
              ]
 
     xpathRegistry = XPathRegistry()

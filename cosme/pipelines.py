@@ -48,9 +48,11 @@ class CosmePipeline(object):
         #Parse with default pipeline first to handle generic stuff.
         #parse item with custom pipeline
         #print "Parsing item %s",(item)
+	item = self.defaultSite.process(item, spider)
         cleanItem = sitePipe.process(item,spider,self.matcher)
-    
-        cleanItem = self.defaultSite.process(cleanItem,spider)
+   	print "***********CLEAN ITEM *************"
+	print cleanItem 
+        #cleanItem = self.defaultSite.process(cleanItem,spider)
         #Separate Store for raw data
         #storeItem  = {}
         #storeItem['url'] = cleanItem['url']
@@ -62,7 +64,7 @@ class CosmePipeline(object):
         
         #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
         singleItemJson = json.dumps(arrItem)
-        log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
+        #log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
 
         if commit:
             #Send Data to MongoDB
@@ -80,9 +82,9 @@ class CosmePipeline(object):
                 try:
                     #lets see what we got
                     page = urllib2.urlopen(req)
-                    log.msg("Sent doc to solr with response %s "%page, level=log.DEBUG)
+                    log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
                 except Exception, e:
-                    log.msg("ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
+                    log.msg("***********ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
         else:
             log.msg("Not commiting to solr or DB commit set to false  ",level=log.WARNING)
 

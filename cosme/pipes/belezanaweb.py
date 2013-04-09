@@ -15,7 +15,6 @@ class BelezanaWeb(AbstractSite):
         if item['brand']:
             tempBrand = item['brand']
             tempBrand = tempBrand[0]
-            print "########TEMP DOS  ######### %s", tempBrand
             tempBrand = utils.extractBrand(tempBrand)
             item['brand'] = tempBrand
     
@@ -26,8 +25,6 @@ class BelezanaWeb(AbstractSite):
     
         if item['category']:
             tempCat = item['category']
-            #tampCat = tempCat[0]
-            print "##########CATEGORY PIPE ############", tempCat[0]
             item['category'] = tempCat[0]
         if item['image']:
             temp = item['image'] 

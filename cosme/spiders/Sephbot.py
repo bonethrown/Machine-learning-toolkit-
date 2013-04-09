@@ -19,8 +19,8 @@ class Cosme(CrawlSpider):
     start_urls = ["http://www.sephora.com.br"]
     #start_urls = ['http://www.sephora.com.br/site/produto.asp?idproduto=13943']
     
-    deny_exts = ('include', 'ajax', 'basket')
-    allow_exts = (r'site/produto.asp\?idproduto=\d+',r'site/categoria.asp\?idcategoria=\d+')
+    deny_exts = ('include', 'ajax', 'basket', 'orderby')
+    allow_exts = (r'site/produto.asp\?idproduto=\d+',r'site/categoria.asp\?idcategoria=\d+', r'site/departamento.asp\?iddepartamento=\d+')
         #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
     rules = [
              Rule(SgmlLinkExtractor(allow = allow_exts, deny = deny_exts) , follow=True, callback='parse_item'),
