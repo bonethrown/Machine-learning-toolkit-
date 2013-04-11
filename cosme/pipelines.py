@@ -51,7 +51,7 @@ class CosmePipeline(object):
 	item = self.defaultSite.process(item, spider)
         cleanItem = sitePipe.process(item,spider,self.matcher)
    	print "***********CLEAN ITEM *************"
-	print cleanItem 
+	#print cleanItem 
         #cleanItem = self.defaultSite.process(cleanItem,spider)
         #Separate Store for raw data
         #storeItem  = {}
@@ -64,7 +64,8 @@ class CosmePipeline(object):
         
         #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
         singleItemJson = json.dumps(arrItem)
-        #log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
+        print singleItemJson 
+	#log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
 
         if commit:
             try:
@@ -73,9 +74,9 @@ class CosmePipeline(object):
                 #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
                 resultDB = self.db.items.insert(dict(cleanItem),safe=True )
                 #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
-                log.msg("*************** Submitting to mongoDB ready to send %s type %s  result %s " %
-                                (cleanItem,type(cleanItem),resultDB), 
-                            level=log.DEBUG)
+               # log.msg("*************** Submitting to mongoDB ready to send %s type %s  result %s " %
+                #               (cleanItem,type(cleanItem),resultDB), 
+                 #           level=log.DEBUG)
             except Exception, e:
                 log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
 	try:

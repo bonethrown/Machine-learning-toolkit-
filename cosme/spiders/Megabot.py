@@ -16,7 +16,7 @@ class Cosme(CrawlSpider):
     start_urls = ["http://www.belezanaweb.com.br/perfumes/",]
     #start = ('http://www.belezanaweb.com.br/perfumes/',)
     
-    deny_exts = ('site', 'include', 'ajax', 'basket')
+    deny_exts = ('=','site', 'include', 'ajax', 'basket')
     allow_exts = (r'[\w\/-]+')
     #for i in start:
     #   start_urls.append(i)
