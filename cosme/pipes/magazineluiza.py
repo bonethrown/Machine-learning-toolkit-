@@ -19,20 +19,22 @@ class MagazineLuizaSite(AbstractSite):
     
         #if there isn't a price make it very expensive 
         if item['price']:
-            item['price'] = float(utils.getFirst(item['price']).replace(',','.'))
-            
+            temp = float(utils.getFirst(item['price']).replace(',','.'))
+            item['price'] = temp
         if item['name']:
             temp = item['name']
-            log.msg("match found: %s" %temp, level=log.DEBUG)
             item['brand'] = matcher.listMatch(temp)
             #log.msg("match found: %s" %item['brand'], level=log.DEBUG)
             log.msg(item['brand'])
     
         if item['url']:
             item['url'] = item['url'].lower()
-        # item["raw_data"] = "
-        #set our crawl time
-        item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
+        
+	if item['category']:
+		temp = item['category']
+		item['category'] = temp[0]
+	
+	item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
          
         #is this a gay video?
             

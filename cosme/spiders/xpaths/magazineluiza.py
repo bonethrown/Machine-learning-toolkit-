@@ -11,7 +11,7 @@ class MagazineLuizaXPath(AbstractXPath):
     
             "description" : "//strong[@class=\'fs-presentation\']/text()" ,
     
-            "category" : "//ul[@class=\'breadcrumb\']/li[3]/a/text()" ,
+            "category" : "//ul[@class='breadcrumb breadcrumb-list-product']/li[@class='category']/a/text()" ,
     
             "sku" : "//div[@class=\'container-title-product-detail\']/small/text()" ,
             }

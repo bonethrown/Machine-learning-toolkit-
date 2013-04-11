@@ -67,26 +67,25 @@ class CosmePipeline(object):
         #log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
 
         if commit:
-            #Send Data to MongoDB
             try:
                 req  = urllib2.Request(self.solr_url, data = singleItemJson)
                 req.add_header("Content-type", "application/json")
                 #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
                 resultDB = self.db.items.insert(dict(cleanItem),safe=True )
                 #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
-                log.msg("Submitting to mongoDB ready to send %s type %s  result %s " %
+                log.msg("*************** Submitting to mongoDB ready to send %s type %s  result %s " %
                                 (cleanItem,type(cleanItem),resultDB), 
                             level=log.DEBUG)
             except Exception, e:
-                log.msg("ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
-                try:
-                    #lets see what we got
-                    page = urllib2.urlopen(req)
-                    log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
-                except Exception, e:
-                    log.msg("***********ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
+                log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
+	try:
+	    #lets see what we got
+	    page = urllib2.urlopen(req)
+	    log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
+	except Exception, e:
+	    log.msg("***********ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
         else:
-            log.msg("Not commiting to solr or DB commit set to false  ",level=log.WARNING)
+            log.msg("*********** Not commiting to solr or DB commit set to false  ",level=log.WARNING)
 
         return cleanItem
         

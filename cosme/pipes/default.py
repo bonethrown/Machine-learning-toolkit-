@@ -18,9 +18,8 @@ class AbstractSite:
         # match For Brand
         #if there isn't a price make it very expensive 
         if not item['price']:
-            	#*** CHECK alternate price if no price. alternateprice == discount or any price besides main price
-		item['price'] = 1000
-        if not item['brand']:
+        	raise DropItem("missing price DROPPING")
+	if not item['brand']:
             raise DropItem("missing brand in %s . Dropping this" % item)
 	if not item['category']:
 		raise DropItem("*******Droping Item - missing Category*******")     
