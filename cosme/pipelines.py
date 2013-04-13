@@ -51,13 +51,13 @@ class CosmePipeline(object):
 	item = self.defaultSite.process(item, spider)
         cleanItem = sitePipe.process(item,spider,self.matcher)
    	print "***********CLEAN ITEM *************"
-	#print cleanItem 
-        #cleanItem = self.defaultSite.process(cleanItem,spider)
-        #Separate Store for raw data
-        #storeItem  = {}
-        #storeItem['url'] = cleanItem['url']
-        #storeItem['raw_data'] = cleanItem['raw_data']
-        #package to JSON and encode
+	print cleanItem 
+        
+        storeItem  = {}
+        storeItem['url'] = cleanItem['url']
+        storeItem['comments'] =  cleanItem['comments']
+	cleanItem['comments'] = []
+	
         arrItem = []
         arrItem.append(dict(cleanItem))
 
@@ -72,7 +72,7 @@ class CosmePipeline(object):
                 req  = urllib2.Request(self.solr_url, data = singleItemJson)
                 req.add_header("Content-type", "application/json")
                 #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
-                resultDB = self.db.items.insert(dict(cleanItem),safe=True )
+                resultDB = self.db.items.insert(dict(storeItem),safe=True )
                 #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
                # log.msg("*************** Submitting to mongoDB ready to send %s type %s  result %s " %
                 #               (cleanItem,type(cleanItem),resultDB), 
