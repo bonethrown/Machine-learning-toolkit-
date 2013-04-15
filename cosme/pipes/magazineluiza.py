@@ -15,7 +15,7 @@ class MagazineLuizaSite(AbstractSite):
     
         if item['name']:
             temp = item['name']
-            item['name'] = temp[0]
+            item['name'] = temp[0].lower()
     
         #if there isn't a price make it very expensive 
         if item['price']:

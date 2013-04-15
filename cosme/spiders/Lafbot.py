@@ -11,18 +11,17 @@ class Cosme(CrawlSpider):
     name = 'Lafbot'
     allowed_domains = ['laffayette.com.br']
     #might need to change this this is useless for now
-    magaRegex = ".?(\/pf\/).?"
     start_urls = ["http://www.laffayette.com.br/",]
     #start = ('http://www.belezanaweb.com.br/perfumes/',)
     
-    deny_exts = ('site', 'include', 'ajax', 'basket')
-    allow_exts = ('fill in stuff')
-    #for i in start:
+    deny_exts = ('site', 'include', 'ajax', 'basket', '/\d+')
+    allow_exts = ('produto/[\w.-]+', 'departamento/[\w-]+')
+	#for i in start:
     #   start_urls.append(i)
     #r'/bios/.\w+\.htm'
         #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
     rules = [
-             Rule(SgmlLinkExtractor(allow = ('produto'), deny = deny_exts) , follow=True, callback='parse_item'),
+             Rule(SgmlLinkExtractor(allow = allow_exts, deny = deny_exts) , follow=True, callback='parse_item'),
              ]
 
     xpathRegistry = XPathRegistry()

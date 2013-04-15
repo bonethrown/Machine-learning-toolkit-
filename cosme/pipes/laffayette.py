@@ -5,7 +5,7 @@ from scrapy.exceptions import DropItem
 import datetime
 from  cosme.pipes.default import AbstractSite
 
-class SephaWeb(AbstractSite):
+class laffayetteWeb(AbstractSite):
 	def process(self, item, spider, matcher):
 	    if item['url']:
 		item['url'] = item['url'].lower()					
@@ -37,6 +37,5 @@ class SephaWeb(AbstractSite):
 	    if item['sku']: 
 		temp = item['sku']
 		temp = temp[0]
-		item['sku'] = utils.extractSku(temp)
 
 	    return item

@@ -8,8 +8,10 @@ class MagazineLuizaXPath(AbstractXPath):
             "brand" : "//div[@class=\'fs-row\'][1]/div[@class=\'fs-right\']/div[1]/p/text()",
     
             "price" : "//span[@class=\'right-price\']/strong/text()",
-    
-            "description" : "//strong[@class=\'fs-presentation\']/text()" ,
+    	    
+	    "comments" : "//null",
+            
+	    "description" : "//strong[@class=\'fs-presentation\']/text()" ,
     
             "category" : "//ul[@class='breadcrumb breadcrumb-list-product']/li[@class='category']/a/text()" ,
     

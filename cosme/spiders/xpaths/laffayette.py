@@ -7,9 +7,8 @@ class LaffayetteXPath(AbstractXPath):
     "name" :  "//li[@class=\'nomeProd_g\']/text()",
     "brand" : "//li[@class=\'marca\']/text()",
     "price" : "//span[@class=\'precoItem\']/b/text()",
-    "start" : "//null",
-    "description" : "//div[@id=\'itensProd\']/ul/li[3]/p/text()",
-    "category" : "//div[@class=\'tituloPag\']/ul/li[5]/a/text()",
+    "description" : "//div[@id=\'itensProd\']/ul/li[4]/div[3]/text()",
+    "category" : "//div[@class='tituloPag']/ul/li[2]/a/text()",
     "sku" : "//ul/li[@class=\'marca\']/span/i/text()",
     }
 

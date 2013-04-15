@@ -6,7 +6,9 @@ from scrapy.http import Request
 from cosme.items import CosmeItem
 from scrapy import log
 from scrapy.contrib.loader import XPathItemLoader
-
+from cosme.spiders.xpaths.xpath_registry import XPathRegistry
+from scrapy.exceptions import CloseSpider
+from cosme.settings import COSME_DEBUG
 from xpaths import *
 import sys
 
@@ -26,7 +28,7 @@ class Cosme(CrawlSpider):
     rules = [
              Rule(SgmlLinkExtractor(allow = allow_exts, deny = deny_exts) , follow=True, callback='parse_item'),
              ]
-
+    xpathRegistry = XPathRegistry()
    
     def getDomain(self, url):
         try:
@@ -48,9 +50,10 @@ class Cosme(CrawlSpider):
         cosmeItem = CosmeItem()
         cosmeItem['site'] = self.getDomain(response.url)
         cosmeItem['url'] = response.url
-        siteModulePath = "cosme.spiders.xpaths."+cosmeItem['site']
-        siteModule = sys.modules[siteModulePath]
+        siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
+	#siteModulePath = "cosme.spiders.xpaths."+cosmeItem['site']
+        #siteModule = sys.modules[siteModulePath]
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-
+	
         yield cosmeItem

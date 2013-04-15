@@ -23,7 +23,7 @@ class Cosme(CrawlSpider):
     allow_exts = (r'site/produto.asp\?idproduto=\d+',r'site/categoria.asp\?idcategoria=\d+', r'site/departamento.asp\?iddepartamento=\d+')
         #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
     rules = [
-             Rule(SgmlLinkExtractor(allow = allow_exts, deny = deny_exts) , follow=True, callback='parse_item'),
+             Rule(SgmlLinkExtractor(allow = allow_exts, deny = deny_exts, unique = True) , follow=True, callback='parse_item'),
              ]
 
     xpathRegistry = XPathRegistry()

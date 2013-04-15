@@ -4,13 +4,14 @@ Pipelines per site are stored in their own folder for minumum chaos
 
 from utils import utils
 from scrapy.exceptions import DropItem
+from scrapy import log
 import datetime
 
 class AbstractSite:
     
     #Do all default processing here before going on to site specific processing.
-    def process(self, item,spider):
-        if  not item['name']:
+    def process(self, item, spider):
+	if  not item['name']:
             raise DropItem("Missing name in %s . Dropping" % item)
         #De-array these values. 
         if isinstance(item['description'],list) and len(item['description']) > 0:

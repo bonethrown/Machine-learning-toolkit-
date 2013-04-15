@@ -7,7 +7,7 @@ class Sephora2XPath(AbstractXPath):
     "name" :  "//div[@class=\'tituloDescricaoProduto\']/h1/text()",
     "brand" : "//ul[@class=\'breadCrumb\']/li[1]/a/text()",
     "price" : "//td[@class=\'precoSKU\']/div/span[@class=\'produtoPrecoVendaPor\']/text()",
-    "description" : "//div[@class=\'descricaoProduto\']/p/text()",
+    "description" : "//div[@class='descricaoProduto']/span[@id='shortdescription']/p[1]/text()",
     "category" : "//ul[@class=\'breadCrumb\']/li[3]/a/text()",
     "sku" : "//td[@class=\'refSKU\']/span[@class=\'refSKUNumero\']/text()"
     }

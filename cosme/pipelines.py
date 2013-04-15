@@ -15,7 +15,8 @@ from cosme.pipes.sephora import SephoraSite
 from cosme.pipes.magazineluiza import MagazineLuizaSite
 from cosme.pipes.infinitabeleza import InfiniteBeleza
 from cosme.pipes.default import AbstractSite
-
+from cosme.pipes.sepha import SephaWeb
+from cosme.pipes.laffayette import laffayetteWeb
 
 
 #simple pipeline for now. Drop Items with no description!
@@ -34,8 +35,10 @@ class CosmePipeline(object):
         self.siteDict['magazineluiza'] = MagazineLuizaSite()
         self.siteDict['inifitebeleza'] = InfiniteBeleza()
         self.siteDict['default'] = AbstractSite()
-        self.defaultSite = AbstractSite()
-
+        self.siteDict['sepha'] = SephaWeb()
+	self.siteDict['laffayette'] = laffayetteWeb()
+	self.defaultSite = AbstractSite()
+	# **** WHY IS THERE TWO ABSTRACT SITES BEING SET
     def process_item(self, item, spider):
         #Set this to false if you wish to crawl only and not submit to solr 
         commit = True
@@ -72,7 +75,7 @@ class CosmePipeline(object):
                 req  = urllib2.Request(self.solr_url, data = singleItemJson)
                 req.add_header("Content-type", "application/json")
                 #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
-                resultDB = self.db.items.insert(dict(storeItem),safe=True )
+               # resultDB = self.db.items.insert(dict(storeItem),safe=True )
                 #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
                # log.msg("*************** Submitting to mongoDB ready to send %s type %s  result %s " %
                 #               (cleanItem,type(cleanItem),resultDB), 
@@ -80,8 +83,9 @@ class CosmePipeline(object):
             except Exception, e:
                 log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
 	try:
-	    #lets see what we got
+	    # SUBNIT TO DB ONLY IF RESPONSE FROM SOLR
 	    page = urllib2.urlopen(req)
+            resultDB = self.db.items.insert(dict(storeItem),safe=True )
 	    log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
 	except Exception, e:
 	    log.msg("***********ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
