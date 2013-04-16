@@ -23,10 +23,10 @@ class MagazineLuizaSite(AbstractSite):
             item['price'] = temp
         if item['name']:
             temp = item['name']
-            item['brand'] = matcher.listMatch(temp)
-            #log.msg("match found: %s" %item['brand'], level=log.DEBUG)
-            log.msg(item['brand'])
-    
+        if item['brand']:
+	    temp = item['brand'][0]
+	    item['brand'] = temp    
+		# item['brand'] = matcher.listMatch(temp)
         if item['url']:
             item['url'] = item['url'].lower()
         
