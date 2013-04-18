@@ -19,7 +19,7 @@ def convertTime(time):
     return (min*60)+sec
     
 def convertDate(toConvert):
-    dateSplit = toConver.split(" ")
+    dateSplit = toConvert.split(" ")
     
     
 def cleanChars(toClean):
@@ -83,7 +83,8 @@ def getLast(array):
 
 def convertDateClassOBJ(toConv):
     date =  parse(toConv)
-    return dat
+    return date
+
 def extractSku(string):
     temp = str(string)
     temp = re.search(r'[\d]+', temp)
