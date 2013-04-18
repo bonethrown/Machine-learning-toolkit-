@@ -19,3 +19,4 @@ class CosmeItem(Item):
     url = Field()
     date_crawled = Field()
     comments = Field()
+    product_id = Field()
