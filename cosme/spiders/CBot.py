@@ -74,7 +74,6 @@ class Cosme(CrawlSpider):
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
         
         cosmeItem['comments'] = self.get_comments(hxs, siteModule)
-        self.log(str(cosmeItem),log.INFO)
         if COSME_DEBUG:
             raise CloseSpider('Ad-hoc closing for debugging')
         else:
@@ -95,6 +94,7 @@ class Cosme(CrawlSpider):
             commentDict['name'] = comment.select(siteModule.get_comments()['commenterName']).extract()
             if len(commentDict['name']) == 0:
                 commentDict['name'] = comment.select(siteModule.get_comments()['commenterName2']).extract()
+            commentDict['name'] = commentDict['name'][0] if len(commentDict['name']) > 0 else ''
             commentDict['date'] = self.get_date(comment, siteModule.get_comments()['commentDate'])
             commentText = comment.select(siteModule.get_comments()['commentText']).extract()
             if len(commentText) == 0:

@@ -32,6 +32,9 @@ class TestMagazineLuizaCommentExtract(unittest.TestCase):
         
     def my_parse_item(self, response, cosme):
         hxs = HtmlXPathSelector(response)
-        siteModule = self.xpathRegistry.getXPath('magazineluiza')        
+        siteModule = self.xpathRegistry.getXPath('magazineluiza')
+        #Traverse All our fields in our xpath
+        for field in siteModule.META.keys():
+            print('%s -> %s' % (field, hxs.select(siteModule.META[field]).extract()))
         return cosme.get_comments(hxs, siteModule)
         
