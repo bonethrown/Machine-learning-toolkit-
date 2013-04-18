@@ -53,55 +53,11 @@ class Cosme(CrawlSpider):
         siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-        self.log('%s gives Price %s of length %s ' % (response.url, cosmeItem['price'], len(cosmeItem['price'])) ,log.INFO)            
         if len(cosmeItem['price']) == 0: # Check for the 'por' price
-            self.log('Price: Trying again with regex: %s ' % (siteModule.get_price2()) ,log.INFO)
             cosmeItem['price'] = hxs.select(siteModule.get_price2()).extract()
-        cosmeItem['comments'] = self.get_comments(hxs, siteModule)
         self.log('CosmeItem %s' % cosmeItem,log.INFO)
         if COSME_DEBUG:
             raise CloseSpider('Ad-hoc2 closing for debugging')
         else:
             yield cosmeItem
-
-    def get_comments(self, hxs, siteModule):
-        pattern =  siteModule.get_comments()['commentList']        
-        comments = hxs.select(pattern)
-        result = []
-        for comment in comments:
-            self.log('Processing comments %s ' % comment)
-            commentDict = dict()
-            commentDict['star'] = self.get_star(comment, siteModule.get_comments()['commentStar'])
-            commentDict['name'] = comment.select(siteModule.get_comments()['commenterName']).extract()[0].strip()
-            commentDict['date'] = self.get_date(comment, siteModule.get_comments()['commentDate'])
-            commentDict['comment'] = comment.select(siteModule.get_comments()['commentText']).extract()[0].strip()
-            result.append(commentDict)
-        return result
-    
-    def get_date(self, comment, pattern):
-        datestr  = ''.join(comment.select(pattern).extract()).strip()
-        needle= 'em'
-        idx = datestr.find(needle)
-        if idx > -1:
-            return datestr[idx + len(needle):].strip()
-        else:
-            return datestr
-
-    def get_star(self, comment, pattern):
-            star = 0
-            possiblestars  = comment.select(pattern).extract()
-            self.log('Possible stars %s ' % (possiblestars),log.INFO)
-            if len(possiblestars) == 1:
-                stars = possiblestars[0]
-                if 'Avaliacao10' in stars:
-                    star = 1
-                elif 'Avaliacao20' in stars:
-                    star = 2
-                elif 'Avaliacao30' in stars:
-                    star = 3
-                elif 'Avaliacao40' in stars:
-                    star = 4
-                elif 'Avaliacao50' in stars:
-                    star = 5
-            return star
 
