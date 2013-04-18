@@ -8,14 +8,15 @@ class SephaXPath(AbstractXPath):
     "description" : "//span[@id=\'textoDescricao\']/text()",
     "category" : "//h2[@class=\'titulo\']/a/text()",
     "sku" : "//span[@class=\'referencia\']/text()",
+    "product_id": "//meta[@itemprop=\"productID\"]/@content"
     }
 
     COMMENTS = {
-       "commentList":  "//div[@id=\"opinioes_lista_counteudo\"]/div",
+       "commentList"  : "//div[@class=\'comentarioBox\']",
        "commenterName": ".//div[@class=\'right-comments\']/div[@class=\'txt-avaliation\']/small[1]/text()",
-       "commentText": ".//div[@class=\'right-comments\']/div[@class=\'content-comments\']/span[@class=\'txt-util\']/text()",
-       "commentDate": ".//div[@class=\'right-comments\']/div[@class=\'txt-avaliation\']/small[2]/text()",
-       "commentStar": ".//div[@class=\'produtosOpinioes\']/div[@itemprop=\'reviewRating\']/ul/li",
+       "commentText"  : ".//div[@class=\'right-comments\']/div[@class=\'content-comments\']/span[@class=\'txt-util\']/text()",
+       "commentDate"  : ".//div[@class=\'right-comments\']/div[@class=\'txt-avaliation\']/small[2]/text()",
+       "commentStar"  : ".//div[@class=\'produtosOpinioes\']/div[@itemprop=\'reviewRating\']/ul/li",
     }
     def get_meta(self):
         return self.META
