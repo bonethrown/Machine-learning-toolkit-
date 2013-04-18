@@ -13,5 +13,16 @@ class InfinitaBelezaXPath(AbstractXPath):
     "sku" : "//null",
     }
 
+    COMMENTS = {
+       "commentList":  "//ul[@class=\'produtoListaComentarios\']/li",
+       "commenterName": ".//h3/span/text()",
+       "commentText": ".//p/text()",
+       "commentDate": ".//h3/text()",
+       "commentStar": ".//div[contains(@class, 'avaliacaoProduto')]/@class"
+    }
+    
     def get_meta(self):
         return self.META
+
+    def get_comments(self):
+        return self.COMMENTS
