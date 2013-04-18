@@ -4,9 +4,7 @@
 # See: http://doc.scrapy.org/topics/item-pipeline.html
 
 ##remember to import new added pipes
-import sys
 from scrapy import log
-from pipes import default
 import json, urllib2
 from  pipes.utils import db,utils
 import os
@@ -36,9 +34,10 @@ class CosmePipeline(object):
         self.siteDict['inifitebeleza'] = InfiniteBeleza()
         self.siteDict['default'] = AbstractSite()
         self.siteDict['sepha'] = SephaWeb()
-	self.siteDict['laffayette'] = laffayetteWeb()
-	self.defaultSite = AbstractSite()
-	# **** WHY IS THERE TWO ABSTRACT SITES BEING SET
+        self.siteDict['laffayette'] = laffayetteWeb()
+        self.defaultSite = AbstractSite()
+        # **** WHY IS THERE TWO ABSTRACT SITES BEING SET
+       
     def process_item(self, item, spider):
         #Set this to false if you wish to crawl only and not submit to solr 
         commit = True
@@ -51,16 +50,16 @@ class CosmePipeline(object):
         #Parse with default pipeline first to handle generic stuff.
         #parse item with custom pipeline
         #print "Parsing item %s",(item)
-	item = self.defaultSite.process(item, spider)
+        item = self.defaultSite.process(item, spider)
         cleanItem = sitePipe.process(item,spider,self.matcher)
-   	print "***********CLEAN ITEM *************"
-	print cleanItem 
+        print "***********CLEAN ITEM *************"
+        print cleanItem 
         
         storeItem  = {}
         storeItem['url'] = cleanItem['url']
         storeItem['comments'] =  cleanItem['comments']
-	cleanItem['comments'] = []
-	
+        cleanItem['comments'] = []
+        
         arrItem = []
         arrItem.append(dict(cleanItem))
 
@@ -68,27 +67,27 @@ class CosmePipeline(object):
         #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
         singleItemJson = json.dumps(arrItem)
         print singleItemJson 
-	#log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
+        #log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
 
         if commit:
             try:
                 req  = urllib2.Request(self.solr_url, data = singleItemJson)
                 req.add_header("Content-type", "application/json")
                 #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
-               # resultDB = self.db.items.insert(dict(storeItem),safe=True )
+                # resultDB = self.db.items.insert(dict(storeItem),safe=True )
                 #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
-               # log.msg("*************** Submitting to mongoDB ready to send %s type %s  result %s " %
+                # log.msg("*************** Submitting to mongoDB ready to send %s type %s  result %s " %
                 #               (cleanItem,type(cleanItem),resultDB), 
-                 #           level=log.DEBUG)
+                #           level=log.DEBUG)
             except Exception, e:
                 log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
-	try:
-	    # SUBNIT TO DB ONLY IF RESPONSE FROM SOLR
-	    page = urllib2.urlopen(req)
-            resultDB = self.db.items.insert(dict(storeItem),safe=True )
-	    log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
-	except Exception, e:
-	    log.msg("***********ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
+            try:
+                # SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
+                page = urllib2.urlopen(req)
+                resultDB = self.db.items.insert(dict(storeItem),safe=True )
+                log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
+            except Exception, e:
+                log.msg("***********ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
         else:
             log.msg("*********** Not commiting to solr or DB commit set to false  ",level=log.WARNING)
 
