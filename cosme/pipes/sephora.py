@@ -6,7 +6,6 @@ class SephoraSite(AbstractSite):
     def process(self, item,spider,matcher):
         if item['url']:
             item['url'] = item['url'].lower()					
-    
         if item['price']: 
         # tempPrice = re.search(r'[\d.,]+',str(item['price']))
         # tempPrice = tempPrice.group().replace(',','.')
