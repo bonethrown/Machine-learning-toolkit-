@@ -3,6 +3,14 @@ from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
 from cosme.items import CosmeItem
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
+from scrapy import log
+from cosme.settings import COSME_DEBUG
+from scrapy.exceptions import CloseSpider
+import logging
+import sys
+import traceback
+
+logger = logging.info(__name__)
 
 #TODO Use SitemapSpider instead for magazineluiza.com.br
 class Cosme(CrawlSpider):
@@ -53,7 +61,7 @@ class Cosme(CrawlSpider):
         #Lets try using ItemLoaders built into scrapy
         #l = XPathItemLoader(item=CosmeItem(),response=response)
 
-        x = HtmlXPathSelector(response)
+        hxs = HtmlXPathSelector(response)
         cosmeItem = CosmeItem()
         
         cosmeItem['site']= self.getDomain(response.url)
@@ -63,6 +71,56 @@ class Cosme(CrawlSpider):
                 
         #Traverse All our fields in our xpath
         for field in siteModule.META.keys():
-            cosmeItem[field] = x.select(siteModule.META[field]).extract()
+            cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
+        
+        cosmeItem['comments'] = self.get_comments(hxs, siteModule)
+        self.log(str(cosmeItem),log.INFO)
+        if COSME_DEBUG:
+            raise CloseSpider('Ad-hoc closing for debugging')
+        else:
+            yield cosmeItem
         
         yield cosmeItem
+        
+    def get_comments(self, hxs, siteModule):
+        comments = hxs.select(siteModule.get_comments()['commentList'])
+        result = []
+        for comment in comments:
+            commentDict = dict()
+            commentDict['star'] = self.get_star(comment, 
+                                                    siteModule.get_comments()['commentStar'],
+                                                    siteModule.get_comments()['commentStar2'])
+            if commentDict['star'] is None:
+                continue
+            commentDict['name'] = comment.select(siteModule.get_comments()['commenterName']).extract()
+            if len(commentDict['name']) == 0:
+                commentDict['name'] = comment.select(siteModule.get_comments()['commenterName2']).extract()
+            commentDict['date'] = self.get_date(comment, siteModule.get_comments()['commentDate'])
+            commentText = comment.select(siteModule.get_comments()['commentText']).extract()
+            if len(commentText) == 0:
+                commentText = comment.select(siteModule.get_comments()['commentText2']).extract()
+            commentDict['comment'] = commentText[0].strip()
+                
+            
+            result.append(commentDict)
+        return result
+    
+    def get_date(self, comment, pattern):
+        datestr  = ''.join(comment.select(pattern).extract()).strip()
+        needle= 'em'
+        idx = datestr.find(needle)
+        if idx > -1:
+            return datestr[idx + len(needle):].strip()
+        else:
+            return datestr
+
+    def get_star(self, comment, pattern, pattern2):
+            possiblestars  = comment.select(pattern).extract()[0]
+            # Eg: "width:100%"
+            star = 0
+            try:
+                width = possiblestars.split(':')[1].split('%')[0]
+                star = int(float(width)/20)
+            except:
+                traceback.print_exc(file=sys.stdout)
+            return star
