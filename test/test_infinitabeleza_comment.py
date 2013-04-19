@@ -1,12 +1,10 @@
 import unittest
 
 import logging
-from scrapy.http.request import Request
-from scrapy.http.response.html import HtmlResponse
-from scrapy.selector.lxmlsel import HtmlXPathSelector
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from test.test_comment_extractor import load_file
-from cosme.spiders.CBot import Cosme
+from cosme.pipes.utils import utils
+from cosme.pipes.infinitabeleza import InfiniteBeleza
 
 logging.debug('creating logger')
 logger = logging.getLogger(__name__)
@@ -17,21 +15,19 @@ class TestInfinitaBelezaCommentExtract(unittest.TestCase):
     xpathRegistry = XPathRegistry()
         
     def test_comment_extraction(self):
-        cosme = Cosme()
-        sephora_html = load_file('magazineluiza_com.html')
-        #print sephora_html
-        url = 'http://www.magazineluiza.com.br/ferrari-black-perfume-masculino-eau-de-toilette-75-ml/p/2070190/pf/pffe/'
-        request = Request(url=url)
-        response = HtmlResponse(url=url,
-                            request=request,
-                            body=sephora_html,
-                            encoding = 'utf-8')
-        item = self.my_parse_item(response, cosme)
-        print '%s ' % item
+        sephora_html = load_file('infinitabeleza.html')
+        url = 'http://www.infinitabeleza.com.br/kit-botox-capilar-loreal-force-vector-cabelos-grossos-pr-2326-238722.htm'
+        hxs = utils.get_http_response(sephora_html, url)
+        siteModule = self.xpathRegistry.getXPath('infinitabeleza')
+        
+        logger.info('Comments pattern %s ' % (siteModule.META['comments']))
+        comment = hxs.select(siteModule.META['comments']).extract()
+        self.my_parse_item(comment, siteModule)
         
         
-    def my_parse_item(self, response, cosme):
-        hxs = HtmlXPathSelector(response)
-        siteModule = self.xpathRegistry.getXPath('magazineluiza')        
-        return cosme.get_comments(hxs, siteModule)
+    def my_parse_item(self, comment, siteModule):
+        infiniteBeleza = InfiniteBeleza()
+        comments = infiniteBeleza.get_comments(comment, 'http://google.com')
+        logger.info(comments)
+        
         

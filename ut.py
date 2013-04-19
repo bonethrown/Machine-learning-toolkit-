@@ -5,6 +5,7 @@ from test.test_laffayette_comment import TestLaffayetteCommentExtract
 from test.test_belezanaweb_comment import TestBelezanaCommentExtract
 from test.test_magazineluiza_comment import TestMagazineLuizaCommentExtract
 from test.test_sepha_comment import TestSephaComment
+from test.test_infinitabeleza_comment import TestInfinitaBelezaCommentExtract
 
 
 
@@ -18,6 +19,7 @@ def process():
     run_test(TestBelezanaCommentExtract)
     run_test(TestMagazineLuizaCommentExtract)
     run_test(TestSephaComment)
-        
+    run_test(TestInfinitaBelezaCommentExtract)
+    
 if __name__ == '__main__':
     process()
