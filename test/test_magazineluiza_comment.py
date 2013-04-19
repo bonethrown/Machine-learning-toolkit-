@@ -1,12 +1,10 @@
 import unittest
 
 import logging
-from scrapy.http.request import Request
-from scrapy.http.response.html import HtmlResponse
-from scrapy.selector.lxmlsel import HtmlXPathSelector
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from test.test_comment_extractor import load_file
-from cosme.spiders.CBot import Cosme
+from cosme.pipes.magazineluiza import MagazineLuizaSite
+from cosme.pipes.utils import utils
 
 logging.debug('creating logger')
 logger = logging.getLogger(__name__)
@@ -17,24 +15,19 @@ class TestMagazineLuizaCommentExtract(unittest.TestCase):
     xpathRegistry = XPathRegistry()
         
     def test_comment_extraction(self):
-        cosme = Cosme()
         sephora_html = load_file('magazineluiza_com.html')
-        #print sephora_html
         url = 'http://www.magazineluiza.com.br/ferrari-black-perfume-masculino-eau-de-toilette-75-ml/p/2070190/pf/pffe/'
-        request = Request(url=url)
-        response = HtmlResponse(url=url,
-                            request=request,
-                            body=sephora_html,
-                            encoding = 'utf-8')
-        item = self.my_parse_item(response, cosme)
-        print '%s ' % item
-        
-        
-    def my_parse_item(self, response, cosme):
-        hxs = HtmlXPathSelector(response)
+        hxs = utils.get_http_response(sephora_html, url)
         siteModule = self.xpathRegistry.getXPath('magazineluiza')
-        #Traverse All our fields in our xpath
-        for field in siteModule.META.keys():
-            print('%s -> %s' % (field, hxs.select(siteModule.META[field]).extract()))
-        return cosme.get_comments(hxs, siteModule)
+        
+        logger.info('Comments pattern %s ' % (siteModule.META['comments']))
+        comment = hxs.select(siteModule.META['comments']).extract()
+        self.my_parse_item(comment, siteModule, url)
+        
+        
+    def my_parse_item(self, comment, siteModule, url):
+        magazineLuiza = MagazineLuizaSite()
+        comments = magazineLuiza.get_comments(comment, url)
+        logger.info(comments)
+        
         

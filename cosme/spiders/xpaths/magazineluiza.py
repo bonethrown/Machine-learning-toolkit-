@@ -14,6 +14,8 @@ class MagazineLuizaXPath(AbstractXPath):
             "category" : "//ul[@class='breadcrumb breadcrumb-list-product']/li[@class='category']/a/text()" ,
     
             "sku" : "//div[@class=\'container-title-product-detail\']/small/text()" ,
+            
+            "comments": "//div[@class=\'container-seeing-comments\']"
             }
 
     COMMENTS = {
