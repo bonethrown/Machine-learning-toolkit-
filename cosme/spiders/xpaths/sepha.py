@@ -12,11 +12,11 @@ class SephaXPath(AbstractXPath):
     }
 
     COMMENTS = {
-       "commentList"  : "//div[@class=\'comentarioBox\']",
-       "commenterName": ".//div[@class=\'right-comments\']/div[@class=\'txt-avaliation\']/small[1]/text()",
-       "commentText"  : ".//div[@class=\'right-comments\']/div[@class=\'content-comments\']/span[@class=\'txt-util\']/text()",
-       "commentDate"  : ".//div[@class=\'right-comments\']/div[@class=\'txt-avaliation\']/small[2]/text()",
-       "commentStar"  : ".//div[@class=\'produtosOpinioes\']/div[@itemprop=\'reviewRating\']/ul/li",
+       "commentList"  : "//div[@id=\'opinioes_lista_counteudo\']/div",
+       "commenterName": ".//div[@class=\'nome\']/span[@itemprop=\'author\']/text()",
+       "commentText"  : ".//div[@itemprop=\'description\']/text()",
+       "commentDate"  : ".//div[@class=\'nome\']/text()",
+       "commentStar"  : ".//div[@itemprop=\'reviewRating\']/ul/li",
     }
     def get_meta(self):
         return self.META

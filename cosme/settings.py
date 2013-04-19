@@ -5,6 +5,7 @@
 #
 #     http://doc.scrapy.org/topics/settings.html
 #
+import logging
 
 #BOT_NAME = 'cosme'
 #BOT_VERSION = '1.0'
@@ -29,4 +30,12 @@ LOG_LEVEL='DEBUG'
 RANDOMIZE_DOWNLOAD_DELAY=True
 DOWNLOAD_DELAY = 0.25  
 
-COSME_DEBUG=False
+COSME_DEBUG=True
+
+HTTP_NUMPOOLS=2
+HTTP_MAXSIZE=10
+
+logging.basicConfig(
+        level = logging.DEBUG,
+        format = '%(asctime)s %(levelname)s %(name)s:%(lineno)s  %(message)s',
+)

@@ -56,8 +56,5 @@ class Cosme(CrawlSpider):
         if len(cosmeItem['price']) == 0: # Check for the 'por' price
             cosmeItem['price'] = hxs.select(siteModule.get_price2()).extract()
         self.log('CosmeItem %s' % cosmeItem,log.INFO)
-        if COSME_DEBUG:
-            raise CloseSpider('Ad-hoc2 closing for debugging')
-        else:
-            yield cosmeItem
+        yield cosmeItem
 

@@ -4,6 +4,7 @@ from test.test_comment_extractor import TestCommentExtract
 from test.test_laffayette_comment import TestLaffayetteCommentExtract
 from test.test_belezanaweb_comment import TestBelezanaCommentExtract
 from test.test_magazineluiza_comment import TestMagazineLuizaCommentExtract
+from test.test_sepha_comment import TestSephaComment
 
 
 
@@ -16,6 +17,7 @@ def process():
     run_test(TestLaffayetteCommentExtract)
     run_test(TestBelezanaCommentExtract)
     run_test(TestMagazineLuizaCommentExtract)
+    run_test(TestSephaComment)
         
 if __name__ == '__main__':
     process()

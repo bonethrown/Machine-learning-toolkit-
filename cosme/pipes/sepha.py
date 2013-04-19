@@ -4,8 +4,25 @@ from scrapy import log
 from scrapy.exceptions import DropItem
 import datetime
 from  cosme.pipes.default import AbstractSite
+import sys
+import traceback
+from scrapy.selector.lxmlsel import HtmlXPathSelector
+import urllib3
+from cosme.settings import HTTP_NUMPOOLS, HTTP_MAXSIZE
+import logging
+from cosme.spiders.xpaths.xpath_registry import XPathRegistry
+from scrapy.http.request import Request
+from scrapy.http.response.html import HtmlResponse
+
+logger = logging.getLogger(__name__)
 
 class SephaWeb(AbstractSite):
+	
+	
+	def __init__(self):
+		self.http = urllib3.PoolManager(num_pools=HTTP_NUMPOOLS, block=True,maxsize=HTTP_MAXSIZE)
+		self.siteModule = XPathRegistry().getXPath('sepha')
+			
 	def process(self, item, spider, matcher):
 		if item['url']:
 			item['url'] = item['url'].lower()					
@@ -40,6 +57,49 @@ class SephaWeb(AbstractSite):
 			item['sku'] = utils.extractSku(temp)
 		if item['product_id']:
 			temp = item['product_id']
-			comment_url = 'http://www.sepha.com.br/comentario/produto/id/%s/pagina/1' % (temp[0])
+
 			# TODO: Make a call to comment_url and extract from the same.
 		return item
+	
+
+	def get_comments(self, productId):
+		#Eg: 14663
+		comment_url = 'http://www.sepha.com.br/comentario/produto/id/%s/pagina/1' % (productId)
+		rsp = self.http.request('GET', comment_url)
+		request = Request(url=comment_url)
+		response = HtmlResponse(url=comment_url,
+							request=request,
+							body=rsp.data,
+							encoding = 'utf-8')
+		hxs = HtmlXPathSelector(response)
+		comments = hxs.select(self.siteModule.get_comments()['commentList'])
+		result = []
+		for comment in comments:
+			commentDict = dict()
+			commentDict['star'] = self.get_star(comment, 
+													self.siteModule.get_comments()['commentStar'])
+			if commentDict['star'] is None:
+				continue
+			commentDict['name'] = comment.select(self.siteModule.get_comments()['commenterName']).extract()
+			commentDict['name'] = commentDict['name'][0] if len(commentDict['name']) > 0 else ''
+			
+			commentDict['date'] = self.get_date(comment, self.siteModule.get_comments()['commentDate'])
+			commentText = comment.select(self.siteModule.get_comments()['commentText']).extract()
+			commentDict['comment'] = commentText[0].strip() if len(commentText) > 0 else ''
+				
+			
+			result.append(commentDict)
+		return result
+	
+	def get_date(self, comment, pattern):
+		datestr  = ''.join(comment.select(pattern).extract()).strip()
+		needle= 'em'
+		idx = datestr.find(needle)
+		if idx > -1:
+			return datestr[idx + len(needle):].strip()
+		else:
+			return datestr
+
+	def get_star(self, comment, pattern):
+		stars = comment.select(pattern)
+		return len(stars)
