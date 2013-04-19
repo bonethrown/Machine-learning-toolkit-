@@ -9,6 +9,8 @@ from cosme.items import CosmeItem
 from scrapy.http.response.html import HtmlResponse
 from scrapy.selector.lxmlsel import HtmlXPathSelector
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
+from cosme.pipes.utils import utils
+from cosme.pipes.sephora import SephoraSite
 
 logging.debug('creating logger')
 logger = logging.getLogger(__name__)
@@ -31,29 +33,16 @@ class TestCommentExtract(unittest.TestCase):
     xpathRegistry = XPathRegistry()
         
     def test_comment_extraction(self):
-        cosme = Cosme()
         sephora_html = load_file('All is Bright Lip Glaze Set na Sephora.html')
         url = 'http://www.sephora.com.br/site/produto.asp?idproduto=13943'
-        request = Request(url=url)
-        response = HtmlResponse(url=url,
-                            request=request,
-                            body=sephora_html,
-                            encoding = 'utf-8')
-        
-        print 'About to parse item'
-        item = self.my_parse_item(response, cosme)
-        print '%s ' % item
+        hxs = utils.get_http_response(sephora_html, url)
+        siteModule = self.xpathRegistry.getXPath('sephora')
+        self.my_parse_item(siteModule, url)
         
         
+    def my_parse_item(self, siteModule, url):
+        sephoraSite = SephoraSite()
+        comments = sephoraSite.get_comments(url)
+        logger.info(comments)
         
-    def my_parse_item(self, response, cosme):
-        hxs = HtmlXPathSelector(response)
-        #cosmeItem['url'] = response.url
-        #siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
-        '''
-        for field in siteModule.META.keys():
-            cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-        '''
-        siteModule = self.xpathRegistry.getXPath('sephora')        
-        return cosme.get_comments(hxs, siteModule)
         
