@@ -3,6 +3,9 @@ Module containing some helpful utility functions
 """
 import re,datetime,time
 from dateutil.parser import parse
+from scrapy.selector import HtmlXPathSelector
+from scrapy.http.request import Request
+from scrapy.http.response.html import HtmlResponse
 #convert format "13:13" to minutes
 def convertTime(time):
     timeInSeconds = 0
@@ -129,6 +132,16 @@ class listMatcher:
                 print "######match found "+brand.group()
                 return brand.group()
 
+
+def get_http_response(responseBody, url):
+        request = Request(url=url)
+        response = HtmlResponse(url=url,
+                            request=request,
+                            body=responseBody,
+                            encoding = 'utf-8')
+        hxs = HtmlXPathSelector(response)
+        return hxs
+    
 def extractBrand(toConv):
     toConv  = re.search(r'[\w]+.+', toConv)
     toConv=toConv.group()
@@ -146,5 +159,7 @@ if __name__ == '__main__':
     print a
     m = listMatcher('brandric.list')
     print m.listMatch(a)
+
+
 
 

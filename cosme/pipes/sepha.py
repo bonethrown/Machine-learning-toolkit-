@@ -13,6 +13,7 @@ import logging
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
+from cosme.pipes.utils.utils import get_http_response
 
 logger = logging.getLogger(__name__)
 
@@ -66,12 +67,7 @@ class SephaWeb(AbstractSite):
 		#Eg: 14663
 		comment_url = 'http://www.sepha.com.br/comentario/produto/id/%s/pagina/1' % (productId)
 		rsp = self.http.request('GET', comment_url)
-		request = Request(url=comment_url)
-		response = HtmlResponse(url=comment_url,
-							request=request,
-							body=rsp.data,
-							encoding = 'utf-8')
-		hxs = HtmlXPathSelector(response)
+		hxs = get_http_response(rsp.data, comment_url)
 		comments = hxs.select(self.siteModule.get_comments()['commentList'])
 		result = []
 		for comment in comments:
