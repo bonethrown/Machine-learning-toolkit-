@@ -58,13 +58,14 @@ class SephaWeb(AbstractSite):
 			item['sku'] = utils.extractSku(temp)
 		if item['product_id']:
 			temp = item['product_id']
-
+			item['comments'] = self.get_comments(temp)
 			# TODO: Make a call to comment_url and extract from the same.
 		return item
 	
 
 	def get_comments(self, productId):
 		#Eg: 14663
+		# TODO: Only the first page is retrieved
 		comment_url = 'http://www.sepha.com.br/comentario/produto/id/%s/pagina/1' % (productId)
 		rsp = self.http.request('GET', comment_url)
 		hxs = get_http_response(rsp.data, comment_url)
