@@ -9,16 +9,17 @@ class InfinitaBelezaXPath(AbstractXPath):
     "brand" : "//a[@class=\\'color\\']/strong/text()",
     "price" : "//span[@id=\\'variacaoPreco\\']/text()",
     "description" : "//p[1]/span/span/strong/span/text()",
+    "comments":  "//div[@id=\"coments\"]",
     "category" : "null",
     "sku" : "//null",
     }
 
     COMMENTS = {
-       "commentList":  "//ul[@class=\'produtoListaComentarios\']/li",
-       "commenterName": ".//h3/span/text()",
-       "commentText": ".//p/text()",
-       "commentDate": ".//h3/text()",
-       "commentStar": ".//div[contains(@class, 'avaliacaoProduto')]/@class"
+       "commentList"  : ".//div[@class=\'hreview']",
+       "commenterName": ".//span[@class=\'reviewer']/h3/text()",
+       "commentText"  : ".//span[@class=\'description']/text()",
+       "commentDate"  : ".//span[@class=\'nonexistent']/text()",
+       "commentStar"  : ".//div[@class=\'ranking']/span[1]/@class"
     }
     
     def get_meta(self):
