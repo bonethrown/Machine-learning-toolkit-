@@ -1,18 +1,10 @@
-from utils import utils,categorizer
-import re
+from utils import utils
 from scrapy import log
-from scrapy.exceptions import DropItem
-import datetime
 from  cosme.pipes.default import AbstractSite
-import sys
-import traceback
-from scrapy.selector.lxmlsel import HtmlXPathSelector
 import urllib3
 from cosme.settings import HTTP_NUMPOOLS, HTTP_MAXSIZE
 import logging
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
-from scrapy.http.request import Request
-from scrapy.http.response.html import HtmlResponse
 from cosme.pipes.utils.utils import get_http_response
 
 logger = logging.getLogger(__name__)
@@ -56,11 +48,10 @@ class SephaWeb(AbstractSite):
 			temp = item['sku']
 			temp = temp[0]
 			item['sku'] = utils.extractSku(temp)
-			item['comments'] = self.get_comments(temp)
 		if item['product_id']:
 			temp = item['product_id']
-			item['comments'] = self.get_comments(temp)
-# TODO: Make a call to comment_url and extract from the same.
+			if len(temp) == 1:
+				item['comments'] = self.get_comments(temp[0])
 		return item
 	
 
