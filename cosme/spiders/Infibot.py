@@ -18,19 +18,17 @@ class Cosme(CrawlSpider):
     name = 'Infbot'
     allowed_domains = ['infinitabeleza.com.br']   #Add one by one, comment out as necassary
  
-    magaRegex = ".?(\/pf\/).?"
     #magaRe = re.compile('.?(\/pf\/pfba\/)$')
     #allowed_domains = ['pornhub.com']
     start_urls = []
 
     #TODO put these in a file!
-    start = ('http://www.infinitabeleza.com.br/shampoo-ct-37-238722.htm',)
-    #start_urls = [start[4]]
+    start = ('http://www.infinitabeleza.com.br/',)
     deny_exts = ('games','cams','photos','stories','login\.php','signup\.php','tags\.html','categories\.html','upload.html','search' ,'cat','c=','channel','tag','channels','click','pornstar','community')
     for i in start:
          start_urls.append(i)
 
-    magazine_rule = Rule(SgmlLinkExtractor(allow=(magaRegex),unique=True,deny_extensions=('php'),deny=deny_exts ),callback='parse_item',follow=True)
+    magazine_rule = Rule(SgmlLinkExtractor(unique=True,deny_extensions=('php'),deny=deny_exts ),callback='parse_item',follow=True)
    
    
     rules = (

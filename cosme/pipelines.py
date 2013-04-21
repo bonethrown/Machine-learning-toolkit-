@@ -84,7 +84,7 @@ class CosmePipeline(object):
             try:
                 # SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
                 page = urllib2.urlopen(req)
-                resultDB = self.db.items.update({"url" : storeItem['url']} ,{"url" : dict(storeItem)},upsert=True)
+                resultDB = self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
 		#resultDB = self.db.items.insert(dict(storeItem),safe=True )
                 log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
             except Exception, e:

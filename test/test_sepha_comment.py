@@ -1,7 +1,7 @@
 import unittest
 
 import logging
-from cosme.pipes.sepha import SephaWeb
+from pipes.sepha import SephaWeb
 
 
 

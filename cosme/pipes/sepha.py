@@ -56,10 +56,11 @@ class SephaWeb(AbstractSite):
 			temp = item['sku']
 			temp = temp[0]
 			item['sku'] = utils.extractSku(temp)
+			item['comments'] = self.get_comments(temp)
 		if item['product_id']:
 			temp = item['product_id']
 			item['comments'] = self.get_comments(temp)
-			# TODO: Make a call to comment_url and extract from the same.
+# TODO: Make a call to comment_url and extract from the same.
 		return item
 	
 
