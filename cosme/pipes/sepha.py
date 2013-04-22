@@ -82,8 +82,8 @@ class SephaWeb(AbstractSite):
 	
 	def get_date(self, comment, pattern):
 		datestr  = ''.join(comment.select(pattern).extract()).strip()
-		needle= 'em'
-		idx = datestr.find(needle)
+		needle= '-'
+		idx = datestr.rfind(needle)
 		if idx > -1:
 			return datestr[idx + len(needle):].strip()
 		else:
