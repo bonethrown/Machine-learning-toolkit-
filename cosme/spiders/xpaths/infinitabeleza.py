@@ -4,13 +4,13 @@ class InfinitaBelezaXPath(AbstractXPath):
     
     META = {
     
-    "image" : "//img[@id=\\'imgView\\']/@src",
-    "name" : "//h1[@id=\\'nome-produto\\']/text()",
-    "brand" : "//a[@class=\\'color\\']/strong/text()",
-    "price" : "//span[@id=\\'variacaoPreco\\']/text()",
+    "image" : "//img[@id='imgView']/@src",
+    "name" : "//h1[@id='nome-produto']/text()",
+    "brand" : "//a[@class='color']/strong/text()",
+    "price" : "//span[@id='variacaoPreco']/text()",
     "description" : "//p[1]/span/span/strong/span/text()",
     "comments":  "//div[@id=\"coments\"]",
-    "category" : "null",
+    "category" : "//span[@class='link_itens'][1]/a/text()",
     "sku" : "//null",
     }
 

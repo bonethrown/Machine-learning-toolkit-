@@ -31,7 +31,7 @@ class CosmePipeline(object):
         self.siteDict['belezanaweb'] = BelezanaWeb()
         self.siteDict['sephora'] = SephoraSite()
         self.siteDict['magazineluiza'] = MagazineLuizaSite()
-        self.siteDict['inifitebeleza'] = InfiniteBeleza()
+        self.siteDict['infinitabeleza'] = InfiniteBeleza()
         self.siteDict['default'] = AbstractSite()
         self.siteDict['sepha'] = SephaWeb()
         self.siteDict['laffayette'] = laffayetteWeb()
@@ -40,7 +40,7 @@ class CosmePipeline(object):
        
     def process_item(self, item, spider):
         #Set this to false if you wish to crawl only and not submit to solr 
-        commit = True
+        commit = False
         #switch between pipelines , import module accordingly
         pipeModule = "cosme.pipes."+item['site']
         log.msg("Opening Module %s for parsing"%pipeModule, level=log.INFO)
