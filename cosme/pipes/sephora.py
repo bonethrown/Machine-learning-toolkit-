@@ -4,6 +4,11 @@ from cosme.pipes.utils.utils import get_http_response
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from cosme.settings import HTTP_MAXSIZE, HTTP_NUMPOOLS
 import urllib3
+import sys
+import traceback
+import logging
+
+logger = logging.getLogger(__name__)
 
 class SephoraSite(AbstractSite):
     
@@ -42,7 +47,13 @@ class SephoraSite(AbstractSite):
             temp = item['sku']
             temp = temp[0]
             item['sku'] = utils.extractSku(temp)
-        item['comments'] = self.get_comments(item['url'])
+        try:
+            item['comments'] = self.get_comments(item['url'])
+        except:
+                exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+                logger.error('Error getting comments %s , Exception information: %s, %s, Stack trace: %s ' % (item['url'],
+                                            exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
+            
         return item
 
 

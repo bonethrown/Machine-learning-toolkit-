@@ -6,6 +6,11 @@ import datetime
 from  cosme.pipes.default import AbstractSite
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from cosme.pipes.utils.utils import get_http_response
+import sys
+import traceback
+import logging
+
+logger = logging.getLogger(__name__)
 
 class laffayetteWeb(AbstractSite):
 	
@@ -46,7 +51,13 @@ class laffayetteWeb(AbstractSite):
 
 		if item['comments']:
 			comment_html = item['comments']
-			item['comments'] = self.get_comments(comment_html, item['url'])
+			try:
+				item['comments'] = self.get_comments(comment_html, item['url'])
+			except:
+				exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+				logger.error('Error getting comments %s , Exception information: %s, %s, Stack trace: %s ' % (item['url'],
+											exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
+				
 
 		return item
 
