@@ -48,11 +48,11 @@ class InfiniteBeleza(AbstractSite):
             if commentDict['star'] is None:
                 continue
             commentDict['name'] = comment.select(self.siteModule.get_comments()['commenterName']).extract()
-            commentDict['name'] = commentDict['name'][0] if len(commentDict['name']) > 0 else ''
+            commentDict['name'] = utils.cleanChars(commentDict['name'][0] if len(commentDict['name']) > 0 else '')
             
             commentDict['date'] = self.get_date(comment, self.siteModule.get_comments()['commentDate'])
             commentText = comment.select(self.siteModule.get_comments()['commentText']).extract()
-            commentDict['comment'] = commentText[0].strip() if len(commentText) > 0 else ''
+            commentDict['comment'] = utils.cleanChars(commentText[0].strip() if len(commentText) > 0 else '')
                 
             
             result.append(commentDict)
