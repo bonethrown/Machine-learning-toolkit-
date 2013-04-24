@@ -23,14 +23,14 @@ DOWNLOAD_DELAY = 2
 
 DEPTH_LIMIT=1
 
-#CLOSESPIDER_PAGECOUNT=5
+CLOSESPIDER_PAGECOUNT=5
 
 RANDOMIZE_DOWNLOAD_DELAY=True
 DOWNLOAD_DELAY = 0.25  
 
 
 # Debug is Very noisy.
-LOG_LEVEL='DEBUG'
+LOG_LEVEL='INFO'
 
 
 RANDOMIZE_DOWNLOAD_DELAY=True
@@ -42,6 +42,6 @@ HTTP_NUMPOOLS=2
 HTTP_MAXSIZE=10
 
 logging.basicConfig(
-        level = logging.DEBUG,
+        level = logging.INFO,
         format = '%(asctime)s %(levelname)s %(name)s:%(lineno)s  %(message)s',
 )
