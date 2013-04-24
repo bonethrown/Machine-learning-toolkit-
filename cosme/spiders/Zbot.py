@@ -1,17 +1,23 @@
 from scrapy.contrib.spiders import CrawlSpider ,Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
-from scrapy.utils.response import body_or_str, get_base_url, get_meta_refresh
-from scrapy.http import Request
 from cosme.items import CosmeItem
 from scrapy import log
-from scrapy.contrib.loader import XPathItemLoader
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
-from scrapy.exceptions import CloseSpider
-from cosme.settings import COSME_DEBUG
-from xpaths import *
-import sys
 
+class LocalSgmlLinkExtractor(SgmlLinkExtractor):
+    
+    def __init__(self, allow=(), deny=(), allow_domains=(), deny_domains=(), restrict_xpaths=(), 
+                 tags=('a', 'area'), attrs=('href'), canonicalize=True, unique=True, process_value=None,
+                 deny_extensions=None):
+        SgmlLinkExtractor.__init__(self, allow=allow, deny=deny, allow_domains=allow_domains, deny_domains=deny_domains,
+                                   restrict_xpaths = restrict_xpaths, tags=tags, attrs=attrs, canonicalize=canonicalize,
+                                   unique = unique, process_value = process_value, deny_extensions = deny_extensions)
+        
+    def extract_links(self, response):
+        response.body = response.body.replace('<! ', '<!--')
+        return SgmlLinkExtractor.extract_links(self, response)
+        
 class Cosme(CrawlSpider):
     name = 'Zbot'
     allowed_domains = ['sepha.com.br']
@@ -26,7 +32,7 @@ class Cosme(CrawlSpider):
     #r'/bios/.\w+\.htm'
         #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
     rules = [
-             Rule(SgmlLinkExtractor(allow = allow_exts, deny = deny_exts) , follow=True, callback='parse_item'),
+             Rule(LocalSgmlLinkExtractor(allow = allow_exts, deny = deny_exts) , follow=True, callback='parse_item'),
              ]
     xpathRegistry = XPathRegistry()
    
