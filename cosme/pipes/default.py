@@ -23,11 +23,11 @@ class AbstractSite:
         if not item['brand']:
             raise DropItem("missing brand in %s . Dropping this" % item)
         if not item['category']:
-            raise DropItem("*******Droping Item - missing Category*******")     
+           # raise DropItem("*******Droping Item - missing Category*******")     
         
         # item["raw_data"] = ""
         #set our crawl time
-        item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
+       	    item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
          
         return item
              

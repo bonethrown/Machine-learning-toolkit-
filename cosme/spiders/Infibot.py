@@ -24,7 +24,7 @@ class Cosme(CrawlSpider):
 
     #TODO put these in a file!
     start = ('http://www.infinitabeleza.com.br/',)
-    deny_exts = ('games','cams','photos','stories','login\.php','signup\.php','tags\.html','categories\.html','upload.html','search' ,'cat','c=','channel','tag','channels','click','pornstar','community')
+    deny_exts = (r'login\.php','signup\.php','tags\.html','categories\.html','upload.html','search' ,'cat','c=')
     for i in start:
          start_urls.append(i)
 

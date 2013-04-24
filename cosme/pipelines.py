@@ -40,7 +40,7 @@ class CosmePipeline(object):
        
     def process_item(self, item, spider):
         #Set this to false if you wish to crawl only and not submit to solr 
-        commit = False
+        commit = True
         #switch between pipelines , import module accordingly
         pipeModule = "cosme.pipes."+item['site']
         log.msg("Opening Module %s for parsing"%pipeModule, level=log.INFO)
