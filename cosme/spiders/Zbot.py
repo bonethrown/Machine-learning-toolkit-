@@ -22,17 +22,17 @@ class Cosme(CrawlSpider):
     name = 'Zbot'
     allowed_domains = ['sepha.com.br']
     #might need to change this this is useless for now
-    start_urls = ["http://www.sepha.com.br",]
+    start_urls = ["http://www.sepha.com.br","http://www.sepha.com.br/cat/perfume/"]
     #start = ('http://www.belezanaweb.com.br/perfumes/',)
     
-    deny_exts = (r'listagem\.php', r'site', r'include', 'ajax', 'basket')
-    allow_exts = ('/cat/[\w]+([//\w.]+)')
+    deny_exts = (r'listagem\.php', r'site', r'include', 'ajax', 'basket', r'busca\.php', r'brindes')
+    allow_exts = (r'[\w]+([//\w.]+)')
     #for i in start:
      #   start_urls.append(i)
     #r'/bios/.\w+\.htm'
         #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
     rules = [
-             Rule(LocalSgmlLinkExtractor(unique = True, deny_extensions = ('\.php'), allow = allow_exts, deny = deny_exts) , follow=True, callback='parse_item'),
+             Rule(LocalSgmlLinkExtractor(unique = True, deny_extensions = ('\.php'), deny = deny_exts) , follow=True, callback='parse_item'),
              ]
     xpathRegistry = XPathRegistry()
    
