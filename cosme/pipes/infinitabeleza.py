@@ -16,14 +16,11 @@ class InfiniteBeleza(AbstractSite):
     
     #do all default processing here
     def process(self, item,spider,matcher):
-    
-        for key in item.keys():
-            if item[key]:
-                item[key] = utils.getFirst(item[key])
-    
+   	    if item['brand']:
+		item['brand'] = item['brand'][0] 
             if item['name']:
-                tempNameArr = item['name']
-                
+                tempNameArr = item['name'][0]
+		item['name'] = utils.cleanChars(tempNameArr)
             if item['comments']:
                 comment_html = item['comments']
                 try:
@@ -34,7 +31,7 @@ class InfiniteBeleza(AbstractSite):
                                             exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
                 
         
-        return item
+            return item
     
     
     def get_comments(self, comment_html, url):
