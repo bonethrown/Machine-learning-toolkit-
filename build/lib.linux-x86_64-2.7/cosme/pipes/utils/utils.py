@@ -23,43 +23,10 @@ def convertTime(time):
     
 def convertDate(toConvert):
     dateSplit = toConvert.split(" ")
-
-def cleanNumberArray(array, strOrFloat):
-	out = []
-	for e in array:
-		e = findPrice(e)
-		e = cleanPrice(e)
-		if strOrFloat == "float":
-			e = strToFloat(e)		
-			out.append(e)
-		else:
-			out.append(e)
-				
-	return out
-
-def cleanElementChars(array):
-	out = []
-	for e in array:
-		e = cleanChars(e)
-	    	out.append(e)
-	return out
-def isDotAndComma(string):
-	dot = "."
-	com = ","
-	if string.find(dot) > 0 and string.find(com) > 0:
-		return True
-	else:
-		return False
-
-def cleanPrice(toClean):
-	badChars = ["R","r","$"]
-	toClean = toClean.strip()
-	for val in badChars:
-		toClean = toClean.replace(val, "")
-	return toClean
-
+    
+    
 def cleanChars(toClean):
- 
+    
     badChars = ["\\r","\\t","\\n",":","%",",","(",")"]
     stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
     toClean = toClean.lower().strip()
@@ -100,13 +67,7 @@ def dateDeltaToIso(dateStr):
     
     newDate = today - dateTimeDelta
     return newDate.isoformat()+"Z"
-def isEqualAvg(item, array):
-	a = sum(array)
-	b = a / len(array)
-	if item == b:
-		return True
-	else:
-		return False    
+    
 # Ecpected format is "August 15, 2012"
 def convertDateClass(toConv):
     date =  parse(toConv)
@@ -134,39 +95,13 @@ def extractSku(string):
     temp = int(temp)
     return temp
 
-def radioButtonPriceMatch(uniqueExt, priceArray, radioArray):
-	url = uniqueExt
-	priceArray = cleanNumberArray(priceArray)	
-	for buttonId in radioArray:
-		if buttonId == url:
-			index = radioArray.index(buttonId)			 
-			price = priceArray[index]
-			return price
-
-def findPrice(string):
+def extractPrice(string):
     tempPrice = str(string)
-    tempPrice = re.search(r'[\d.,]+', tempPrice).group()
-    if isDotAndComma(tempPrice):
-	tempPrice = tempPrice.replace('.','')
-	tempPrice = tempPrice.replace(',','.')
-    else:
-	tempPrice = tempPrice.replace(',','.')
-   
-    return tempPrice
+    tempPrice = re.search(r'[\d.,]+', tempPrice)
+    tempPrice = tempPrice.group().replace(',','.')
+    tempPrice = float(tempPrice)
 
-def strToFloat(string):
-    tempPrice = float(string)
     return tempPrice
-
-def extractPrice(arrayOrString):
-	if isinstance(arrayOrString, list):
-		temp = arrayOrString[0]
-		price = findPrice(temp)
-		return price
-	elif isinstance(arrayOrString, str):
-		temp = arrayOrString
-		price = temp(findPrice)
-		return price	
 
 class listMatcher:
 

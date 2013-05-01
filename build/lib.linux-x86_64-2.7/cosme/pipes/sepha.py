@@ -2,7 +2,6 @@ from utils import utils
 from scrapy import log
 from  cosme.pipes.default import AbstractSite
 import urllib3
-import re
 from cosme.settings import HTTP_NUMPOOLS, HTTP_MAXSIZE
 import logging
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
@@ -22,26 +21,16 @@ class SephaWeb(AbstractSite):
 	def process(self, item, spider, matcher):
 		if item['url']:
 			item['url'] = item['url'].lower()					
-		if item['sku']: 
-			item['sku'] = utils.cleanNumberArray(item['sku'],'string')
 		if item['price']: 
-
-			temp  = utils.cleanNumberArray(item['price'],'float')
-			
-			if len(item['price']) > 1 and utils.isEqualAvg(temp[0], temp):
-				url = item['url']
-				url = re.search(r'\d+', url)
-				print url 
-				temp = utils.radioButtonPriceMatch(url, item['price'], item['sku'])
-				#item['price'] = utils.extractPrice(temp)
-				item['price'] = temp
-				print "******* PRICE OUT ****** %s", temp
-			else:
-				item['price'] = utils.extractPrice(item['price'])
+			# tempPrice = re.search(r'[\d.,]+',str(item['price']))
+			# tempPrice = tempPrice.group().replace(',','.')
+			# item['price'] = float(tempPrice)
+			item['price'] = utils.extractPrice(item['price'])
 
 		if item['brand']:
 			tempBrand = item['brand']
 			tempBrand = tempBrand[0]
+			print "########TEMP DOS  ######### %s", tempBrand
 			tempBrand = utils.extractBrand(tempBrand)
 			item['brand'] = tempBrand
 
@@ -57,7 +46,10 @@ class SephaWeb(AbstractSite):
 			temp = item['image'] 
 			temp = temp[0]
 			item['image'] = temp
-
+		if item['sku']: 
+			temp = item['sku']
+			temp = temp[0]
+			item['sku'] = utils.extractSku(temp)
 		if item['product_id']:
 			temp = item['product_id']
 			try:
