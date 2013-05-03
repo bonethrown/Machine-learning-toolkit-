@@ -20,3 +20,4 @@ class CosmeItem(Item):
     date_crawled = Field()
     comments = Field()
     product_id = Field()
+    volume = Field()

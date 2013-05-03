@@ -23,7 +23,22 @@ def convertTime(time):
     
 def convertDate(toConvert):
     dateSplit = toConvert.split(" ")
+def extractVolume(string):
+	vol = re.search(r'\d+ml',string)
+	if vol is not None:
+		vol = vol.group()
+		return vol
+	else: 
+		return None
 
+def getElementVolume(volArray):
+	out = []
+	for e in volArray:
+		e = extractVolume(e)
+		if e is not None:
+			out.append(e)
+	return out
+	
 def cleanNumberArray(array, strOrFloat):
 	out = []
 	for e in array:
@@ -136,7 +151,7 @@ def extractSku(string):
 
 def radioButtonPriceMatch(uniqueExt, priceArray, radioArray):
 	url = uniqueExt
-	priceArray = cleanNumberArray(priceArray)	
+	priceArray = cleanNumberArray(priceArray, "string")	
 	for buttonId in radioArray:
 		if buttonId == url:
 			index = radioArray.index(buttonId)			 

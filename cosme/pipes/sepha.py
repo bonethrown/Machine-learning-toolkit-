@@ -34,7 +34,8 @@ class SephaWeb(AbstractSite):
 				print url 
 				temp = utils.radioButtonPriceMatch(url, item['price'], item['sku'])
 				#item['price'] = utils.extractPrice(temp)
-				item['price'] = temp
+				item['price'] = findPrice(temp[0])
+				item['price'] = strToFloat(item['price'])
 				print "******* PRICE OUT ****** %s", temp
 			else:
 				item['price'] = utils.extractPrice(item['price'])

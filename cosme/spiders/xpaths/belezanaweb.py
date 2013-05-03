@@ -17,6 +17,8 @@ class BelezanaWebXPath(AbstractXPath):
             "sku" : "//div[@class=\'title\']/p/text()" ,
             
             "comments":  "//div[@class=\"rateAndTips\"]",
+
+	    "volume" : "//div[@class='prices']/div[1]",
             }
     
     def get_meta(self):
