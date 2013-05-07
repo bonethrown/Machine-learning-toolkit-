@@ -15,7 +15,9 @@ class MagazineLuizaXPath(AbstractXPath):
     
             "sku" : "//div[@class=\'container-title-product-detail\']/small/text()" ,
             
-            "comments": "//div[@class=\'container-seeing-comments\']"
+            "comments": "//div[@class=\'container-seeing-comments\']",
+    
+            "volume": "//span[@class=\'btn-default\' and input[@checked=\'checked\']]/span/text()"
             }
 
     COMMENTS = {
