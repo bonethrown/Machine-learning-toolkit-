@@ -24,6 +24,20 @@ class TestLaffayetteCommentExtract(unittest.TestCase):
         comment = hxs.select(siteModule.META['comments']).extract()
         self.my_parse_item(comment, siteModule)
         
+
+    def test_volume_extraction(self):
+        sephora_html = load_file('Laffayette.html')
+        url = 'http://www.laffayette.com.br/produto/esmalte-revlon-scented-nail-enamel-14,7ml.html'
+        hxs = utils.get_http_response(sephora_html, url)
+        siteModule = self.xpathRegistry.getXPath('laffayette')
+        
+        logger.info('name pattern %s ' % (siteModule.META['name']))
+        name = hxs.select(siteModule.META['name']).extract()
+        
+        lweb = laffayetteWeb()
+        volume = lweb.get_volume(name)
+        logger.info('%s %s ' % (name , volume))
+
         
     def my_parse_item(self, comment, siteModule):
         laffayetteSite = laffayetteWeb()

@@ -34,10 +34,11 @@ class laffayetteWeb(AbstractSite):
 			item['brand'] = tempBrand
 
 		if item['name']:
+			item['volume'] = self.get_volume(item['name'])
 			tempName = item['name']
 			tempName = tempName[0]
 			item['name'] = utils.cleanChars(tempName)
-
+			
 		if item['category']:
 			tempCat = item['category']
 			item['category'] =utils.cleanChars(tempCat[0])
@@ -61,6 +62,14 @@ class laffayetteWeb(AbstractSite):
 
 		return item
 
+	def get_volume(self, name):
+		volume = ''
+		if len(name) >= 1:
+			actualname = name[0]
+			if actualname.endswith('ML'):
+				idx = actualname.rfind(' ')
+				volume=actualname[idx:]
+		return volume
 
 	def get_comments(self, comment_html, url):
 		hxs = get_http_response(comment_html[0], url)
