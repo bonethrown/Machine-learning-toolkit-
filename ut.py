@@ -14,12 +14,12 @@ def run_test(testcase):
     unittest.TextTestRunner(verbosity=2).run(suite)    
     
 def process():
-    run_test(TestCommentExtract)
+    #run_test(TestCommentExtract)
     run_test(TestLaffayetteCommentExtract)
-    run_test(TestBelezanaCommentExtract)
-    run_test(TestMagazineLuizaCommentExtract)
-    run_test(TestSephaComment)
-    run_test(TestInfinitaBelezaCommentExtract)
+    #run_test(TestBelezanaCommentExtract)
+    #run_test(TestMagazineLuizaCommentExtract)
+    #run_test(TestSephaComment)
+    #run_test(TestInfinitaBelezaCommentExtract)
     
 if __name__ == '__main__':
     process()
