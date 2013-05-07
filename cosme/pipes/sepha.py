@@ -50,7 +50,8 @@ class SephaWeb(AbstractSite):
 			tempName = item['name']
 			tempName = tempName[0]
 			item['name'] = utils.cleanChars(tempName)
-
+			item['volume'] = utils.extractVolume(item['name']) 
+			
 		if item['category']:
 			tempCat = item['category']
 			item['category'] =utils.cleanChars(tempCat[0])
