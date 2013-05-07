@@ -32,9 +32,12 @@ def get_volume(name, pattern='ML'):
     volume = ''
     if len(name) >= 1:
         actualname = name[0]
-        if actualname.endswith(pattern):
-            idx = actualname.rfind(' ')
-            volume=actualname[idx:]
+    else:
+        actualname = name
+    actualname = actualname.strip()
+    if actualname.endswith(pattern):
+        idx = actualname.rfind(' ')
+        volume=actualname[idx:]
     return volume
     
 def extractVolume(inputstring, suffixpattern='ml'):

@@ -20,8 +20,8 @@ class BelezanaWeb(AbstractSite):
         if item['price']: 
             # tempPrice = re.search(r'[\d.,]+',str(item['price']))
             # tempPrice = tempPrice.group().replace(',','.')
-		item['price'] = utils.cleanNumberArray(item['price'])
-            	item['price'] = item['price'][0]
+            item['price'] = utils.cleanNumberArray(item['price'])
+            item['price'] = item['price'][0]
     
         if item['brand']:
             tempBrand = item['brand']
@@ -30,6 +30,7 @@ class BelezanaWeb(AbstractSite):
             item['brand'] = tempBrand
     
         if item['name']:
+            item['volume'] = utils.get_volume(item['name'], 'ml')
             tempName = item['name']
             tempName = tempName[0]
             item['name'] = utils.cleanChars(tempName)
