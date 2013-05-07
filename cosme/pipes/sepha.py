@@ -6,7 +6,7 @@ import re
 from cosme.settings import HTTP_NUMPOOLS, HTTP_MAXSIZE
 import logging
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
-from cosme.pipes.utils.utils import get_http_response
+from cosme.pipes.utils.utils import get_http_response, findPrice, strToFloat
 import sys
 import traceback
 
