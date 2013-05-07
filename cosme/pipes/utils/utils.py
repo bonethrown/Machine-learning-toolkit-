@@ -6,7 +6,10 @@ from dateutil.parser import parse
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
+import logging
 #convert format "13:13" to minutes
+logger = logging.getLogger(__name__)
+
 def convertTime(time):
     timeInSeconds = 0
     if time.find(":")>0:
@@ -23,13 +26,26 @@ def convertTime(time):
     
 def convertDate(toConvert):
     dateSplit = toConvert.split(" ")
-def extractVolume(string):
-	vol = re.search(r'\d+ml',string)
-	if vol is not None:
-		vol = vol.group()
-		return vol
-	else: 
-		return None
+
+
+def get_volume(name, pattern='ML'):
+    volume = ''
+    if len(name) >= 1:
+        actualname = name[0]
+        if actualname.endswith(pattern):
+            idx = actualname.rfind(' ')
+            volume=actualname[idx:]
+    return volume
+    
+def extractVolume(inputstring, suffixpattern='ml'):
+    pattern  = '\d+%s' % suffixpattern
+    logger.info(pattern)
+    vol = re.search(pattern,inputstring)
+    if vol is not None:
+        vol = vol.group()
+        return vol
+    else: 
+        return None
 
 def getElementVolume(volArray):
 	out = []

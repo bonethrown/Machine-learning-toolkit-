@@ -5,6 +5,7 @@ from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from test.test_comment_extractor import load_file
 from cosme.pipes.utils import utils
 from cosme.pipes.laffayette import laffayetteWeb
+from cosme.pipes.utils.utils import extractVolume
 
 logging.debug('creating logger')
 logger = logging.getLogger(__name__)
@@ -34,9 +35,8 @@ class TestLaffayetteCommentExtract(unittest.TestCase):
         logger.info('name pattern %s ' % (siteModule.META['name']))
         name = hxs.select(siteModule.META['name']).extract()
         
-        lweb = laffayetteWeb()
-        volume = lweb.get_volume(name)
-        logger.info('%s %s ' % (name , volume))
+        volume = utils.get_volume(name)
+        logger.info('%s %s %s' % (name , volume, extractVolume(name[0], 'ML')))
 
         
     def my_parse_item(self, comment, siteModule):
