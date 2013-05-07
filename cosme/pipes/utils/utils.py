@@ -39,7 +39,6 @@ def get_volume(name, pattern='ML'):
     
 def extractVolume(inputstring, suffixpattern='ml'):
     pattern  = '\d+%s' % suffixpattern
-    logger.info(pattern)
     vol = re.search(pattern,inputstring)
     if vol is not None:
         vol = vol.group()
