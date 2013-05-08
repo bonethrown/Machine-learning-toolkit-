@@ -10,6 +10,11 @@ import logging
 #convert format "13:13" to minutes
 logger = logging.getLogger(__name__)
 
+def createKey(cosmeItem):
+	key = ""
+	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem['name'].replace(" ","-") + "_"+str(cosmeItem['price']).replace(",","-").replace(".","-")
+	return key
+
 def convertTime(time):
     timeInSeconds = 0
     if time.find(":")>0:

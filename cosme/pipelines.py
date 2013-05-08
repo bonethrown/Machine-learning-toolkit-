@@ -36,7 +36,7 @@ class CosmePipeline(object):
         self.siteDict['sepha'] = SephaWeb()
         self.siteDict['laffayette'] = laffayetteWeb()
         self.defaultSite = AbstractSite()
-        # **** WHY IS THERE TWO ABSTRACT SITES BEING SET
+
        
     def process_item(self, item, spider):
         #Set this to false if you wish to crawl only and not submit to solr 
@@ -52,21 +52,30 @@ class CosmePipeline(object):
         #print "Parsing item %s",(item)
         item = self.defaultSite.process(item, spider)
         cleanItem = sitePipe.process(item,spider,self.matcher)
-        print "***********CLEAN ITEM *************"
-        print cleanItem 
+	if cleanItem['volume'] == None:
+		cleanItem['volume'] = ""
+        cleanItem['key'] = utils.createKey(cleanItem)
+	print "***PRICE****"
+	print type(cleanItem['price'])
+	print cleanItem['key']		 
         
-        storeItem  = {}
-        storeItem['url'] = cleanItem['url']
+        print "***JSON ****"
+	clean = dict(cleanItem)
+	#clean = json.dumps(clean)
+	print clean
+	
+	storeItem  = {}
+	storeItem['url'] = cleanItem['url']
         storeItem['comments'] =  cleanItem['comments']
-        cleanItem['comments'] = []
         
+	cleanItem['comments'] = []
         arrItem = []
         arrItem.append(dict(cleanItem))
 
         
         #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
         singleItemJson = json.dumps(arrItem)
-        print singleItemJson 
+        #print singleItemJson 
         #log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
 
         if commit:
@@ -76,17 +85,18 @@ class CosmePipeline(object):
                 #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
                 # resultDB = self.db.items.insert(dict(storeItem),safe=True )
                 #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
-                # log.msg("*************** Submitting to mongoDB ready to send %s type %s  result %s " %
-                #               (cleanItem,type(cleanItem),resultDB), 
-                #           level=log.DEBUG)
             except Exception, e:
                 log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
             try:
                 # SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
                 page = urllib2.urlopen(req)
-                resultDB = self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
-		#resultDB = self.db.items.insert(dict(storeItem),safe=True )
-                log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
+                #resultDB = self.db.items
+		self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
+		#lalinaDB = self.db.lalina
+		print "****TYPE******"
+		print type(clean)
+		self.db.lalina.update({"key" : clean['key']}, clean, upsert=True, safe = True)
+		log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
             except Exception, e:
                 log.msg("***********ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
         else:

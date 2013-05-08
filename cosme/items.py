@@ -7,6 +7,7 @@ from scrapy.item import Item, Field
 
 class CosmeItem(Item):
     # define the fields for your item here like:
+    key = Field()
     name = Field()
     brand = Field()
     sku = Field()

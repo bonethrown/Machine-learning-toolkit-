@@ -36,10 +36,11 @@ class SephaWeb(AbstractSite):
 				#item['price'] = utils.extractPrice(temp)
 				item['price'] = findPrice(temp[0])
 				item['price'] = strToFloat(item['price'])
-				print "******* PRICE OUT ****** %s", temp
+				print "******* PRICE OUT ****** %s", type(item['price'])
 			else:
 				item['price'] = utils.extractPrice(item['price'])
-
+				item['price'] = strToFloat(item['price']) 
+				print "******* PRICE OUT ****** %s", type(item['price'])
 		if item['brand']:
 			tempBrand = item['brand']
 			tempBrand = tempBrand[0]
