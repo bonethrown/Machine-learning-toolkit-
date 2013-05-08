@@ -1,4 +1,4 @@
-from utils import utils
+from utils import utils, itemTools
 from scrapy import log
 from  cosme.pipes.default import AbstractSite
 import urllib3
@@ -25,22 +25,9 @@ class SephaWeb(AbstractSite):
 		if item['sku']: 
 			item['sku'] = utils.cleanNumberArray(item['sku'],'string')
 		if item['price']: 
-
-			temp  = utils.cleanNumberArray(item['price'],'float')
-			
-			if len(item['price']) > 1 and utils.isEqualAvg(temp[0], temp):
-				url = item['url']
-				url = re.search(r'\d+', url)
-				print url 
-				temp = utils.radioButtonPriceMatch(url, item['price'], item['sku'])
-				#item['price'] = utils.extractPrice(temp)
-				item['price'] = findPrice(temp[0])
-				item['price'] = strToFloat(item['price'])
-				print "******* PRICE OUT ****** %s", type(item['price'])
-			else:
-				item['price'] = utils.extractPrice(item['price'])
-				item['price'] = strToFloat(item['price']) 
-				print "******* PRICE OUT ****** %s", type(item['price'])
+			item['price'] = itemTools.filterMultiPrice(item)
+			print "*****PRICE FINAL ***** %s", item['price']
+	
 		if item['brand']:
 			tempBrand = item['brand']
 			tempBrand = tempBrand[0]
