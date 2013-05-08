@@ -55,19 +55,12 @@ class CosmePipeline(object):
 	if cleanItem['volume'] == None:
 		cleanItem['volume'] = ""
         cleanItem['key'] = utils.createKey(cleanItem)
-	print "***PRICE****"
-	print type(cleanItem['price'])
-	print cleanItem['key']		 
-        
-        print "***JSON ****"
 	clean = dict(cleanItem)
-	#clean = json.dumps(clean)
-	print clean
 	
 	storeItem  = {}
 	storeItem['url'] = cleanItem['url']
         storeItem['comments'] =  cleanItem['comments']
-        
+        storeItem['key'] = clean['key'] 
 	cleanItem['comments'] = []
         arrItem = []
         arrItem.append(dict(cleanItem))
