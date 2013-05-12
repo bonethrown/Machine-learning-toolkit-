@@ -1,4 +1,4 @@
-from utils import utils
+from utils import utils, itemTools
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.utils.utils import get_http_response
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
@@ -16,13 +16,11 @@ class BelezanaWeb(AbstractSite):
     def process(self, item,spider,matcher):
         if item['url']:
             item['url'] = item['url'].lower()					
-    
+        if item['sku']: 
+            item['sku'] = utils.cleanSkuArray(item['sku'], 'string')
         if item['price']: 
-            # tempPrice = re.search(r'[\d.,]+',str(item['price']))
-            # tempPrice = tempPrice.group().replace(',','.')
-            item['price'] = utils.cleanNumberArray(item['price'])
-            item['price'] = item['price'][0]
-    
+   	    item['price'] =utils.cleanNumberArray(item['price'], 'float')
+	 
         if item['brand']:
             tempBrand = item['brand']
             tempBrand = tempBrand[0]
@@ -30,7 +28,7 @@ class BelezanaWeb(AbstractSite):
             item['brand'] = tempBrand
     
         if item['name']:
-            item['volume'] = utils.get_volume(item['name'], 'ml')
+            #item['volume'] = utils.get_volume(item['name'], 'ml')
             tempName = item['name']
             tempName = tempName[0]
             item['name'] = utils.cleanChars(tempName)
@@ -42,10 +40,6 @@ class BelezanaWeb(AbstractSite):
             temp = item['image'] 
             temp = temp[0]
             item['image'] = temp
-        if item['sku']: 
-            temp = item['sku']
-            temp = temp[0]
-            item['sku'] = utils.extractSku(temp)
         if item['comments']:
             comment_html = item['comments']
             try:
@@ -88,12 +82,12 @@ class BelezanaWeb(AbstractSite):
         needle= 'em'
         idx = datestr.find(needle)
         if idx > -1:
-            return datestr[idx + len(needle):].strip()
-        else:
-            return datestr
+		return datestr[idx + len(needle):].strip()
+	else:
+		return datestr
 
     def get_star(self, comment, pattern, pattern2):
-            possiblestars  = comment.select(pattern).extract()
-            if len(possiblestars) == 0:
-                possiblestars  = comment.select(pattern2).extract()
-            return len(possiblestars)    
+	possiblestars  = comment.select(pattern).extract()
+	if len(possiblestars) == 0:
+		possiblestars  = comment.select(pattern2).extract()
+	return len(possiblestars)

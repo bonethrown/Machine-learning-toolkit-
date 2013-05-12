@@ -61,7 +61,17 @@ def getElementVolume(volArray):
 		if e is not None:
 			out.append(e)
 	return out
-	
+def cleanSkuArray(array, strOrFloat):
+	out = []
+	for e in array:
+		e = extractSku(e)
+ 		if strOrFloat == "float":
+			e = strToFloat(e)
+			out.append(e)
+		else:
+			out.append(e)
+	return out
+
 def cleanNumberArray(array, strOrFloat):
 	out = []
 	for e in array:
@@ -171,15 +181,6 @@ def extractSku(string):
     temp = temp.group()
     temp = int(temp)
     return temp
-
-def radioButtonPriceMatch(uniqueExt, priceArray, radioArray):
-	url = uniqueExt
-	priceArray = cleanNumberArray(priceArray, "string")	
-	for buttonId in radioArray:
-		if buttonId == url:
-			index = radioArray.index(buttonId)			 
-			price = priceArray[index]
-			return price
 
 def findPrice(string):
     tempPrice = str(string)

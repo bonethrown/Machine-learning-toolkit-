@@ -25,7 +25,8 @@ class SephaWeb(AbstractSite):
 		if item['sku']: 
 			item['sku'] = utils.cleanNumberArray(item['sku'],'string')
 		if item['price']: 
-			item['price'] = itemTools.filterMultiPrice(item)
+			item['price'] = itemTools.filterMultiPriceRadio(item)
+			item['price'] = utils.cleanNumberArray(item['price'], 'float')
 			print "*****PRICE FINAL ***** %s", item['price']
 	
 		if item['brand']:
@@ -33,12 +34,15 @@ class SephaWeb(AbstractSite):
 			tempBrand = tempBrand[0]
 			tempBrand = utils.extractBrand(tempBrand)
 			item['brand'] = tempBrand
-
+		if item['volume']:
+			temp = item['volume'] 
+			temp = utils.getElementVolume(temp)
+			item['volume'] = temp
 		if item['name']:
 			tempName = item['name']
 			tempName = tempName[0]
 			item['name'] = utils.cleanChars(tempName)
-			item['volume'] = utils.extractVolume(item['name']) 
+			#item['volume'] = utils.extractVolume(item['name']) 
 			
 		if item['category']:
 			tempCat = item['category']
