@@ -38,7 +38,7 @@ def filterMultiPriceRadio(item):
 	if hasDiffPrices(item):
 		print "*****MULTI PRICE CASE******"
 		url = item['url']
-		url = re.search(r'[^ww2//][\d]+', url)
+		url = re.search(r'\d{2,}', url)
 		url = url.group()
 		temp = []
 		temp.append(radioButtonPriceMatch(url, item['price'], item['sku']))
