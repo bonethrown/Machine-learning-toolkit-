@@ -40,7 +40,8 @@ def filterMultiPriceRadio(item):
 		url = item['url']
 		url = re.search(r'[^ww2//][\d]+', url)
 		url = url.group()
-		temp = radioButtonPriceMatch(url, item['price'], item['sku'])
+		temp = []
+		temp.append(radioButtonPriceMatch(url, item['price'], item['sku']))
 		#item['price'] = utils.extractPrice(temp)
 		#item['price'] = findPrice(temp[0])
 		#item['price'] = strToFloat(item['price'])
