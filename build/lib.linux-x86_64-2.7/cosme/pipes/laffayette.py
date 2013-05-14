@@ -34,10 +34,11 @@ class laffayetteWeb(AbstractSite):
 			item['brand'] = tempBrand
 
 		if item['name']:
+			item['volume'] = utils.get_volume(item['name'])
 			tempName = item['name']
 			tempName = tempName[0]
 			item['name'] = utils.cleanChars(tempName)
-
+			
 		if item['category']:
 			tempCat = item['category']
 			item['category'] =utils.cleanChars(tempCat[0])

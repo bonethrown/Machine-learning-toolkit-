@@ -39,6 +39,15 @@ class TestCommentExtract(unittest.TestCase):
         siteModule = self.xpathRegistry.getXPath('sephora')
         self.my_parse_item(siteModule, url)
         
+    def test_volume_extraction(self):
+        sephora_html = load_file('All is Bright Lip Glaze Set na Sephora.html')
+        url = 'http://www.sephora.com.br/site/produto.asp?idproduto=13943'
+        hxs = utils.get_http_response(sephora_html, url)
+        siteModule = self.xpathRegistry.getXPath('sephora')
+        
+        volume = hxs.select(siteModule.META['volume']).extract()
+        logger.info(volume)
+        
         
     def my_parse_item(self, siteModule, url):
         sephoraSite = SephoraSite()
