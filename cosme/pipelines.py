@@ -75,6 +75,9 @@ class CosmePipeline(object):
         storeItem['comments'] =  cleanItem['comments']
         storeItem['key'] = clean['key']
         cleanItem['comments'] = []
+        if 'name' in cleanItem:
+            # No tokenization, but just storing - used for clustering.
+            cleanItem['name_noindex']= cleanItem['name']
         arrItem = []
         arrItem.append(dict(cleanItem))
 
@@ -87,16 +90,17 @@ class CosmePipeline(object):
             try:
                 req  = urllib2.Request(self.solr_url, data = singleItemJson)
                 req.add_header("Content-type", "application/json")
-                #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
-                # resultDB = self.db.items.insert(dict(storeItem),safe=True )
-                #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
             except Exception, e:
-                log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
+                log.msg("************* ERROR Submitting to Solr error: %s "%e, level=log.ERROR)
             try:
-                # SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
+                # SUBMIT TO DB ONLY IF RESPONSE FROM SOLR IS OK.
                 page = urllib2.urlopen(req)
                 #resultDB = self.db.items
                 self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
+                #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
+                # resultDB = self.db.items.insert(dict(storeItem),safe=True )
+                #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
+
                 #lalinaDB = self.db.lalina
                 print "****TYPE******"
                 print type(clean)
