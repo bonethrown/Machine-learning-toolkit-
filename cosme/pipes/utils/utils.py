@@ -148,10 +148,14 @@ def dateDeltaToIso(dateStr):
     
     newDate = today - dateTimeDelta
     return newDate.isoformat()+"Z"
-def isEqualAvg(item, array):
+def isEqualAvg(element, array):
+	b = float()
+	
 	a = sum(array)
-	b = a / len(array)
-	if item == b:
+	c = len(array) 
+	b = float(a) / float(c)
+
+	if element == float(b):
 		return True
 	else:
 		return False    
