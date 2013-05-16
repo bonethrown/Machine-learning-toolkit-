@@ -7,7 +7,8 @@ class SephaXPath(AbstractXPath):
     "price" : "//span[@itemprop=\'price\']/text()",
     "description" : "//span[@id=\'textoDescricao\']/text()",
     "category" : "//h2[@class=\'titulo\']/a/text()",
-    "sku" : "//span[@class=\'referencia\']/text()",
+    "sku" : "//div[@class='tamanhoPrd']/input/@value",
+    "volume" : "//div[@class='tamanhoPrd']/input",
     "product_id": "//meta[@itemprop=\"productID\"]/@content"
     }
 

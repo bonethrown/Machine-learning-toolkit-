@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def createKey(cosmeItem):
 	key = ""
-	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem['name'].replace(" ","-") + "_"+str(cosmeItem['price']).replace(",","-").replace(".","-")
+	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem['name'].replace(" ","-") + "_"+str(cosmeItem['price'][0]).replace(",","-").replace(".","-")
 	return key
 
 def convertTime(time):

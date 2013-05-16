@@ -6,7 +6,15 @@ from dateutil.parser import parse
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
+import logging
 #convert format "13:13" to minutes
+logger = logging.getLogger(__name__)
+
+def createKey(cosmeItem):
+	key = ""
+	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem['name'].replace(" ","-") + "_"+str(cosmeItem['price']).replace(",","-").replace(".","-")
+	return key
+
 def convertTime(time):
     timeInSeconds = 0
     if time.find(":")>0:
@@ -23,10 +31,83 @@ def convertTime(time):
     
 def convertDate(toConvert):
     dateSplit = toConvert.split(" ")
+
+
+def get_volume(name, pattern='ML'):
+    volume = ''
+    if len(name) >= 1:
+        actualname = name[0]
+    else:
+        actualname = name
+    actualname = actualname.strip()
+    if actualname.endswith(pattern):
+        idx = actualname.rfind(' ')
+        volume=actualname[idx:]
+    return volume
     
-    
+def extractVolume(inputstring, suffixpattern='ml'):
+    pattern  = '\d+%s' % suffixpattern
+    vol = re.search(pattern,inputstring)
+    if vol is not None:
+        vol = vol.group()
+        return vol
+    else: 
+        return None
+
+def getElementVolume(volArray):
+	out = []
+	for e in volArray:
+		e = extractVolume(e)
+		if e is not None:
+			out.append(e)
+	return out
+def cleanSkuArray(array, strOrFloat):
+	out = []
+	for e in array:
+		e = extractSku(e)
+ 		if strOrFloat == "float":
+			e = strToFloat(e)
+			out.append(e)
+		else:
+			out.append(e)
+	return out
+
+def cleanNumberArray(array, strOrFloat):
+	out = []
+	for e in array:
+		e = findPrice(e)
+		e = cleanPrice(e)
+		if strOrFloat == "float":
+			e = strToFloat(e)		
+			out.append(e)
+		else:
+			out.append(e)
+				
+	return out
+
+def cleanElementChars(array):
+	out = []
+	for e in array:
+		e = cleanChars(e)
+	    	out.append(e)
+	return out
+def isDotAndComma(string):
+	dot = "."
+	com = ","
+	if string.find(dot) > 0 and string.find(com) > 0:
+		return True
+	else:
+		return False
+
+def cleanPrice(toClean):
+	badChars = ["R","r","$"]
+	toClean = toClean.strip()
+	for val in badChars:
+		toClean = toClean.replace(val, "")
+	return toClean
+
 def cleanChars(toClean):
-    
+ 
     badChars = ["\\r","\\t","\\n",":","%",",","(",")"]
     stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
     toClean = toClean.lower().strip()
@@ -67,7 +148,13 @@ def dateDeltaToIso(dateStr):
     
     newDate = today - dateTimeDelta
     return newDate.isoformat()+"Z"
-    
+def isEqualAvg(item, array):
+	a = sum(array)
+	b = a / len(array)
+	if item == b:
+		return True
+	else:
+		return False    
 # Ecpected format is "August 15, 2012"
 def convertDateClass(toConv):
     date =  parse(toConv)
@@ -95,13 +182,30 @@ def extractSku(string):
     temp = int(temp)
     return temp
 
-def extractPrice(string):
+def findPrice(string):
     tempPrice = str(string)
-    tempPrice = re.search(r'[\d.,]+', tempPrice)
-    tempPrice = tempPrice.group().replace(',','.')
-    tempPrice = float(tempPrice)
-
+    tempPrice = re.search(r'[\d.,]+', tempPrice).group()
+    if isDotAndComma(tempPrice):
+	tempPrice = tempPrice.replace('.','')
+	tempPrice = tempPrice.replace(',','.')
+    else:
+	tempPrice = tempPrice.replace(',','.')
+   
     return tempPrice
+
+def strToFloat(string):
+    tempPrice = float(string)
+    return tempPrice
+
+def extractPrice(arrayOrString):
+	if isinstance(arrayOrString, list):
+		temp = arrayOrString[0]
+		price = findPrice(temp)
+		return price
+	elif isinstance(arrayOrString, str):
+		temp = arrayOrString
+		price = temp(findPrice)
+		return price	
 
 class listMatcher:
 

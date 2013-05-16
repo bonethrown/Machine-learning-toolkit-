@@ -27,7 +27,6 @@ class SephaWeb(AbstractSite):
 		if item['price']: 
 			item['price'] = itemTools.filterMultiPriceRadio(item)
 			item['price'] = utils.cleanNumberArray(item['price'], 'float')
-			print "*****PRICE FINAL ***** %s", item['price']
 	
 		if item['brand']:
 			tempBrand = item['brand']

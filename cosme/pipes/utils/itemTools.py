@@ -21,18 +21,14 @@ def keyGen(item):
 	return key
 
 def radioButtonPriceMatch(uniqueExt, priceArray, radioArray):
-	url = uniqueExt
+	url = str(uniqueExt)
         priceArray = utils.cleanNumberArray(priceArray, "string")
-        print url 
-	print priceArray
-	print radioArray
 	for buttonId in radioArray:
-                if buttonId == url:
+		if re.search(url, buttonId) != None:
                         index = radioArray.index(buttonId)
                         price = priceArray[index]
-                        return price
-		else:
-			print "none"
+			return price
+	return None                         
 def filterMultiPriceRadio(item):
 	#temp  = utils.cleanNumberArray(item['price'],'float')
 	if hasDiffPrices(item):
@@ -47,9 +43,10 @@ def filterMultiPriceRadio(item):
 		#item['price'] = strToFloat(item['price'])
 		return temp
 	else:
-		item['price'] = utils.cleanNumberArray(item['price'], 'string')
-		#item['price'] = strToFloat(item['price'])
-		return item['price']
+		temp = []
+		temp.append(utils.cleanNumberArray(item['price'], 'string'))
+		return temp
+
 def hasDiffPrices(item):
 	temp = utils.cleanNumberArray(item['price'], 'float') 
 	if len(item['price']) > 1 and not utils.isEqualAvg(temp[0], temp):

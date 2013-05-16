@@ -1,11 +1,12 @@
-from utils import utils
+from utils import utils, itemTools
 from scrapy import log
 from  cosme.pipes.default import AbstractSite
 import urllib3
+import re
 from cosme.settings import HTTP_NUMPOOLS, HTTP_MAXSIZE
 import logging
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
-from cosme.pipes.utils.utils import get_http_response
+from cosme.pipes.utils.utils import get_http_response, findPrice, strToFloat
 import sys
 import traceback
 
@@ -21,24 +22,28 @@ class SephaWeb(AbstractSite):
 	def process(self, item, spider, matcher):
 		if item['url']:
 			item['url'] = item['url'].lower()					
+		if item['sku']: 
+			item['sku'] = utils.cleanNumberArray(item['sku'],'string')
 		if item['price']: 
-			# tempPrice = re.search(r'[\d.,]+',str(item['price']))
-			# tempPrice = tempPrice.group().replace(',','.')
-			# item['price'] = float(tempPrice)
-			item['price'] = utils.extractPrice(item['price'])
-
+			item['price'] = itemTools.filterMultiPriceRadio(item)
+			item['price'] = utils.cleanNumberArray(item['price'], 'float')
+			print "*****PRICE FINAL ***** %s", item['price']
+	
 		if item['brand']:
 			tempBrand = item['brand']
 			tempBrand = tempBrand[0]
-			print "########TEMP DOS  ######### %s", tempBrand
 			tempBrand = utils.extractBrand(tempBrand)
 			item['brand'] = tempBrand
-
+		if item['volume']:
+			temp = item['volume'] 
+			temp = utils.getElementVolume(temp)
+			item['volume'] = temp
 		if item['name']:
 			tempName = item['name']
 			tempName = tempName[0]
 			item['name'] = utils.cleanChars(tempName)
-
+			#item['volume'] = utils.extractVolume(item['name']) 
+			
 		if item['category']:
 			tempCat = item['category']
 			item['category'] =utils.cleanChars(tempCat[0])
@@ -46,10 +51,7 @@ class SephaWeb(AbstractSite):
 			temp = item['image'] 
 			temp = temp[0]
 			item['image'] = temp
-		if item['sku']: 
-			temp = item['sku']
-			temp = temp[0]
-			item['sku'] = utils.extractSku(temp)
+
 		if item['product_id']:
 			temp = item['product_id']
 			try:

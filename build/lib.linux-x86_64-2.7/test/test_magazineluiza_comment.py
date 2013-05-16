@@ -24,6 +24,13 @@ class TestMagazineLuizaCommentExtract(unittest.TestCase):
         comment = hxs.select(siteModule.META['comments']).extract()
         self.my_parse_item(comment, siteModule, url)
         
+    def test_volume_extraction(self):
+        sephora_html = load_file('magazineluiza_com.html')
+        url = 'http://www.magazineluiza.com.br/ferrari-black-perfume-masculino-eau-de-toilette-75-ml/p/2070190/pf/pffe/'
+        hxs = utils.get_http_response(sephora_html, url)
+        siteModule = self.xpathRegistry.getXPath('magazineluiza')
+        volume = hxs.select(siteModule.META['volume']).extract()
+        logger.info(volume)
         
     def my_parse_item(self, comment, siteModule, url):
         magazineLuiza = MagazineLuizaSite()

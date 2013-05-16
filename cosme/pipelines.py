@@ -21,7 +21,7 @@ class CosmePipeline(object):
     def __init__(self):
         self.solr_url = "http://localhost:8080/solr/cosme0/update?json"
         #Lets send to ec2 as well
-        self.solr_url_prod = "http://ec2-54-242-158-167.compute-1.amazonaws.com:8080/solr/update?"
+        #self.solr_url_prod = "http://ec2-54-242-158-167.compute-1.amazonaws.com:8080/solr/update?"
         #Set up NonRelDB-Connection
         self.db = db.getConnection()
         brandsList = os.path.join(os.getcwd(),"cosme","pipes","utils","brandric.list")
@@ -64,16 +64,16 @@ class CosmePipeline(object):
 
     def postProcess(self, item, spider):
 	
-	commit = True
+	commitSolr = False
+	commitDB = True	
 	
 	cleanItem = item
 	#cleanItem = itemTools.checkVolume(cleanItem)
-	print cleanItem
-        clean = dict(cleanItem)
+        cleanItem = dict(cleanItem)
         storeItem  = {}
         storeItem['url'] = cleanItem['url']
         storeItem['comments'] =  cleanItem['comments']
-        storeItem['key'] = clean['key']
+        storeItem['key'] = cleanItem['key']
         cleanItem['comments'] = []
         arrItem = []
         arrItem.append(dict(cleanItem))
@@ -83,7 +83,7 @@ class CosmePipeline(object):
         #print singleItemJson
         #log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
 
-        if commit:
+        if commitSolr:
             try:
                 req  = urllib2.Request(self.solr_url, data = singleItemJson)
                 req.add_header("Content-type", "application/json")
@@ -92,18 +92,17 @@ class CosmePipeline(object):
                 #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
             except Exception, e:
                 log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
-            try:
+            
+	elif commitDB:
+	    try:
                 # SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
-                page = urllib2.urlopen(req)
-                #resultDB = self.db.items
+                #page = urllib2.urlopen(req)
                 self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
-                #lalinaDB = self.db.lalina
-                print "****TYPE******"
-                print type(clean)
-                self.db.lalina.update({"key" : clean['key']}, clean, upsert=True, safe = True)
-                log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
-            except Exception, e:
-                log.msg("***********ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
+                self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
+                log.msg("********* MONGO SUBMITTED ****** with response", level=log.DEBUG)
+            
+	    except Exception, e:
+                log.msg("***********ERROR Submitting to MONGO error: %s"%e, level=log.ERROR)
         else:
             log.msg("*********** Not commiting to solr or DB commit set to false  ",level=log.WARNING)
 

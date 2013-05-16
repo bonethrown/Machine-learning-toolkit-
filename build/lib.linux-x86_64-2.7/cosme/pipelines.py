@@ -6,7 +6,7 @@
 ##remember to import new added pipes
 from scrapy import log
 import json, urllib2
-from  pipes.utils import db,utils
+from  pipes.utils import db,utils, itemTools
 import os
 from cosme.pipes.belezanaweb import BelezanaWeb
 from cosme.pipes.sephora import SephoraSite
@@ -15,8 +15,7 @@ from cosme.pipes.infinitabeleza import InfiniteBeleza
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.sepha import SephaWeb
 from cosme.pipes.laffayette import laffayetteWeb
-
-
+from cosme.pipes import splitPipe
 #simple pipeline for now. Drop Items with no description!
 class CosmePipeline(object):
     def __init__(self):
@@ -36,37 +35,52 @@ class CosmePipeline(object):
         self.siteDict['sepha'] = SephaWeb()
         self.siteDict['laffayette'] = laffayetteWeb()
         self.defaultSite = AbstractSite()
-        # **** WHY IS THERE TWO ABSTRACT SITES BEING SET
-       
+	#self.preProcess = preProcess()
+    
     def process_item(self, item, spider):
-        #Set this to false if you wish to crawl only and not submit to solr 
-        commit = True
+	 #Set this to false if you wish to crawl only and not submit to solr 
         #switch between pipelines , import module accordingly
         pipeModule = "cosme.pipes."+item['site']
-        log.msg("Opening Module %s for parsing"%pipeModule, level=log.INFO)
-        
         sitePipe = self.siteDict[item['site']]
         
-        #Parse with default pipeline first to handle generic stuff.
-        #parse item with custom pipeline
-        #print "Parsing item %s",(item)
         item = self.defaultSite.process(item, spider)
-        cleanItem = sitePipe.process(item,spider,self.matcher)
-        print "***********CLEAN ITEM *************"
-        print cleanItem 
+        #cleanItem = sitePipe.process(item,spider,self.matcher)
+  	self.priceProcess(item, sitePipe, spider)
+    def priceProcess(self, item, sitePipe, spider):
         
+	cleanItem = sitePipe.process(item, spider, self.matcher)
+    	
+	if itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
+		itemArray = []
+		itemArray = splitPipe.itemizeByPrice(cleanItem)
+		for cleanItem in itemArray:
+			print "*** ITEM FACTORY*****"
+			print item 
+			cleanItem['key'] = itemTools.keyGen(cleanItem)
+  			self.postProcess(cleanItem, spider)
+	else:
+		cleanItem['key'] = itemTools.keyGen(cleanItem)
+  		self.postProcess(cleanItem, spider)
+
+    def postProcess(self, item, spider):
+	
+	commit = True
+	
+	cleanItem = item
+	#cleanItem = itemTools.checkVolume(cleanItem)
+	print cleanItem
+        clean = dict(cleanItem)
         storeItem  = {}
         storeItem['url'] = cleanItem['url']
         storeItem['comments'] =  cleanItem['comments']
+        storeItem['key'] = clean['key']
         cleanItem['comments'] = []
-        
         arrItem = []
         arrItem.append(dict(cleanItem))
 
-        
         #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
         singleItemJson = json.dumps(arrItem)
-        print singleItemJson 
+        #print singleItemJson
         #log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
 
         if commit:
@@ -76,22 +90,21 @@ class CosmePipeline(object):
                 #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
                 # resultDB = self.db.items.insert(dict(storeItem),safe=True )
                 #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
-                # log.msg("*************** Submitting to mongoDB ready to send %s type %s  result %s " %
-                #               (cleanItem,type(cleanItem),resultDB), 
-                #           level=log.DEBUG)
             except Exception, e:
                 log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
             try:
                 # SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
                 page = urllib2.urlopen(req)
-                resultDB = self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
-		#resultDB = self.db.items.insert(dict(storeItem),safe=True )
+                #resultDB = self.db.items
+                self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
+                #lalinaDB = self.db.lalina
+                print "****TYPE******"
+                print type(clean)
+                self.db.lalina.update({"key" : clean['key']}, clean, upsert=True, safe = True)
                 log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
             except Exception, e:
                 log.msg("***********ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
         else:
             log.msg("*********** Not commiting to solr or DB commit set to false  ",level=log.WARNING)
 
-        return cleanItem
-        
-
+        return cleanItem	 
