@@ -1,0 +1,21 @@
+#!/bin/bash
+# /etc/init.d/cosme-scrapyd
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+  start)
+    echo "Starting script cosme-scrapyd "
+    nohup /home/dev/cosme-scrapyd/launch-cosme-scrapyd.sh  >$HOME/nohup-scrapyd.out 2>&1 &
+    ;;
+  stop)
+    echo "Stopping script cosme-scrapyd "
+    ps -aef | grep launch-cosme-scrapyd | awk '{print $2;}'
+    ps -aef | grep launch-cosme-scrapyd | awk '{print $2;}' | xargs kill -9
+    ;;
+  *)
+    echo "Usage: /etc/init.d/cosme-scrapyd {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

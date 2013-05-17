@@ -75,6 +75,9 @@ class CosmePipeline(object):
         storeItem['comments'] =  cleanItem['comments']
         storeItem['key'] = cleanItem['key']
         cleanItem['comments'] = []
+        if 'name' in cleanItem:
+            # No tokenization, but just storing - used for clustering.
+            cleanItem['name_noindex']= cleanItem['name']
         arrItem = []
         arrItem.append(dict(cleanItem))
 
@@ -87,9 +90,6 @@ class CosmePipeline(object):
             try:
                 req  = urllib2.Request(self.solr_url, data = singleItemJson)
                 req.add_header("Content-type", "application/json")
-                #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
-                # resultDB = self.db.items.insert(dict(storeItem),safe=True )
-                #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
             except Exception, e:
                 log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
             
