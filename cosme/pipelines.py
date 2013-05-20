@@ -80,7 +80,9 @@ class CosmePipeline(object):
             cleanItem['name_noindex']= cleanItem['name']
         arrItem = []
         arrItem.append(dict(cleanItem))
-
+	print "****CLEAN ITEM ****"
+	print cleanItem['key']
+	print cleanItem
         #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
         singleItemJson = json.dumps(arrItem)
         #print singleItemJson

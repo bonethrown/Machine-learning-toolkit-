@@ -31,7 +31,8 @@ def itemizeByPrice(item):
 		for price in temp:
 			for vol in volume:
 				newItem = item
-				newItem['price'] = price
+				newItem['price'] = []
+				newItem['price'].append(price)
 				newItem['volume'] = vol
          			responseArray.append(newItem)
 		return responseArray
