@@ -7,6 +7,8 @@ from scrapy.selector import HtmlXPathSelector
 from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
 import logging
+from numpy import mean
+
 #convert format "13:13" to minutes
 logger = logging.getLogger(__name__)
 
@@ -149,13 +151,10 @@ def dateDeltaToIso(dateStr):
     newDate = today - dateTimeDelta
     return newDate.isoformat()+"Z"
 def isEqualAvg(element, array):
-	b = float()
+	#numpy dependent
+	b= mean(array)
 	
-	a = sum(array)
-	c = len(array) 
-	b = float(a) / float(c)
-
-	if element == float(b):
+	if float(element) / round(b, 2) == 1:
 		return True
 	else:
 		return False    
