@@ -23,20 +23,17 @@ def addItemVolume(item):
 			newItem['volume'] = v
 			out.append(newItem)
 		return out
-		
+
 def itemizeByPrice(item):
-		responseArray = []
-		temp = utils.cleanNumberArray(item['price'], 'float')
-		volume = item['volume']
-		for price in temp:
-			for vol in volume:
-				newItem = item
-				newItem['price'] = []
-				newItem['price'].append(price)
-				newItem['volume'] = vol
-         			responseArray.append(newItem)
-		return responseArray
-             
-        #except:
-        #    log.msg("Error parsing results", level=log.WARNING)
-        #   raise DropItem("Something whent wrong parsing dropping item %s " % item['url'])
+                responseArray = []
+                temp = utils.cleanNumberArray(item['price'], 'float')
+                volume = item['volume']
+                for price in temp:
+                                newItem = copy.copy(item)
+                                newItem['price'] = []
+                                newItem['volume'] = []
+                                newItem['price'].append(price)
+                                i = temp.index(price)
+                                newItem['volume'] = volume[i]
+                                responseArray.append(newItem)
+                return responseArray		

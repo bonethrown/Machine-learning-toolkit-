@@ -1,6 +1,6 @@
 import unittest
 
-import logging
+import logging, copy
 from cosme.spiders.Sephbot import Cosme
 import os
 from scrapy.http.request import Request
@@ -15,6 +15,20 @@ from cosme.pipes.utils import utils, itemTools
 from cosme.pipes import splitPipe
 logging.debug('creating logger')
 logger = logging.getLogger(__name__)
+
+def itemizeByPrice(item):
+                responseArray = []
+                temp = utils.cleanNumberArray(item['price'], 'float')
+                volume = item['volume']
+                for price in temp:
+				newItem = copy.copy(item)
+				newItem['price'] = []
+                                newItem['volume'] = []
+				newItem['price'].append(price)
+                                i = temp.index(price)
+				newItem['volume'] = volume[i] 
+				responseArray.append(newItem)
+		return responseArray
 
 def priceProcess(item):
 	cleanItem = item
