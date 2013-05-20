@@ -8,6 +8,7 @@ from scrapy import log
 import datetime
 from cosme.pipes.utils.utils import get_http_response
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
+import copy
 
 def isVolumeEqualToPrice(item):
 	if len(item['price']) == len(item['volume']):
