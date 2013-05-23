@@ -26,7 +26,8 @@ def singularityPipe(item):
 		item['volume'] = item['volume'][0]
 	
 	if item['sku']:
-		item['sku'] = item['sku'][0] 
+		if isinstance(item['sku'], list):
+			item['sku'] = item['sku'][0] 
 
 	if item['key']:
 		Item['key'] = itemTools.keyGen(Item)

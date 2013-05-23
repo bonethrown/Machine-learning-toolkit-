@@ -60,14 +60,14 @@ class CosmePipeline(object):
 			for cleanItem in itemArray:
 				print "*** ITEM FACTORY*****"
 				
-				cleanItem = splitPipe.singularityPipe(cleanItem)
-				self.postProcess(cleanItem, spider)
+				finalItem = splitPipe.singularityPipe(cleanItem)
+				self.postProcess(finalItem, spider)
 		else:
-			cleanItem = splitPipe.singularityPipe(cleanItem)
-			self.postProcess(cleanItem, spider)
+			finalItem = splitPipe.singularityPipe(cleanItem)
+			self.postProcess(finalItem, spider)
 	else:
-		cleanItem = splitPipe.singularityPipe(cleanItem)
-		self.postProcess(cleanItem, spider)
+		finalItem = splitPipe.singularityPipe(cleanItem)
+		self.postProcess(finalItem, spider)
 	
     def postProcess(self, item, spider):
 	
