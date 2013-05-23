@@ -49,19 +49,26 @@ class CosmePipeline(object):
     def priceProcess(self, item, sitePipe, spider):
         
 	cleanItem = sitePipe.process(item, spider, self.matcher)
-    	
-	if itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
-		itemArray = []
-		itemArray = splitPipe.itemizeByPrice(cleanItem)
-		for cleanItem in itemArray:
-			print "*** ITEM FACTORY*****"
-			print item 
-			cleanItem['key'] = itemTools.keyGen(cleanItem)
-  			self.postProcess(cleanItem, spider)
-	else:
-		cleanItem['key'] = itemTools.keyGen(cleanItem)
-  		self.postProcess(cleanItem, spider)
+    
 
+	if itemTools.hasMultiPrice(cleanItem): 
+
+	
+		if itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
+			itemArray = []
+			itemArray = splitPipe.itemizeByPrice(cleanItem)
+			for cleanItem in itemArray:
+				print "*** ITEM FACTORY*****"
+				
+				cleanItem = splitPipe.singularityPipe(cleanItem)
+				self.postProcess(cleanItem, spider)
+		else:
+			cleanItem = splitPipe.singularityPipe(cleanItem)
+			self.postProcess(cleanItem, spider)
+	else:
+		cleanItem = splitPipe.singularityPipe(cleanItem)
+		self.postProcess(cleanItem, spider)
+	
     def postProcess(self, item, spider):
 	
 	commitSolr = False

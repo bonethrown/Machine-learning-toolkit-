@@ -17,8 +17,10 @@ class BelezanaWeb(AbstractSite):
         if item['url']:
             item['url'] = item['url'].lower()					
         if item['sku']: 
-            item['sku'] = utils.cleanSkuArray(item['sku'], 'string')
-        if item['price']: 
+		item['sku'] = utils.cleanSkuArray(item['sku'], 'string')
+       		print "***************************" 
+            	print item['sku']
+	if item['price']: 
    	    item['price'] =utils.cleanNumberArray(item['price'], 'float')
 	 
         if item['brand']:
@@ -27,6 +29,8 @@ class BelezanaWeb(AbstractSite):
             tempBrand = utils.extractBrand(tempBrand)
             item['brand'] = tempBrand
    	if item['volume']:
+		#first check if volume array exists(if not getelement returns empty and see if the name contains volume information)
+
 		temp = item['volume']
 		temp = utils.getElementVolume(temp)
 		item['volume'] = temp

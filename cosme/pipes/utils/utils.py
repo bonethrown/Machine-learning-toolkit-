@@ -54,7 +54,7 @@ def extractVolume(inputstring, suffixpattern='ml'):
         vol = vol.group()
         return vol
     else: 
-        return None
+        return ""
 
 def getElementVolume(volArray):
 	out = []

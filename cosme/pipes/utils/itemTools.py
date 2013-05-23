@@ -46,6 +46,12 @@ def filterMultiPriceRadio(item):
 		temp = []
 		temp.append(utils.cleanNumberArray(item['price'], 'string'))
 		return temp
+def hasMultiPrice(item):
+	temp = utils.cleanNumberArray(item['price'], 'float')
+	if len(temp) > 1:
+		return True
+	else:
+		return False
 
 def hasDiffPrices(item):
 	temp = utils.cleanNumberArray(item['price'], 'float') 
