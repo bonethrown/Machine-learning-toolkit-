@@ -14,7 +14,10 @@ logger = logging.getLogger(__name__)
 
 def createKey(cosmeItem):
 	key = ""
-	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem['name'].replace(" ","-") + "_"+str(cosmeItem['price'][0]).replace(",","-").replace(".","-")
+	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem["name"].replace(" ","-") + "_"+str(cosmeItem['price'][0]).replace(",","-").replace(".","-")
+	
+	key = str(cleanChars(key))
+
 	return key
 
 def convertTime(time):
@@ -110,7 +113,7 @@ def cleanPrice(toClean):
 
 def cleanChars(toClean):
  
-    badChars = ["\\r","\\t","\\n",":","%",",","(",")"]
+    badChars = ["\\r","\\t","\\n",":","%",",","(",")","'"]
     stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
     toClean = toClean.lower().strip()
     for val in badChars:

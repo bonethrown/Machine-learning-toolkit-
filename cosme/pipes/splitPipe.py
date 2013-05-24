@@ -1,6 +1,7 @@
 """
 Pipelines per site are stored in their own folder for minumum chaos
 """
+import copy
 from cosme.pipes.default import AbstractSite
 from utils import utils, itemTools
 from scrapy.exceptions import DropItem
@@ -14,25 +15,19 @@ def keySpace(item):
 	return item
 
 def singularityPipe(item):
-	
-	item = keySpace(item)
-	
+	print "*********** singularity volume ***************"
+	print item		
 	if item['price']:
 		temp = item['price']
 		item['price'] = []
 		temp = temp[0]
 		item['price'].append(temp)
 	if item['volume']:
-		item['volume'] = item['volume'][0]
-	
+		if isinstance(item['volume'], list):
+			item['volume'] = item['volume'][0]
 	if item['sku']:
 		if isinstance(item['sku'], list):
 			item['sku'] = item['sku'][0] 
-
-	if item['key']:
-		Item['key'] = itemTools.keyGen(Item)
-		print item['key'] 
-		print item
 	return item
 
 def isVolumeEqualToPrice(item):
@@ -55,11 +50,19 @@ def itemizeByPrice(item):
                 temp = utils.cleanNumberArray(item['price'], 'float')
                 volume = item['volume']
                 for price in temp:
-                                newItem = copy.copy(item)
+                                newItem = copy.deepcopy(item)
                                 newItem['price'] = []
                                 newItem['volume'] = []
                                 newItem['price'].append(price)
                                 i = temp.index(price)
                                 newItem['volume'] = volume[i]
-                                responseArray.append(newItem)
-                return responseArray		
+				print "METRICS GOING IN ***************"
+				print volume[i]
+				print price
+				print newItem
+				responseArray.append(newItem)
+				del newItem
+                print "************ARRAY LENGTH***************"
+		print len(responseArray)
+		print responseArray
+		return responseArray		

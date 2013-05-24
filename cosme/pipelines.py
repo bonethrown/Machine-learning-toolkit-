@@ -49,25 +49,31 @@ class CosmePipeline(object):
     def priceProcess(self, item, sitePipe, spider):
         
 	cleanItem = sitePipe.process(item, spider, self.matcher)
-    
+   	 
 
 	if itemTools.hasMultiPrice(cleanItem): 
 
 	
 		if itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
+			#print "**************HAS MULTI DIFF PRICE"
+			#print cleanItem
 			itemArray = []
 			itemArray = splitPipe.itemizeByPrice(cleanItem)
+			print "array HAS"
+			print itemArray
 			for cleanItem in itemArray:
-				print "*** ITEM FACTORY*****"
-				
 				finalItem = splitPipe.singularityPipe(cleanItem)
 				self.postProcess(finalItem, spider)
 		else:
+			print " multi price but not DIFFERENT ************************"
 			finalItem = splitPipe.singularityPipe(cleanItem)
 			self.postProcess(finalItem, spider)
 	else:
-		finalItem = splitPipe.singularityPipe(cleanItem)
-		self.postProcess(finalItem, spider)
+		print "*********** non multi price*************"
+		print cleanItem['volume']
+		print cleanItem
+		cleanItem = splitPipe.singularityPipe(cleanItem)
+		self.postProcess(cleanItem, spider)
 	
     def postProcess(self, item, spider):
 	
@@ -75,8 +81,12 @@ class CosmePipeline(object):
 	commitDB = True	
 	
 	cleanItem = item
+	cleanItem['key'] = itemTools.keyGen(item)
 	#cleanItem = itemTools.checkVolume(cleanItem)
-        cleanItem = dict(cleanItem)
+        print " *****CLEAN ITEM ********"
+	print cleanItem
+ 
+	cleanItem = dict(cleanItem)
         storeItem  = {}
         storeItem['url'] = cleanItem['url']
         storeItem['comments'] =  cleanItem['comments']
@@ -87,9 +97,6 @@ class CosmePipeline(object):
             cleanItem['name_noindex']= cleanItem['name']
         arrItem = []
         arrItem.append(dict(cleanItem))
-	print "****CLEAN ITEM ****"
-	print cleanItem['key']
-	print cleanItem
         #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
         singleItemJson = json.dumps(arrItem)
         #print singleItemJson
@@ -104,7 +111,8 @@ class CosmePipeline(object):
             
 	elif commitDB:
 	    try:
-                # SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
+                print " ****************************************************SENDING TO DB"
+		# SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
                 #page = urllib2.urlopen(req)
                 self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
                 self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
