@@ -8,6 +8,7 @@ from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
 import logging
 from numpy import mean
+import hashlib
 
 #convert format "13:13" to minutes
 logger = logging.getLogger(__name__)
@@ -16,9 +17,9 @@ def createKey(cosmeItem):
 	key = ""
 	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem["name"].replace(" ","-") + "_"+str(cosmeItem['price'][0]).replace(",","-").replace(".","-")
 	
-	key = str(cleanChars(key))
+	out = hashlib.md5(key).hexdigest()	
 
-	return key
+	return out
 
 def convertTime(time):
     timeInSeconds = 0
