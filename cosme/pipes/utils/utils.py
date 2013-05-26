@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 def createKey(cosmeItem):
 	key = ""
 	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem["name"].replace(" ","-") + "_"+str(cosmeItem['price'][0]).replace(",","-").replace(".","-")
-	
-	out = hashlib.md5(key).hexdigest()	
+	out = key.encode('ascii', 'replace')	
+	out = hashlib.md5(out).hexdigest()	
 
 	return out
 
