@@ -79,7 +79,7 @@ class CosmePipeline(object):
 	
 	commitSolr = False
 	commitDB = True	
-	
+	prodDB = False	
 	cleanItem = item
 	cleanItem['key'] = itemTools.keyGen(item)
 	#cleanItem = itemTools.checkVolume(cleanItem)
@@ -115,9 +115,11 @@ class CosmePipeline(object):
 		# SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
                 #page = urllib2.urlopen(req)
                 self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
-                self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
-                log.msg("********* MONGO SUBMITTED ****** with response", level=log.DEBUG)
-            
+                if prodDB:
+			self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
+                	log.msg("********* MONGO SUBMITTED ****** with response", level=log.DEBUG)
+            	else:
+			self.db.testLalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
 	    except Exception, e:
                 log.msg("***********ERROR Submitting to MONGO error: %s"%e, level=log.ERROR)
         else:

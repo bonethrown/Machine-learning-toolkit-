@@ -10,6 +10,7 @@ class LaffayetteXPath(AbstractXPath):
     "description" : "//div[@id=\'itensProd\']/ul/li[4]/div[3]/text()",
     "category" : "//div[@class='tituloPag']/ul/li[2]/a/text()",
     "sku" : "//ul/li[@class=\'marca\']/span/i/text()",
+    "volume" : "//li[@class='prodML']",
     "comments":  "//div[@id=\'comentarios\']",
 
     }

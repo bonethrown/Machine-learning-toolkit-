@@ -46,7 +46,12 @@ class MagazineLuizaSite(AbstractSite):
                 # item['brand'] = matcher.listMatch(temp)
         if item['url']:
             item['url'] = item['url'].lower()
-        
+	
+	if item['volume']: 
+		if not bool(item['volume']): 
+			tempName = item['name'][0]
+			item['volume'] = utils.extractVolume(tempName, 'ml') 				        
+ 
         if item['category']:
             if isinstance(item['category'], list):
                 temp = item['category']

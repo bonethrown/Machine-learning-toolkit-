@@ -20,10 +20,8 @@ class SephoraSite(AbstractSite):
         if item['url']:
             item['url'] = item['url'].lower()					
         if item['price']: 
-        # tempPrice = re.search(r'[\d.,]+',str(item['price']))
-        # tempPrice = tempPrice.group().replace(',','.')
-        # item['price'] = float(tempPrice)
-            item['price'] = utils.extractPrice(item['price'])
+            
+		item['price'] = utils.cleanNumberArray(item['price'], 'float')
     
         if item['brand']:
             tempBrand = item['brand']
@@ -35,8 +33,12 @@ class SephoraSite(AbstractSite):
             tempName = item['name']
             tempName = tempName[0]
             item['name'] = utils.cleanChars(tempName)
-    
-        if item['category']:
+   	if item['volume']:
+	 	if not bool(item['volume'][0]):
+                        tempName= item['name'][0]
+                        item['volume'] = utils.extractVolume(tempName, 'ml')	 
+        
+	if item['category']:
             tempCat = item['category']
             item['category'] = utils.cleanChars(tempCat[0])
         if item['image']:

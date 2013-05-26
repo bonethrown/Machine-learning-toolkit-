@@ -38,7 +38,6 @@ def convertTime(time):
 def convertDate(toConvert):
     dateSplit = toConvert.split(" ")
 
-
 def get_volume(name, pattern='ML'):
     volume = ''
     if len(name) >= 1:
@@ -60,12 +59,25 @@ def extractVolume(inputstring, suffixpattern='ml'):
     else: 
         return ""
 
+def extract_ML(inputstring, suffixpattern='ML'):
+    pattern  = '\d+%s' % suffixpattern
+    vol = re.search(pattern,inputstring)
+    if vol is not None:
+        vol = vol.group()
+        return vol
+    else:
+        return ""
 def getElementVolume(volArray):
 	out = []
 	for e in volArray:
-		e = extractVolume(e)
-		if e is not None:
-			out.append(e)
+		temp = extractVolume(e)
+		if not temp:
+			e = extract_ML(e) 
+			if bool(e):
+				out.append(e)
+		elif bool(temp):
+			out.append(temp)	
+			
 	return out
 def cleanSkuArray(array, strOrFloat):
 	out = []
