@@ -46,7 +46,7 @@ class SephoraSite(AbstractSite):
             temp = temp[0]
             item['image'] = temp
         if item['sku']: 
-            item['sku'] = utils.cleanNumberArray(item['sku'])
+            item['sku'] = utils.cleanSkuArray(item['sku'], 'string')
         try:
             item['comments'] = self.get_comments(item['url'])
         except:
