@@ -15,8 +15,6 @@ def keySpace(item):
 	return item
 
 def singularityPipe(item):
-	print "*********** singularity volume ***************"
-	print item		
 	if item['price']:
 		temp = item['price']
 		item['price'] = []
@@ -62,7 +60,4 @@ def itemizeByPrice(item):
 				print newItem
 				responseArray.append(newItem)
 				del newItem
-                print "************ARRAY LENGTH***************"
-		print len(responseArray)
-		print responseArray
 		return responseArray		

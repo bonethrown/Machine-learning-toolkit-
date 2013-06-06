@@ -6,12 +6,11 @@ class InfinitaBelezaXPath(AbstractXPath):
     
     "image" : "//img[@id='imgView']/@src",
     "name" : "//h1[@id='nome-produto']/text()",
-    "brand" : "//a[@class='color']/strong/text()",
+    "brand" : "//span[@class='dados-valor brand']/a/strong/text()",
     "price" : "//span[@id='variacaoPreco']/text()",
     "description" : "//p[1]/span/span/strong/span/text()",
     "comments":  "//div[@id=\"coments\"]",
     "category" : "//span[@class='link_itens'][1]/a/text()",
-    "sku" : "//null",
     }
 
     COMMENTS = {
