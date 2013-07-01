@@ -24,21 +24,40 @@ class laffayetteWeb(AbstractSite):
 			# tempPrice = re.search(r'[\d.,]+',str(item['price']))
 			# tempPrice = tempPrice.group().replace(',','.')
 			# item['price'] = float(tempPrice)
-			item['price'] = utils.extractPrice(item['price'])
-
+			item['price'] = utils.cleanNumberArray(item['price'], 'float')
+		
 		if item['brand']:
 			tempBrand = item['brand']
 			tempBrand = tempBrand[0]
 			print "########TEMP DOS  ######### %s", tempBrand
 			tempBrand = utils.extractBrand(tempBrand)
 			item['brand'] = tempBrand
-
+		
 		if item['name']:
-			item['volume'] = utils.get_volume(item['name'])
+			#item['volume'] = utils.get_volume(item['name'])
 			tempName = item['name']
 			tempName = tempName[0]
 			item['name'] = utils.cleanChars(tempName)
-			
+		
+		if item['volume']:
+			if len(item['price']) > 1:
+	
+				temp = item['volume']
+				temp = utils.getElementVolume(temp)
+				item['volume'] = temp
+				print "len price more than 1 "			
+			else:
+                        	if isinstance(item['volume'], list):
+					item['volume'] = utils.extract_ML(item['volume'][0])
+					print 'standard volume extract'
+				else:
+					item['volume'] = utils.extract_ML(item['volume'])
+				
+				if not item['volume']:
+					print "looking for ml in name"
+					tempName = item['name'] 
+					item['volume'] = utils.extractVolume(tempName, 'ml')
+	
 		if item['category']:
 			tempCat = item['category']
 			item['category'] =utils.cleanChars(tempCat[0])

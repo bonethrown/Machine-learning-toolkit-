@@ -23,11 +23,12 @@ class SephaWeb(AbstractSite):
 		if item['url']:
 			item['url'] = item['url'].lower()					
 		if item['sku']: 
-			item['sku'] = utils.cleanNumberArray(item['sku'],'string')
+			item['sku'] = utils.cleanSkuArray(item['sku'],'string')
 		if item['price']: 
 			item['price'] = itemTools.filterMultiPriceRadio(item)
-			item['price'] = utils.cleanNumberArray(item['price'], 'float')
-	
+			logger.info('PIPELINE OP: %s' % item['price'])
+			#item['price'] = utils.cleanNumberArray(item['price'], 'float')
+		 	item['price'] = utils.arrayStringToFloat(item['price'])		
 		if item['brand']:
 			tempBrand = item['brand']
 			tempBrand = tempBrand[0]
@@ -36,14 +37,14 @@ class SephaWeb(AbstractSite):
 		
 		if item['name']:
 			tempName = item['name']
-			tempName = tempName[0]
-			item['name'] = utils.cleanChars(tempName)
+			item['name'] = tempName[0]
+			#item['name'] = utils.cleanChars(tempName)
 			#item['volume'] = utils.extractVolume(item['name']) 
 		if item['volume']:
 			tempName = item['name']
                         tempName = tempName[0]
 			item['volume'] = utils.extractVolume(tempName, 'ml')
-			
+			logger.info('volume EXTACTED : %s' %item['volume'])	
 		if item['category']:
 			tempCat = item['category']
 			item['category'] =utils.cleanChars(tempCat[0])

@@ -16,12 +16,12 @@ class Cosme(CrawlSpider):
     
     start_urls = ["http://www.sephora.com.br", "http://www.sephora.com.br/site/departamento.asp?iddepartamento=1", "http://www.sephora.com.br/site/marca.asp?id=197"]
     #start_urls = ['http://www.sephora.com.br/site/produto.asp?idproduto=13943']
-    allow_exts =(r'produto\.asp\?idproduto=\d+') 
-    deny_exts = (r'=', r'newsletter',r'\.php',r'busca', r'mac', r'include', r'ajax', r'basket', r'cesta\.asp',r'comprar\.asp', r'view=all', r'compartilhe\.asp', r'produto\.asp\?id=\d+', r'marca\.asp\?[\w&=]+', r'avise-me\.asp\?id=\d+', r'produtoDetalhe\.asp')
+    allow_exts =(r'site/produto\.asp\?id=\d+', r'imagens[\w\./{}-]+',r'site/categoria\.asp\?\w+=\d+', r'site/marca\.asp\?\w+=\d+', r'site/departamento\.asp\?\w+=\d+') 
+    deny_exts = (r'checkout\.asp', r'login\.asp', r'newsletter\.asp',r'\.php',r'busca', r'mac', r'include', r'ajax', r'basket\.asp', r'cesta\.asp',r'comprar\.asp', r'view=all', r'compartilhe\.asp', r'marca\.asp\?[\w&=]+', r'avise-me\.asp\?id=\d+', r'produtoDetalhe\.asp')
    # allow_exts = (r'produto.asp\?idproduto=\d+')
         #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
     rules = [
-             Rule(SgmlLinkExtractor(deny_domains = denydom, allow_domains = allowed_domains, deny = deny_exts, unique = True) , follow=True, callback='parse_item'),
+             Rule(SgmlLinkExtractor(deny_domains = denydom, allow_domains = allowed_domains, allow = allow_exts, unique = True) , follow=True, callback='parse_item'),
              ]
 
     xpathRegistry = XPathRegistry()

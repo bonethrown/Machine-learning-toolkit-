@@ -46,13 +46,13 @@ class CosmePipeline(object):
         item = self.defaultSite.process(item, spider)
         #cleanItem = sitePipe.process(item,spider,self.matcher)
   	self.priceProcess(item, sitePipe, spider)
+    
     def priceProcess(self, item, sitePipe, spider):
         
+        print "INPUT PRICE::::: %s", item['price']
 	cleanItem = sitePipe.process(item, spider, self.matcher)
-   	 
 
 	if itemTools.hasMultiPrice(cleanItem): 
-
 	
 		if itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
 			#print "**************HAS MULTI DIFF PRICE"
@@ -114,7 +114,7 @@ class CosmePipeline(object):
                 print " ****************************************************SENDING TO DB"
 		# SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
                 #page = urllib2.urlopen(req)
-                self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
+                self.db.items.update({"key" : storeItem['key']},{"comments" : storeItem['comments'], "url" : storeItem['url'], "key" : storeItem['key']}, upsert=True)
                 if prodDB:
 			self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
                 	log.msg("********* MONGO SUBMITTED ****** with response", level=log.DEBUG)

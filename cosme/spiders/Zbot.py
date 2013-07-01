@@ -61,6 +61,11 @@ class Cosme(CrawlSpider):
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
         if len(cosmeItem['price']) == 0: # Check for the 'por' price
             cosmeItem['price'] = hxs.select(siteModule.get_price2()).extract()
-        self.log('CosmeItem %s' % cosmeItem,log.INFO)
-        yield cosmeItem
+        elif  len(cosmeItem['price']) == 0: 
+            cosmeItem['price'] = hxs.select(siteModule.get_price3()).extract()
+        	
 
+	self.log('CosmeItem %s' % cosmeItem,log.INFO)
+        yield cosmeItem
+   
+   

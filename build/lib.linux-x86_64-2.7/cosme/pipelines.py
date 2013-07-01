@@ -21,7 +21,7 @@ class CosmePipeline(object):
     def __init__(self):
         self.solr_url = "http://localhost:8080/solr/cosme0/update?json"
         #Lets send to ec2 as well
-        self.solr_url_prod = "http://ec2-54-242-158-167.compute-1.amazonaws.com:8080/solr/update?"
+        #self.solr_url_prod = "http://ec2-54-242-158-167.compute-1.amazonaws.com:8080/solr/update?"
         #Set up NonRelDB-Connection
         self.db = db.getConnection()
         brandsList = os.path.join(os.getcwd(),"cosme","pipes","utils","brandric.list")
@@ -49,61 +49,79 @@ class CosmePipeline(object):
     def priceProcess(self, item, sitePipe, spider):
         
 	cleanItem = sitePipe.process(item, spider, self.matcher)
-    	
-	if itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
-		itemArray = []
-		itemArray = splitPipe.itemizeByPrice(cleanItem)
-		for cleanItem in itemArray:
-			print "*** ITEM FACTORY*****"
-			print item 
-			cleanItem['key'] = itemTools.keyGen(cleanItem)
-  			self.postProcess(cleanItem, spider)
-	else:
-		cleanItem['key'] = itemTools.keyGen(cleanItem)
-  		self.postProcess(cleanItem, spider)
+   	 
 
+	if itemTools.hasMultiPrice(cleanItem): 
+
+	
+		if itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
+			#print "**************HAS MULTI DIFF PRICE"
+			#print cleanItem
+			itemArray = []
+			itemArray = splitPipe.itemizeByPrice(cleanItem)
+			print "array HAS"
+			print itemArray
+			for cleanItem in itemArray:
+				finalItem = splitPipe.singularityPipe(cleanItem)
+				self.postProcess(finalItem, spider)
+		else:
+			print " multi price but not DIFFERENT ************************"
+			finalItem = splitPipe.singularityPipe(cleanItem)
+			self.postProcess(finalItem, spider)
+	else:
+		print "*********** non multi price*************"
+		print cleanItem['volume']
+		print cleanItem
+		cleanItem = splitPipe.singularityPipe(cleanItem)
+		self.postProcess(cleanItem, spider)
+	
     def postProcess(self, item, spider):
 	
-	commit = True
-	
+	commitSolr = False
+	commitDB = True	
+	prodDB = False	
 	cleanItem = item
+	cleanItem['key'] = itemTools.keyGen(item)
 	#cleanItem = itemTools.checkVolume(cleanItem)
+        print " *****CLEAN ITEM ********"
 	print cleanItem
-        clean = dict(cleanItem)
+ 
+	cleanItem = dict(cleanItem)
         storeItem  = {}
         storeItem['url'] = cleanItem['url']
         storeItem['comments'] =  cleanItem['comments']
-        storeItem['key'] = clean['key']
+        storeItem['key'] = cleanItem['key']
         cleanItem['comments'] = []
+        if 'name' in cleanItem:
+            # No tokenization, but just storing - used for clustering.
+            cleanItem['name_noindex']= cleanItem['name']
         arrItem = []
         arrItem.append(dict(cleanItem))
-
         #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
         singleItemJson = json.dumps(arrItem)
         #print singleItemJson
         #log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
 
-        if commit:
+        if commitSolr:
             try:
                 req  = urllib2.Request(self.solr_url, data = singleItemJson)
                 req.add_header("Content-type", "application/json")
-                #send data to MongoDB vids collection (sample use nubunu_db; db.vids.find();)
-                # resultDB = self.db.items.insert(dict(storeItem),safe=True )
-                #resultDB_raw = self.db.vids_raw.insert(dict(storeItem),safe=True )
             except Exception, e:
                 log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
-            try:
-                # SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
-                page = urllib2.urlopen(req)
-                #resultDB = self.db.items
-                self.db.items.update({"url" : storeItem['url']},{"comments" : storeItem['comments'], "url" : storeItem['url']}, upsert=True)
-                #lalinaDB = self.db.lalina
-                print "****TYPE******"
-                print type(clean)
-                self.db.lalina.update({"key" : clean['key']}, clean, upsert=True, safe = True)
-                log.msg("********* SOLR SUBMITTED ****** doc to solr with response %s "%page, level=log.DEBUG)
-            except Exception, e:
-                log.msg("***********ERROR Submitting to SOLR error: %s"%e, level=log.ERROR)
+            
+	elif commitDB:
+	    try:
+                print " ****************************************************SENDING TO DB"
+		# SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
+                #page = urllib2.urlopen(req)
+                self.db.items.update({"key" : storeItem['key']},{"comments" : storeItem['comments'], "url" : storeItem['url'], "key" : storeItem['key']}, upsert=True)
+                if prodDB:
+			self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
+                	log.msg("********* MONGO SUBMITTED ****** with response", level=log.DEBUG)
+            	else:
+			self.db.testLalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
+	    except Exception, e:
+                log.msg("***********ERROR Submitting to MONGO error: %s"%e, level=log.ERROR)
         else:
             log.msg("*********** Not commiting to solr or DB commit set to false  ",level=log.WARNING)
 

@@ -7,13 +7,20 @@ from scrapy.selector import HtmlXPathSelector
 from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
 import logging
+import numpy
+from numpy import mean
+import hashlib
+
 #convert format "13:13" to minutes
 logger = logging.getLogger(__name__)
 
 def createKey(cosmeItem):
 	key = ""
-	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem['name'].replace(" ","-") + "_"+str(cosmeItem['price']).replace(",","-").replace(".","-")
-	return key
+	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem["name"].replace(" ","-") + "_"+str(cosmeItem['price'][0]).replace(",","-").replace(".","-")
+	out = key.encode('ascii', 'replace')	
+	out = hashlib.md5(out).hexdigest()	
+
+	return out
 
 def convertTime(time):
     timeInSeconds = 0
@@ -31,7 +38,6 @@ def convertTime(time):
     
 def convertDate(toConvert):
     dateSplit = toConvert.split(" ")
-
 
 def get_volume(name, pattern='ML'):
     volume = ''
@@ -52,14 +58,27 @@ def extractVolume(inputstring, suffixpattern='ml'):
         vol = vol.group()
         return vol
     else: 
-        return None
+        return ""
 
+def extract_ML(inputstring, suffixpattern='ML'):
+    pattern  = '\d+%s' % suffixpattern
+    vol = re.search(pattern,inputstring)
+    if vol is not None:
+        vol = vol.group()
+        return vol
+    else:
+        return ""
 def getElementVolume(volArray):
 	out = []
 	for e in volArray:
-		e = extractVolume(e)
-		if e is not None:
-			out.append(e)
+		temp = extractVolume(e)
+		if not temp:
+			e = extract_ML(e) 
+			if bool(e):
+				out.append(e)
+		elif bool(temp):
+			out.append(temp)	
+			
 	return out
 def cleanSkuArray(array, strOrFloat):
 	out = []
@@ -108,7 +127,7 @@ def cleanPrice(toClean):
 
 def cleanChars(toClean):
  
-    badChars = ["\\r","\\t","\\n",":","%",",","(",")"]
+    badChars = ["\\r","\\t","\\n",":","%",",","(",")","'"]
     stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
     toClean = toClean.lower().strip()
     for val in badChars:
@@ -148,10 +167,11 @@ def dateDeltaToIso(dateStr):
     
     newDate = today - dateTimeDelta
     return newDate.isoformat()+"Z"
-def isEqualAvg(item, array):
-	a = sum(array)
-	b = a / len(array)
-	if item == b:
+def isEqualAvg(element, array):
+	#numpy dependent
+	b= mean(array)
+	
+	if float(element) / round(b, 2) == 1:
 		return True
 	else:
 		return False    
