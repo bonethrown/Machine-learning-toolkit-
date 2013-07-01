@@ -60,10 +60,13 @@ class Cosme(CrawlSpider):
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
         if len(cosmeItem['price']) == 0: # Check for the 'por' price
-            cosmeItem['price'] = hxs.select(siteModule.get_price2()).extract()
-        elif  len(cosmeItem['price']) == 0: 
-            cosmeItem['price'] = hxs.select(siteModule.get_price3()).extract()
-        	
+		cosmeItem['price'] = hxs.select(siteModule.get_price2()).extract()
+		print "*******SECOND PRICE CHECK"
+		print cosmeItem['price']
+        if  len(cosmeItem['price']) == 0: 
+		cosmeItem['price'] = hxs.select(siteModule.get_price3()).extract()
+		print "*******************Third price check"
+		print cosmeItem['price']
 
 	self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem
