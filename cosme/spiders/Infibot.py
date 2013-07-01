@@ -65,7 +65,10 @@ class Cosme(CrawlSpider):
         
         cosmeItem['site']= self.getDomain(response.url)
         cosmeItem['url'] = response.url
-        #Get xpaths that correspond to our domain
+        cosmeItem['volume'] = ""
+	cosmeItem['sku'] = ""
+
+	#Get xpaths that correspond to our domain
         siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])        
         
         #Traverse All our fields in our xpath

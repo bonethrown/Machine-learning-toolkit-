@@ -1,4 +1,4 @@
-
+from BeautifulSoup import BeautifulSoup
 from utils import utils
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.utils.utils import get_http_response
@@ -22,13 +22,12 @@ class InfiniteBeleza(AbstractSite):
                 tempNameArr = item['name'][0]
 		item['name'] = utils.cleanChars(tempNameArr)
             if item['price']:
-		  temp = item['price'][0]
-		  if isinstance(temp, float):
-			item['price'] = temp
-		  else:
-                	temp = temp.replace(',','.')
-                	temp = float(temp)
-                	item['price'] = temp
+		  temp = item['price']
+		  item['price'] = utils.cleanNumberArray(temp, 'float')
+
+	    if item['volume']:
+		item['volume'] = utils.extractVolume(item['name'])
+ 
 	    if item['comments']:
                 comment_html = item['comments']
                 try:

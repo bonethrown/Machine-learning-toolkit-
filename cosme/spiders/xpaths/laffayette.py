@@ -7,7 +7,7 @@ class LaffayetteXPath(AbstractXPath):
     "name" :  "//li[@class=\'nomeProd_g\']/text()",
     "brand" : "//li[@class=\'marca\']/text()",
     "price" : "//span[@class=\'precoItem\']/b/text()",
-    "description" : "//div[@id=\'itensProd\']/ul/li[4]/div[3]/text()",
+    "description" : "//div[@id=\'itensProd\']/ul",
     "category" : "//div[@class='tituloPag']/ul/li[2]/a/text()",
     "sku" : "//ul/li[@class=\'marca\']/span/i/text()",
     "volume" : "//li[@class='prodML']",
