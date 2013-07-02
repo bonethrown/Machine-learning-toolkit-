@@ -14,33 +14,31 @@ logger = logging.info(__name__)
 
 #TODO Use SitemapSpider instead for magazineluiza.com.br
 class Cosme(CrawlSpider):
-    def __init__(self, *a, **kw):
-	    super(MySpider, self).__init__(*a, **kw)
-	    name = 'CBot'
-	    allowed_domains = ['magazineluiza.com.br']   #Add one by one, comment out as necassary
-	 
-	    magaRegex = ".?(\/pf\/).?"
-	    #magaRe = re.compile('.?(\/pf\/pfba\/)$')
-	    #allowed_domains = ['pornhub.com']
-	    start_urls = []
+    name = 'CBot'
+    allowed_domains = ['magazineluiza.com.br']   #Add one by one, comment out as necassary
+ 
+    magaRegex = ".?(\/pf\/).?"
+    #magaRe = re.compile('.?(\/pf\/pfba\/)$')
+    #allowed_domains = ['pornhub.com']
+    start_urls = []
 
-	    #TODO put these in a file!
-	    start = ('http://www.magazineluiza.com.br/perfumaria/l/pf/',)
-	    #start_urls = [start[4]]
-	    deny_exts = ('games','cams','photos','stories','login\.php','signup\.php','tags\.html','categories\.html','upload.html','search' ,'cat','c=','channel','tag','channels','click','pornstar','community')
-	    for i in start:
-		start_urls.append(i)
+    #TODO put these in a file!
+    start = ('http://www.magazineluiza.com.br/perfumaria/l/pf/',)
+    #start_urls = [start[4]]
+    deny_exts = ('games','cams','photos','stories','login\.php','signup\.php','tags\.html','categories\.html','upload.html','search' ,'cat','c=','channel','tag','channels','click','pornstar','community')
+    for i in start:
+	start_urls.append(i)
 
-	    magazine_rule = Rule(SgmlLinkExtractor(allow=(magaRegex),unique=True,deny_extensions=('php'),deny=deny_exts ),callback='parse_item',follow=True)
-	   
-	   
-	    rules = (
-		magazine_rule,
-			)
-	    
-	    xpathRegistry = XPathRegistry()
-	    
-    #not used for now, we will crawl all links
+    magazine_rule = Rule(SgmlLinkExtractor(allow=(magaRegex),unique=True,deny_extensions=('php'),deny=deny_exts ),callback='parse_item',follow=True)
+   
+   
+    rules = (
+	magazine_rule,
+		)
+    
+    xpathRegistry = XPathRegistry()
+    
+#not used for now, we will crawl all links
     def drop(self,response):
         pass
     

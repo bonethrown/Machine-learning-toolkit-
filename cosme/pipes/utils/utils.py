@@ -8,7 +8,7 @@ from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
 import logging
 import numpy
-from numpy import mean
+#from numpy import mean
 import hashlib
 import unidecode
 #convert format "13:13" to minutes

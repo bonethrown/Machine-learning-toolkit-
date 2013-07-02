@@ -4,10 +4,10 @@ class SephaXPath(AbstractXPath):
     "image" : "//img[@id=\'imagem_descricao\']/@src",
     "name" : "//span[@class=\'nome\']/text()",
     "brand" : "//span[@class='fornecedor']/text()",
-    "price" : "//span[@itemprop=\'price\']/text()",
+    "price" : "//div[@class='qtd-item overFlow']",
     "description" : "//span[@id=\'textoDescricao\']/text()",
     "category" : "//h2[@class=\'titulo\']/a/text()",
-    "sku" : "//div[@class='tamanhoPrd']/input/@value",
+    "sku" : "//input[@class='radio radioTamanhos opcoesProduto']/@value",
     "volume" : "//div[@class='tamanhoPrd']/input",
     "product_id": "//meta[@itemprop=\"productID\"]/@content"
     }
@@ -30,3 +30,5 @@ class SephaXPath(AbstractXPath):
     # With a 'por' highlighted price
     def get_price2(self):
         return "//div[@class=\"boxPrecoProduto\"]/span[2]/span/text()"
+    def get_price3(self):
+	return "//div[@class='boxPrecoProduto precoNormal']"

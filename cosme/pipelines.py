@@ -49,7 +49,6 @@ class CosmePipeline(object):
     
     def priceProcess(self, item, sitePipe, spider):
         
-        print "INPUT PRICE::::: %s", item['price']
 	cleanItem = sitePipe.process(item, spider, self.matcher)
 
 	if itemTools.hasMultiPrice(cleanItem): 
@@ -59,7 +58,6 @@ class CosmePipeline(object):
 			#print cleanItem
 			itemArray = []
 			itemArray = splitPipe.itemizeByPrice(cleanItem)
-			print "array HAS"
 			print itemArray
 			for cleanItem in itemArray:
 				finalItem = splitPipe.singularityPipe(cleanItem)
@@ -77,7 +75,7 @@ class CosmePipeline(object):
 	
     def postProcess(self, item, spider):
 	
-	commitSolr = False
+	commitSolr = True
 	commitDB = True	
 	prodDB = False	
 	cleanItem = item
@@ -109,7 +107,7 @@ class CosmePipeline(object):
             except Exception, e:
                 log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
             
-	elif commitDB:
+	if commitDB:
 	    try:
                 print " ****************************************************SENDING TO DB"
 		# SUBMIT TO DB ONLY IF RESPONSE FROM SOLR

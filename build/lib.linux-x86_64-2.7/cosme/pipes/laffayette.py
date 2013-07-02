@@ -1,3 +1,4 @@
+from BeautifulSoup import BeautifulSoup
 from utils import utils,categorizer
 import re
 from scrapy import log
@@ -29,10 +30,13 @@ class laffayetteWeb(AbstractSite):
 		if item['brand']:
 			tempBrand = item['brand']
 			tempBrand = tempBrand[0]
-			print "########TEMP DOS  ######### %s", tempBrand
 			tempBrand = utils.extractBrand(tempBrand)
 			item['brand'] = tempBrand
-		
+		if item['description']:
+                	
+			temp = item['description']
+			bad = BeautifulSoup(temp)
+			item['description'] = bad.getText()
 		if item['name']:
 			#item['volume'] = utils.get_volume(item['name'])
 			tempName = item['name']
