@@ -8,9 +8,9 @@ from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
 import logging
 import numpy
-from numpy import mean
+#from numpy import mean
 import hashlib
-
+import unidecode
 #convert format "13:13" to minutes
 logger = logging.getLogger(__name__)
 
@@ -88,7 +88,14 @@ def cleanSkuArray(array, strOrFloat):
 			e = strToFloat(e)
 			out.append(e)
 		else:
+			e =str(e)
 			out.append(e)
+	return out
+def arrayStringToFloat(array):
+	out = []
+	for e in array:
+		e= strToFloat(e)
+		out.append(e)
 	return out
 
 def cleanNumberArray(array, strOrFloat):
@@ -103,6 +110,23 @@ def cleanNumberArray(array, strOrFloat):
 			out.append(e)
 				
 	return out
+
+def cleanNumberArray2(array, strOrFloat):
+	out = []
+	if strOrFloat =="float":
+		for e in array:
+			e = findPrice(e)
+			e = cleanPrice(e)
+			e = strToFloat(e)
+			out.append(e)
+			return out
+	else:
+		for e in array:
+			e = findPrice(e)
+			e = cleanPrice(e)
+			out.append(e)
+			return out
+			
 
 def cleanElementChars(array):
 	out = []
@@ -122,7 +146,7 @@ def cleanPrice(toClean):
 	badChars = ["R","r","$"]
 	toClean = toClean.strip()
 	for val in badChars:
-		toClean = toClean.replace(val, "")
+		toClean = toClean.replace(val, "").strip()
 	return toClean
 
 def cleanChars(toClean):
@@ -201,16 +225,20 @@ def extractSku(string):
     temp = temp.group()
     temp = int(temp)
     return temp
+def extractRawPrice(string):
+    tempPrice = unidecode.unidecode(string)
+    tempPrice = re.search(r'R\$\s(\d+.\d+)', tempPrice).group()
+    return tempPrice	
+
 
 def findPrice(string):
-    tempPrice = str(string)
-    tempPrice = re.search(r'[\d.,]+', tempPrice).group()
+    tempPrice = unidecode.unidecode(string)
+    tempPrice = re.search(r'R\$\s(\d+.\d+)', tempPrice).group()
     if isDotAndComma(tempPrice):
 	tempPrice = tempPrice.replace('.','')
-	tempPrice = tempPrice.replace(',','.')
+	tempPrice = tempPrice.replace(',','.').strip()
     else:
-	tempPrice = tempPrice.replace(',','.')
-   
+	tempPrice = tempPrice.replace(',','.').strip()
     return tempPrice
 
 def strToFloat(string):

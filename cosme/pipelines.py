@@ -91,6 +91,7 @@ class CosmePipeline(object):
         storeItem['url'] = cleanItem['url']
         storeItem['comments'] =  cleanItem['comments']
         storeItem['key'] = cleanItem['key']
+	storeItem['site'] = cleanItem['site']
         cleanItem['comments'] = []
         if 'name' in cleanItem:
             # No tokenization, but just storing - used for clustering.
@@ -113,8 +114,8 @@ class CosmePipeline(object):
 	    try:
                 print " ****************************************************SENDING TO DB"
 		# SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
-                #page = urllib2.urlopen(req)
-                self.db.items.update({"key" : storeItem['key']},{"comments" : storeItem['comments'], "url" : storeItem['url'], "key" : storeItem['key']}, upsert=True)
+                if storeItem['comments']:
+			self.db.items.update({"key" : storeItem['key']},{"comments" : storeItem['comments'], "url" : storeItem['url'], "key" : storeItem['key'], "site" : storeItem['site']}, upsert=True)
                 if prodDB:
 			self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
                 	log.msg("********* MONGO SUBMITTED ****** with response", level=log.DEBUG)

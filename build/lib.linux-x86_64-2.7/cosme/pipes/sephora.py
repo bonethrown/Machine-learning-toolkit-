@@ -20,7 +20,6 @@ class SephoraSite(AbstractSite):
         if item['url']:
             item['url'] = item['url'].lower()					
         if item['price']: 
-            
 		item['price'] = utils.cleanNumberArray(item['price'], 'float')
     
         if item['brand']:
