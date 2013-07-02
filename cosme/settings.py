@@ -13,12 +13,11 @@ import logging
 #Guerilla warfare!
 
 BOT_NAME = 'Mozilla'
-BOT_VERSION = '5.0 (Macintosh; Intel Mac OS X 10.6; rv:9.0a2) Gecko/20111101 Firefox/9.0a2'
 
 ITEM_PIPELINES = ['cosme.pipelines.CosmePipeline']
 SPIDER_MODULES = ['cosme.spiders']
 NEWSPIDER_MODULE = 'cosme.spiders'
-USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
+USER_AGENT = '%s' % (BOT_NAME)
 DOWNLOAD_DELAY = 2
 
 DEPTH_LIMIT=0
