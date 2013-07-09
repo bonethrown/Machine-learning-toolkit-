@@ -103,6 +103,7 @@ def cleanNumberArray(array, strOrFloat):
 	for e in array:
 		e = findPrice(e)
 		e = cleanPrice(e)
+		print e
 		if strOrFloat == "float":
 			e = strToFloat(e)		
 			out.append(e)
@@ -232,14 +233,26 @@ def extractRawPrice(string):
 
 
 def findPrice(string):
-    tempPrice = unidecode.unidecode(string)
-    tempPrice = re.search(r'R\$\s(\d+.\d+)', tempPrice).group()
-    if isDotAndComma(tempPrice):
-	tempPrice = tempPrice.replace('.','')
-	tempPrice = tempPrice.replace(',','.').strip()
-    else:
-	tempPrice = tempPrice.replace(',','.').strip()
-    return tempPrice
+    
+	    tempPrice = unidecode.unidecode(string)
+	    tempPrice = re.search(r'R\$\s(\d+.\d+)', tempPrice)
+	    if tempPrice is not None:
+		    tempPrice = tempPrice.group()
+		    if isDotAndComma(tempPrice):
+			tempPrice = tempPrice.replace('.','')
+			tempPrice = tempPrice.replace(',','.').strip()
+		    else:
+			tempPrice = tempPrice.replace(',','.').strip()
+		    return tempPrice
+	    else:
+		    if isDotAndComma(string):
+			tempPrice = string
+			tempPrice = tempPrice.replace('.','')
+			tempPrice = tempPrice.replace(',','.').strip()
+		    else:
+			tempPrice = string
+			tempPrice = tempPrice.replace(',','.').strip()
+		    return tempPrice
 
 def strToFloat(string):
     tempPrice = float(string)

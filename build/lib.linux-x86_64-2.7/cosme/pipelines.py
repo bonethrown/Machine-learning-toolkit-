@@ -49,7 +49,6 @@ class CosmePipeline(object):
     
     def priceProcess(self, item, sitePipe, spider):
         
-        print "INPUT PRICE::::: %s", item['price']
 	cleanItem = sitePipe.process(item, spider, self.matcher)
 
 	if itemTools.hasMultiPrice(cleanItem): 

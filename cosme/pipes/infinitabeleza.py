@@ -27,7 +27,8 @@ class InfiniteBeleza(AbstractSite):
 
 	    if item['volume']:
 		item['volume'] = utils.extractVolume(item['name'])
- 
+	    	print "name extracttion"
+		print item['volume']
 	    if item['comments']:
                 comment_html = item['comments']
                 try:

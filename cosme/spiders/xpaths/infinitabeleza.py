@@ -11,6 +11,7 @@ class InfinitaBelezaXPath(AbstractXPath):
     "description" : "//p[1]/span/span/strong/span/text()",
     "comments":  "//div[@id=\"coments\"]",
     "category" : "//span[@class='link_itens'][1]/a/text()",
+    "volume" : "//h1[@id='nome-produto']/text()"
     }
 
     COMMENTS = {

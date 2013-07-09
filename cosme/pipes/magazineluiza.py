@@ -31,12 +31,19 @@ class MagazineLuizaSite(AbstractSite):
         #if there isn't a price make it very expensive 
         if item['price']:
             temp = utils.getFirst(item['price'])
-            if isinstance(temp, float):
-                item['price'] = temp 
+	    price = []
+            
+	    if isinstance(temp, float):
+		price = []
+		price.append(item['price']) 
+                item['price'] =  price
             else:
+			
                 temp = temp.replace(',','.')
                 temp = float(temp) 
-                item['price'] = temp
+                price.append(temp)
+		item['price'] = price
+
         if item['brand']:
             if isinstance(item['brand'], list):
                 temp = item['brand']
