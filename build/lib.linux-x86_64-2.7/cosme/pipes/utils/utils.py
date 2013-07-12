@@ -8,7 +8,7 @@ from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
 import logging
 import numpy
-#from numpy import mean
+from numpy import mean
 import hashlib
 import unidecode
 #convert format "13:13" to minutes
@@ -50,6 +50,12 @@ def get_volume(name, pattern='ML'):
         idx = actualname.rfind(' ')
         volume=actualname[idx:]
     return volume
+
+def greadyVolume(inputstring, suffixpattern='ml'):
+	pattern = '\d+%s' % suffixpattern
+	volArray = re.findall(pattern, inputstring)
+	if len(volArray)!= 0:
+		return volArray
     
 def extractVolume(inputstring, suffixpattern='ml'):
     pattern  = '\d+%s' % suffixpattern
@@ -58,7 +64,7 @@ def extractVolume(inputstring, suffixpattern='ml'):
         vol = vol.group()
         return vol
     else: 
-        return ""
+        return None
 
 def extract_ML(inputstring, suffixpattern='ML'):
     pattern  = '\d+%s' % suffixpattern
@@ -103,6 +109,7 @@ def cleanNumberArray(array, strOrFloat):
 	for e in array:
 		e = findPrice(e)
 		e = cleanPrice(e)
+		print e
 		if strOrFloat == "float":
 			e = strToFloat(e)		
 			out.append(e)
@@ -232,14 +239,26 @@ def extractRawPrice(string):
 
 
 def findPrice(string):
-    tempPrice = unidecode.unidecode(string)
-    tempPrice = re.search(r'R\$\s(\d+.\d+)', tempPrice).group()
-    if isDotAndComma(tempPrice):
-	tempPrice = tempPrice.replace('.','')
-	tempPrice = tempPrice.replace(',','.').strip()
-    else:
-	tempPrice = tempPrice.replace(',','.').strip()
-    return tempPrice
+    
+	    tempPrice = unidecode.unidecode(string)
+	    tempPrice = re.search(r'R\$\s(\d+.\d+)', tempPrice)
+	    if tempPrice is not None:
+		    tempPrice = tempPrice.group()
+		    if isDotAndComma(tempPrice):
+			tempPrice = tempPrice.replace('.','')
+			tempPrice = tempPrice.replace(',','.').strip()
+		    else:
+			tempPrice = tempPrice.replace(',','.').strip()
+		    return tempPrice
+	    else:
+		    if isDotAndComma(string):
+			tempPrice = string
+			tempPrice = tempPrice.replace('.','')
+			tempPrice = tempPrice.replace(',','.').strip()
+		    else:
+			tempPrice = string
+			tempPrice = tempPrice.replace(',','.').strip()
+		    return tempPrice
 
 def strToFloat(string):
     tempPrice = float(string)

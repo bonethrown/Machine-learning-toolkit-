@@ -8,7 +8,7 @@ from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
 import logging
 import numpy
-#from numpy import mean
+from numpy import mean
 import hashlib
 import unidecode
 #convert format "13:13" to minutes
@@ -50,6 +50,12 @@ def get_volume(name, pattern='ML'):
         idx = actualname.rfind(' ')
         volume=actualname[idx:]
     return volume
+
+def greadyVolume(inputstring, suffixpattern='ml'):
+	pattern = '\d+%s' % suffixpattern
+	volArray = re.findall(pattern, inputstring)
+	if len(volArray)!= 0:
+		return volArray
     
 def extractVolume(inputstring, suffixpattern='ml'):
     pattern  = '\d+%s' % suffixpattern
@@ -58,7 +64,7 @@ def extractVolume(inputstring, suffixpattern='ml'):
         vol = vol.group()
         return vol
     else: 
-        return ""
+        return None
 
 def extract_ML(inputstring, suffixpattern='ML'):
     pattern  = '\d+%s' % suffixpattern

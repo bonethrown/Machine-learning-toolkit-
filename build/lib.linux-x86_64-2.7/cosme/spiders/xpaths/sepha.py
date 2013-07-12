@@ -32,3 +32,6 @@ class SephaXPath(AbstractXPath):
         return "//div[@class=\"boxPrecoProduto\"]/span[2]/span/text()"
     def get_price3(self):
 	return "//div[@class='boxPrecoProduto precoNormal']"
+    
+    def get_volume2(self):
+	return "//span[@class=\'tamanho\']"

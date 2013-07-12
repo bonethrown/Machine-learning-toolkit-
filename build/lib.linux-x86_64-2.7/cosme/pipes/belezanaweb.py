@@ -33,7 +33,7 @@ class BelezanaWeb(AbstractSite):
 		temp = utils.getElementVolume(temp)
 		item['volume'] = temp
 
-		if not bool(temp[0]):		
+		if not temp:		
 			tempName= item['name'][0]
 			item['volume'] = utils.extractVolume(tempName, 'ml')				
 

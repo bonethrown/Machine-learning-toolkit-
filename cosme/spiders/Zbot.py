@@ -68,7 +68,16 @@ class Cosme(CrawlSpider):
 		print "*******************Third price check"
 		print cosmeItem['price']
 
+	cosmeItem['volume'] = self.multiVolumeExtract(cosmeItem, hxs, siteModule) 	
 	self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem
-   
-   
+  
+
+
+ 
+    def multiVolumeExtract(self, cosmeItem, hxs, siteModule):
+        if  len(cosmeItem['volume']) == 0: 
+		cosmeItem['volume'] = hxs.select(siteModule.get_volume2()).extract()
+		print "*******************Second Volume Check"
+		print cosmeItem['volume']
+		return cosmeItem['volume']	

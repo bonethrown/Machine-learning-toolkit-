@@ -9,6 +9,7 @@ cosme/pipes/default.py
 cosme/pipes/infinitabeleza.py
 cosme/pipes/laffayette.py
 cosme/pipes/magazineluiza.py
+cosme/pipes/pipeMethods.py
 cosme/pipes/sepha.py
 cosme/pipes/sephora.py
 cosme/pipes/splitPipe.py

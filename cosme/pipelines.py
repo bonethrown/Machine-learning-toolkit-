@@ -75,7 +75,7 @@ class CosmePipeline(object):
 	
     def postProcess(self, item, spider):
 	
-	commitSolr = True
+	commitSolr = False
 	commitDB = True	
 	prodDB = False	
 	cleanItem = item
