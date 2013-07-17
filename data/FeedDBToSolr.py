@@ -70,7 +70,7 @@ def  createBatch(db,limit=10):
 def main(batchSize):
         connection = Connection()
         lalina = connection.comments_db
-	createBatch(lalina, limit=batchSize)
+	createBatch(testLalina, limit=batchSize)
 
 #if __name__ == "__main__":
 

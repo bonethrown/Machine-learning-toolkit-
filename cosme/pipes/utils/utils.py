@@ -63,8 +63,15 @@ def extractVolume(inputstring, suffixpattern='ml'):
     if vol is not None:
         vol = vol.group()
         return vol
-    else: 
-        return None
+    elif:
+	suffixpattern = ' ml'
+	pattern = '\d+%s' % suffixpattern 
+        vol = re.search(pattern, inputstring)
+	if vol is not None:
+		vol = vol.group()
+		return vol
+	else:
+		return None
 
 def extract_ML(inputstring, suffixpattern='ML'):
     pattern  = '\d+%s' % suffixpattern
@@ -73,7 +80,7 @@ def extract_ML(inputstring, suffixpattern='ML'):
         vol = vol.group()
         return vol
     else:
-        return ""
+        return None
 def getElementVolume(volArray):
 	out = []
 	for e in volArray:
