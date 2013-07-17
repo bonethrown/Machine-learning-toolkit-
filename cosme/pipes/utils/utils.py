@@ -52,6 +52,7 @@ def get_volume(name, pattern='ML'):
     return volume
 
 def greadyVolume(inputstring, suffixpattern='ml'):
+	inputstring = inputstring.lower()
 	pattern = '\d+%s' % suffixpattern
 	volArray = re.findall(pattern, inputstring)
 	if len(volArray)!= 0:
@@ -63,7 +64,7 @@ def extractVolume(inputstring, suffixpattern='ml'):
     if vol is not None:
         vol = vol.group()
         return vol
-    elif:
+    else:
 	suffixpattern = ' ml'
 	pattern = '\d+%s' % suffixpattern 
         vol = re.search(pattern, inputstring)
@@ -72,7 +73,8 @@ def extractVolume(inputstring, suffixpattern='ml'):
 		return vol
 	else:
 		return None
-
+    
+    
 def extract_ML(inputstring, suffixpattern='ML'):
     pattern  = '\d+%s' % suffixpattern
     vol = re.search(pattern,inputstring)
