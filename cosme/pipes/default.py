@@ -22,16 +22,19 @@ class AbstractSite:
             raise DropItem("missing price DROPPING")
         if not item['brand']:
             raise DropItem("missing brand in %s . Dropping this" % item)
-        if not item['category']:
-           # raise DropItem("*******Droping Item - missing Category*******")     
+	if item['name']:
+		if isinstance(item['name'], list):
+			temp = item['name']
+			item['name'] = temp[0].lower()
+		else:
+			item['name'] = item['name'].lower()
+			tempName = item['name'] 
+	# item["raw_data"] = ""
+        #set our crawl tim
+	item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
         
-        # item["raw_data"] = ""
-        #set our crawl time
-       	    item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
-         
-        return item
-             
+	return item
         #except:
         #    log.msg("Error parsing results", level=log.WARNING)
         #   raise DropItem("Something whent wrong parsing dropping item %s " % item['url'])
-        
+       # 

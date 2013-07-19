@@ -23,11 +23,9 @@ class MagazineLuizaSite(AbstractSite):
     def process(self, item,spider,matcher):
 
         if item['name']:
-            if isinstance(item['name'], list):
-                temp = item['name']
-                item['name'] = temp[0].lower()
-            else:
-                item['name'] = item['name'].lower()
+	    tempName = item['name']            
+	    item['volume'] = utils.extractVolume(tempName) 				        
+	   
         #if there isn't a price make it very expensive 
         if item['price']:
             temp = utils.getFirst(item['price'])
@@ -54,13 +52,17 @@ class MagazineLuizaSite(AbstractSite):
         if item['url']:
             item['url'] = item['url'].lower()
 	
-	if item['volume']: 
-		if not bool(item['volume']): 
-			tempName = item['name'][0]
-			item['volume'] = utils.extractVolume(tempName, 'ml') 				        
- 
-        if item['category']:
-            if isinstance(item['category'], list):
+#	if item['volume']:
+#		print "************ VOL UUU MMME EE *********" 
+#		print '**************************NAME IS %s' % item['name']
+#		tempName = item['name']
+#		item['volume'] = utils.extractVolume(tempName) 				        
+#		print "VOLUME EXTRACTION is %s" % item['volume'] 
+        
+
+	if item['category']:
+            print "**** CATEGORY ****"
+	    if isinstance(item['category'], list):
                 temp = item['category']
                 item['category'] = temp[0].lower()
             else:

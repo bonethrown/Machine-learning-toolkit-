@@ -57,7 +57,23 @@ def greadyVolume(inputstring, suffixpattern='ml'):
 	volArray = re.findall(pattern, inputstring)
 	if len(volArray)!= 0:
 		return volArray
-    
+def extractGram(inputstring, suffixpattern='g'):
+    pattern  = '\d+%s' % suffixpattern
+    gram = re.search(pattern,inputstring)
+    if gram is not None:
+        gram = gram.group()
+        return gram
+    else:
+	suffixpattern = ' g'
+    	pattern  = '\d+%s' % suffixpattern
+    	gram = re.search(pattern,inputstring)
+	if gram is not None:
+		gram = gram.group()
+		return gram
+	else:
+		return None 
+
+
 def extractVolume(inputstring, suffixpattern='ml'):
     pattern  = '\d+%s' % suffixpattern
     vol = re.search(pattern,inputstring)
@@ -70,9 +86,14 @@ def extractVolume(inputstring, suffixpattern='ml'):
         vol = re.search(pattern, inputstring)
 	if vol is not None:
 		vol = vol.group()
+		vol = vol.replace(" ","")
 		return vol
 	else:
-		return None
+		vol = extractGram(inputstring)
+		if vol is not None:
+			return vol
+		else:
+			return 'NA'
     
     
 def extract_ML(inputstring, suffixpattern='ML'):
@@ -311,6 +332,8 @@ class listMatcher:
                 print "######match %s"%brand		
                 print "######match found "+brand.group()
                 return brand.group()
+
+
 
 
 def get_http_response(responseBody, url):
