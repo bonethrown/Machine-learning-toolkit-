@@ -37,11 +37,11 @@ class BelezanaWeb(AbstractSite):
 			tempName= item['name'][0]
 			item['volume'] = utils.extractVolume(tempName, 'ml')				
 
-        if item['name']:
+#        if item['name']:
             #item['volume'] = utils.get_volume(item['name'], 'ml')
-            tempName = item['name']
-            tempName = tempName[0]
-            item['name'] = utils.cleanChars(tempName)
+ #           tempName = item['name']
+  #          tempName = tempName[0]
+   #         item['name'] = utils.cleanChars(tempName)
  
         if item['category']:
             tempCat = item['category']

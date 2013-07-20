@@ -41,7 +41,7 @@ def addItemVolume(item):
 			newItem = item
 			newItem['volume'] = v
 			out.append(newItem)
-		return out
+		return Out
 
 def itemizeByPrice(item):
                 responseArray = []

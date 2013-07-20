@@ -9,28 +9,6 @@ import hashlib
 DB = "testLalina"
 NAME_RATIO = 80
 
-def feedtoSolr(batch):
-    
-    logging.basicConfig(filename= 'feedLog.log', level = logging.DEBUG)
-
-    solr_url = "http://localhost:8080/solr/cosme0/update?json"
-    fail = False
-    try:
-        req  = urllib2.Request(solr_url, data = batch)
-        req.add_header("Content-type", "application/json")
-        #lets see what we got
-        page = urllib2.urlopen(req)
-        print "##solr response: %s"%(page)
-    except Exception,e :
-        logging.debug(e) 
-	logging.debug(batch)
-	print "problem sending batch %s"%e
-        print batch
-        fail = True
-	
-    return fail
-
-#set our batch size
 def  createBatch(db,limit=10):
    start = time.time()
    print db.lalina.count()

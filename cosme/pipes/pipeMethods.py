@@ -9,12 +9,23 @@ from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from cosme.pipes.utils.utils import get_http_response, findPrice, strToFloat
 import sys
 import traceback
-from cosme.item import cosmeItem
-
-class GenericPipe(object):
+from cosme.pipes.utils import utils, itemTools
 	#THIS IS A GENERIC VOLUME EXTRACTOR THAT WILL CHECK THE NAME THEN URL THEN THE XPATH FOR 
-	def __init__(self):
-		`
 
-	def GenericPipeVolume(url, name, volume):
+def genericNameExract(name):
+	if isinstance(name, list):
+		name = name[0]
+		name = name.lower()
+		name = utils.cleanChars(name)
+		return name
+	else:
+		name = name.lower()
+		name = utils.cleanChars(name)
+		return name
+
+
+def GenericPipeVolume(url, name, xpath):
+ 	isList = False
 	
+	if isinstance(xpath, list):
+				

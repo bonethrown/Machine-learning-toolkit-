@@ -18,9 +18,10 @@ class InfiniteBeleza(AbstractSite):
     def process(self, item,spider,matcher):
    	    if item['brand']:
 		item['brand'] = item['brand'][0] 
-            if item['name']:
-                tempNameArr = item['name'][0]
-		item['name'] = utils.cleanChars(tempNameArr)
+#  	NAME PROVSSED IN DEFAULT PIPLE LINE 
+#            if item['name']:
+         #       tempNameArr = item['name'][0]
+	#	item['name'] = utils.cleanChars(tempNameArr)
             if item['price']:
 		  temp = item['price']
 		  item['price'] = utils.cleanNumberArray(temp, 'float')

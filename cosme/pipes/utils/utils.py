@@ -57,6 +57,7 @@ def greadyVolume(inputstring, suffixpattern='ml'):
 	volArray = re.findall(pattern, inputstring)
 	if len(volArray)!= 0:
 		return volArray
+
 def extractGram(inputstring, suffixpattern='g'):
     pattern  = '\d+%s' % suffixpattern
     gram = re.search(pattern,inputstring)
@@ -72,7 +73,6 @@ def extractGram(inputstring, suffixpattern='g'):
 		return gram
 	else:
 		return None 
-
 
 def extractVolume(inputstring, suffixpattern='ml'):
     pattern  = '\d+%s' % suffixpattern
