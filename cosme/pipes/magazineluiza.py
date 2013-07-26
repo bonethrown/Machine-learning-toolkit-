@@ -23,7 +23,7 @@ class MagazineLuizaSite(AbstractSite):
     def process(self, item,spider,matcher):
 
         if item['name']:
-	    item['volume'] = utils.extractVolume(tempName) 				        
+	    item['volume'] = utils.extractVolume(item['name'])  
 	   
         #if there isn't a price make it very expensive 
         if item['price']:

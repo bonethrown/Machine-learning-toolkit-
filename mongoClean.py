@@ -19,10 +19,14 @@ def cleanVolume(db):
 			item['volume'] = 'NA'
 			toDb(item,db)
 			print 'item was empty ARRAY %s' % item['key']
-
+		elif item['volume'] == ['NA']:
+			item['volume'] = 'NA'
+			toDb(item,db)
+			print 'item was empty ARRAY %s' % item['key']
+			
 def toDb(item, db):
 	try:
-		db.testLalina.update( {'key': item['key']}, {'volume':item['volume']}, safe = True)
+		db.testLalina.update( {'key': item['key']}, item, safe = True)
 	except Exception, e:
 		print e	
 		

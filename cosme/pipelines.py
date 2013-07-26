@@ -6,6 +6,7 @@
 ##remember to import new added pipes
 from scrapy import log
 import json, urllib2
+from cosme.pipes import pipeMethods
 from  pipes.utils import db,utils, itemTools
 import os
 from cosme.pipes.belezanaweb import BelezanaWeb
@@ -77,7 +78,7 @@ class CosmePipeline(object):
 	
 	commitSolr = False
 	commitDB = True	
-	prodDB = False	
+	prodDB = True	
 	cleanItem = item
 	cleanItem['key'] = itemTools.keyGen(item)
 	#cleanItem = itemTools.checkVolume(cleanItem)
@@ -113,9 +114,9 @@ class CosmePipeline(object):
                 print " ****************************************************SENDING TO DB"
 		# SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
                 if storeItem['comments']:
-			self.db.items.update({"key" : storeItem['key']},{"comments" : storeItem['comments'], "url" : storeItem['url'], "key" : storeItem['key'], "site" : storeItem['site']}, upsert=True)
+			self.db.itemsTest.update({"key" : storeItem['key']},{"comments" : storeItem['comments'], "url" : storeItem['url'], "key" : storeItem['key'], "site" : storeItem['site']}, upsert=True)
                 if prodDB:
-			self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
+			self.db.lalinaDuplicate.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
                 	log.msg("********* MONGO SUBMITTED ****** with response", level=log.DEBUG)
             	else:
 			self.db.testLalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)

@@ -72,8 +72,6 @@ class Cosme(CrawlSpider):
 	self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem
   
-
-
  
     def multiVolumeExtract(self, cosmeItem, hxs, siteModule):
         if  len(cosmeItem['volume']) == 0: 

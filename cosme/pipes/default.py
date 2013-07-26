@@ -6,29 +6,37 @@ from utils import utils
 from scrapy.exceptions import DropItem
 from scrapy import log
 import datetime
-from cosme.pipes.pipeMethods import genericNameExract
+import pipeMethods
+
 class AbstractSite:
     
     #Do all default processing here before going on to site specific processing.
     def process(self, item, spider):
-        if  not item['name']:
-            raise DropItem("Missing name in %s . Dropping" % item)
-        #De-array these values. 
-        if isinstance(item['description'],list) and len(item['description']) > 0:
-            item['description'] = item['description'].pop()
-        if not item['price']:
+        
+	if not item['price']:
             raise DropItem("missing price DROPPING")
+        
+	if  not item['name']:
+            raise DropItem("Missing name in %s . Dropping" % item)
+	
+	if item['name']:
+		item['name'] = pipeMethods.genericNameExtract(item['name'])
+		print "generic name extract is :   %s" % item['name']
+
         if not item['brand']:
 		raise DropItem("missing brand in %s . Dropping this" % item)
-	if not item['volume']: 
+        
+	#De-array these values. 
+        if isinstance(item['description'],list) and len(item['description']) > 0:
+            item['description'] = item['description'].pop()
 
+	if item['volume']:
+		if not utils.checkVolume(item['volume']):
+			item['volume'] = ''
+	if not item['volume']: 
+		item['volume'] = pipeMethods.nonXpathVolume(item['name'], item['url'])
 
 	#if's start here:
-	if item['name']:
-		item['name'] = genericNameExtract(item['name'])
-		print "generic name extract %s" % item['name']
-
-
 
 
 	

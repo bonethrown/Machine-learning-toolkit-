@@ -45,7 +45,8 @@ def addItemVolume(item):
 
 def itemizeByPrice(item):
                 responseArray = []
-                temp = utils.cleanNumberArray(item['price'], 'float')
+                temp = item['price']
+		#temp = utils.cleanNumberArray(item['price'], 'float')
                 volume = item['volume']
                 for price in temp:
                                 newItem = copy.deepcopy(item)
