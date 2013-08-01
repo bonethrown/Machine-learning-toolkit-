@@ -7,6 +7,10 @@ import urllib3
 import sys
 import traceback
 import logging
+from cosme.pipes.utils import stringtools
+import HTMLParser
+from BeautifulSoup import BeautifulSoup
+import urllib
 
 logger = logging.getLogger(__name__)
 
@@ -48,18 +52,24 @@ class SephoraSite(AbstractSite):
             item['sku'] = utils.cleanSkuArray(item['sku'], 'string')
         try:
             item['comments'] = self.get_comments(item['url'])
-        except:
+	except:
                 exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
                 logger.error('Error getting comments %s , Exception information: %s, %s, Stack trace: %s ' % (item['url'],
                                             exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
-            
-        return item
 
+	#	if item['comments']:
+	    
+           # item['comments'] = stringtools.decodeIsoComments(item['comments'])
+	            
+        return item
 
     def get_comments(self, url):
         comment_url = '%s&view=all' % (url)
-        rsp = self.http.request('GET', comment_url)
-        hxs = get_http_response(rsp.data, comment_url)
+        #rsp = self.http.request('GET', comment_url)
+        #print rsp.data
+	html = urllib.urlopen(comment_url).read()
+	rsp = html.decode('iso-8859-1')
+	hxs = get_http_response(rsp, comment_url)
         comments = hxs.select(self.siteModule.get_comments()['commentList'])
         result = []
         for comment in comments:
@@ -67,8 +77,8 @@ class SephoraSite(AbstractSite):
             commentDict['star'] = self.get_star(comment, self.siteModule.get_comments()['commentStar'])
             commentDict['name'] = comment.select(self.siteModule.get_comments()['commenterName']).extract()[0].strip()
             commentDict['date'] = self.get_date(comment, self.siteModule.get_comments()['commentDate'])
-            commentDict['comment'] = comment.select(self.siteModule.get_comments()['commentText']).extract()[0].strip()
-            result.append(commentDict)
+	    commentDict['comment'] = comment.select(self.siteModule.get_comments()['commentText']).extract()[0].strip()
+	    result.append(commentDict)
         return result
     
     def get_date(self, comment, pattern):

@@ -28,10 +28,10 @@ class SephoraSite(AbstractSite):
             tempBrand = utils.extractBrand(tempBrand)
             item['brand'] = tempBrand
     
-        if item['name']:
-            tempName = item['name']
-            tempName = tempName[0]
-            item['name'] = utils.cleanChars(tempName)
+       # if item['name']:
+        #    tempName = item['name']
+         #   tempName = tempName[0]
+          #  item['name'] = utils.cleanChars(tempName)
    	if item['volume']:
 	 	if not bool(item['volume'][0]):
                         tempName= item['name'][0]

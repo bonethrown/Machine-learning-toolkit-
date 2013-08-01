@@ -28,14 +28,26 @@ class BelezanaWeb(AbstractSite):
             item['brand'] = tempBrand
    	if item['volume']:
 		#first check if volume array exists(if not getelement returns empty and see if the name contains volume information)
-
+		print 'PIPELINE INPUT volume is %s' % item['volume']
+		
 		temp = item['volume']
-		temp = utils.getElementVolume(temp)
-		item['volume'] = temp
+		if isinstance(temp, list):
+			length = len(temp)
+			print "multi value volume %s" % temp
+			
+			item['volume'] = utils.getElementVolume(temp)
+		else:
+			print 'NON multi volume field %s' % item['volume']
+			
 
-		if not temp:		
-			tempName= item['name'][0]
-			item['volume'] = utils.extractVolume(tempName, 'ml')				
+
+		#temp = item['volume']
+		#temp = utils.getElementVolume(temp)
+		#i#tem['volume'] = temp
+
+		#if not temp:		
+		#	tempName= item['name'][0]
+		#	item['volume'] = utils.extractVolume(tempName, 'ml')				
 
 #        if item['name']:
             #item['volume'] = utils.get_volume(item['name'], 'ml')

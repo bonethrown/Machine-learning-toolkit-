@@ -35,9 +35,9 @@ class SephaWeb(AbstractSite):
 			tempBrand = utils.extractBrand(tempBrand)
 			item['brand'] = tempBrand
 		
-		if item['name']:
-			tempName = item['name']
-			item['name'] = tempName[0]
+	#	if item['name']:
+	#		tempName = item['name']
+	#		item['name'] = tempName[0]
 			#item['name'] = utils.cleanChars(tempName)
 			#item['volume'] = utils.extractVolume(item['name']) 
 		if item['volume']:

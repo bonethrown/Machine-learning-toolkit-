@@ -22,9 +22,6 @@ class laffayetteWeb(AbstractSite):
 		if item['url']:
 			item['url'] = item['url'].lower()					
 		if item['price']: 
-			# tempPrice = re.search(r'[\d.,]+',str(item['price']))
-			# tempPrice = tempPrice.group().replace(',','.')
-			# item['price'] = float(tempPrice)
 			item['price'] = utils.cleanNumberArray(item['price'], 'float')
 		
 		if item['brand']:
@@ -37,11 +34,11 @@ class laffayetteWeb(AbstractSite):
 			temp = item['description']
 			bad = BeautifulSoup(temp)
 			item['description'] = bad.getText()
-		if item['name']:
+#		if item['name']:
 			#item['volume'] = utils.get_volume(item['name'])
-			tempName = item['name']
-			tempName = tempName[0]
-			item['name'] = utils.cleanChars(tempName)
+#			tempName = item['name']
+#			tempName = tempName[0]
+#			item['name'] = utils.cleanChars(tempName)
 		
 		if item['volume']:
 			if len(item['price']) > 1:

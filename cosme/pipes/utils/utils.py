@@ -82,7 +82,7 @@ def extractGram(inputstring, suffixpattern='g(?=[r\s])/i'):
     else:
 	suffixpattern = ' g(?=[r\s])/i'
     	pattern  = r'\d+%s' % suffixpattern
-    	gram = re.search(pattern,inputstring)
+    	gram = re.search(pattern,inputstring, re.I)
 	if gram is not None:
 		gram = gram.group()
 		return gram
@@ -90,15 +90,15 @@ def extractGram(inputstring, suffixpattern='g(?=[r\s])/i'):
 		return None 
 
 def extractVolume(inputstring, suffixpattern='ml'):
-    pattern  = '\d+%s' % suffixpattern
-    vol = re.search(pattern,inputstring)
+    pattern  = r'\d+%s' % suffixpattern
+    vol = re.search(pattern,inputstring, re.I)
     if vol is not None:
         vol = vol.group()
         return vol
     else:
 	suffixpattern = ' ml'
-	pattern = '\d+%s' % suffixpattern 
-        vol = re.search(pattern, inputstring)
+	pattern = r'\d+%s' % suffixpattern 
+        vol = re.search(pattern, inputstring. re.I)
 	if vol is not None:
 		vol = vol.group()
 		vol = vol.replace(" ","")
@@ -125,9 +125,9 @@ def getElementVolume(volArray):
 		temp = extractVolume(e)
 		if not temp:
 			e = extract_ML(e) 
-			if bool(e):
+			if e:
 				out.append(e)
-		elif bool(temp):
+		elif temp:
 			out.append(temp)	
 			
 	return out
@@ -200,6 +200,18 @@ def cleanPrice(toClean):
 	for val in badChars:
 		toClean = toClean.replace(val, "").strip()
 	return toClean
+
+def cleanSymbols(toClean):
+ 
+    badChars = ["\\r","\\t","\\n",":","%",",","(",")","'","!",]
+    stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
+    toClean = toClean.lower().strip()
+    for val in badChars:
+        toClean = toClean.replace(val,"")
+    for word in stopWords:
+        toClean = toClean.replace(word,"")    
+    if toClean:
+        return toClean.strip()
 
 def cleanChars(toClean):
  

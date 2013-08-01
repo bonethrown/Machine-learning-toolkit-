@@ -78,7 +78,7 @@ class CosmePipeline(object):
 	
 	commitSolr = False
 	commitDB = True	
-	prodDB = True	
+	prodDB = False	
 	cleanItem = item
 	cleanItem['key'] = itemTools.keyGen(item)
 	#cleanItem = itemTools.checkVolume(cleanItem)
@@ -116,10 +116,12 @@ class CosmePipeline(object):
                 if storeItem['comments']:
 			self.db.itemsTest.update({"key" : storeItem['key']},{"comments" : storeItem['comments'], "url" : storeItem['url'], "key" : storeItem['key'], "site" : storeItem['site']}, upsert=True)
                 if prodDB:
-			self.db.lalinaDuplicate.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
+			self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True)
                 	log.msg("********* MONGO SUBMITTED ****** with response", level=log.DEBUG)
             	else:
-			self.db.testLalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True, safe = True)
+			updateParams = { "$set" : { 'price' : cleanItem['price']}, "$set" : { 'volume' : cleanItem['volume']} }
+			self.db.testLalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True)
+			log.msg('updated item %s' % cleanItem['key'])
 	    except Exception, e:
                 log.msg("***********ERROR Submitting to MONGO error: %s"%e, level=log.ERROR)
         else:

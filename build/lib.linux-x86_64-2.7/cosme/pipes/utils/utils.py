@@ -39,6 +39,21 @@ def convertTime(time):
 def convertDate(toConvert):
     dateSplit = toConvert.split(" ")
 
+def checkVolume(vol):
+	if isinstance(vol, list):
+		check = vol[0]
+		check = extractVolume(check)
+	elif isinstance (vol, str):
+		check = extractVolume(vol)
+	elif isinstance (vol, unicode):
+		check = extractVolume(vol)
+		
+	if check == 'NA':
+		return False
+	else:
+		return True	
+
+
 def get_volume(name, pattern='ML'):
     volume = ''
     if len(name) >= 1:
@@ -57,22 +72,22 @@ def greadyVolume(inputstring, suffixpattern='ml'):
 	volArray = re.findall(pattern, inputstring)
 	if len(volArray)!= 0:
 		return volArray
-def extractGram(inputstring, suffixpattern='g'):
-    pattern  = '\d+%s' % suffixpattern
+
+def extractGram(inputstring, suffixpattern='g(?=[r\s])/i'):
+    pattern  = r'\d+%s' % suffixpattern
     gram = re.search(pattern,inputstring)
     if gram is not None:
         gram = gram.group()
         return gram
     else:
-	suffixpattern = ' g'
-    	pattern  = '\d+%s' % suffixpattern
+	suffixpattern = ' g(?=[r\s])/i'
+    	pattern  = r'\d+%s' % suffixpattern
     	gram = re.search(pattern,inputstring)
 	if gram is not None:
 		gram = gram.group()
 		return gram
 	else:
 		return None 
-
 
 def extractVolume(inputstring, suffixpattern='ml'):
     pattern  = '\d+%s' % suffixpattern
@@ -269,7 +284,7 @@ def extractRawPrice(string):
 
 
 def findPrice(string):
-    
+   if isinstance(string, str) or isinstance(string, unicode): 
 	    tempPrice = unidecode.unidecode(string)
 	    tempPrice = re.search(r'R\$\s(\d+.\d+)', tempPrice)
 	    if tempPrice is not None:
@@ -289,6 +304,10 @@ def findPrice(string):
 			tempPrice = string
 			tempPrice = tempPrice.replace(',','.').strip()
 		    return tempPrice
+   else:
+	print 'Utils find price got NON string Price'
+	return string
+	
 
 def strToFloat(string):
     tempPrice = float(string)

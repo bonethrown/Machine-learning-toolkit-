@@ -21,7 +21,6 @@ class AbstractSite:
 	
 	if item['name']:
 		item['name'] = pipeMethods.genericNameExtract(item['name'])
-		print "generic name extract is :   %s" % item['name']
 
         if not item['brand']:
 		raise DropItem("missing brand in %s . Dropping this" % item)
@@ -41,7 +40,6 @@ class AbstractSite:
 
 	
 	item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
-        
 	return item
         #except:
         #    log.msg("Error parsing results", level=log.WARNING)

@@ -22,8 +22,8 @@ class MagazineLuizaSite(AbstractSite):
     #Do all default processing here before going on to site specific processing.
     def process(self, item,spider,matcher):
 
-        if item['name']:
-	    item['volume'] = utils.extractVolume(item['name'])  
+     #   if item['name']:
+#	    item['volume'] = utils.extractVolume(item['name'])  
 	   
         #if there isn't a price make it very expensive 
         if item['price']:
@@ -40,7 +40,12 @@ class MagazineLuizaSite(AbstractSite):
                 temp = float(temp) 
                 price.append(temp)
 		item['price'] = price
+	
+	if item['description']:
+		temp = item['description']
+		temp = utils.cleanChars(temp)
 
+	
         if item['brand']:
             if isinstance(item['brand'], list):
                 temp = item['brand']
@@ -101,7 +106,6 @@ class MagazineLuizaSite(AbstractSite):
                 commentText = comment.select(self.siteModule.get_comments()['commentText2']).extract()
             commentDict['comment'] = commentText[0].strip()
                 
-            
             result.append(commentDict)
         return result
     
