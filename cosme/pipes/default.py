@@ -33,8 +33,9 @@ class AbstractSite:
 		if not utils.checkVolume(item['volume']):
 			item['volume'] = ''
 	if not item['volume']: 
+		print ' ** GOING FOR NON XPATH VOLUME'
 		item['volume'] = pipeMethods.nonXpathVolume(item['name'], item['url'])
-
+		print ' ** NON XPATH ITEM VOLUME %s' % item['volume']
 	#if's start here:
 
 

@@ -18,6 +18,12 @@ from cosme.pipes.sepha import SephaWeb
 from cosme.pipes.laffayette import laffayetteWeb
 from cosme.pipes import splitPipe
 #simple pipeline for now. Drop Items with no description!
+
+COMMENT_DB = 'itemTest'
+PROD_DB = 'lalina'
+TEST_DB = 'testLalina'
+
+
 class CosmePipeline(object):
     def __init__(self):
         self.solr_url = "http://localhost:8080/solr/cosme0/update?json"

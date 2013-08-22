@@ -9,7 +9,8 @@ from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from cosme.pipes.utils.utils import get_http_response, findPrice, strToFloat
 import sys
 import traceback
-
+from BeautifulSoup import BeautifulSoup
+import urllib
 logger = logging.getLogger(__name__)
 
 class SephaWeb(AbstractSite):
@@ -80,8 +81,10 @@ class SephaWeb(AbstractSite):
 		#Eg: 14663
 		# TODO: Only the first page is retrieved
 		comment_url = 'http://www.sepha.com.br/comentario/produto/id/%s/pagina/1' % (productId)
-		rsp = self.http.request('GET', comment_url)
-		hxs = get_http_response(rsp.data, comment_url)
+		#rsp = self.http.request('GET', comment_url)
+		html = urllib.urlopen(comment_url).read()
+        	rsp = html.decode('iso-8859-1')
+		hxs = get_http_response(rsp, comment_url)
 		comments = hxs.select(self.siteModule.get_comments()['commentList'])
 		result = []
 		for comment in comments:
@@ -96,7 +99,6 @@ class SephaWeb(AbstractSite):
 			commentDict['date'] = self.get_date(comment, self.siteModule.get_comments()['commentDate'])
 			commentText = comment.select(self.siteModule.get_comments()['commentText']).extract()
 			commentDict['comment'] = commentText[0].strip() if len(commentText) > 0 else ''
-				
 			
 			result.append(commentDict)
 		return result

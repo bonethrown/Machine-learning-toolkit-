@@ -22,3 +22,4 @@ class CosmeItem(Item):
     comments = Field()
     product_id = Field()
     volume = Field()
+    color = Field()

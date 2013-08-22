@@ -4,7 +4,7 @@ class SephaXPath(AbstractXPath):
     "image" : "//img[@id=\'imagem_descricao\']/@src",
     "name" : "//span[@class=\'nome\']/text()",
     "brand" : "//span[@class='fornecedor']/text()",
-    "price" : "//div[@class='qtd-item overFlow']",
+    "price" : "//span[@class='precoPromocao']",
     "description" : "//span[@id=\'textoDescricao\']/text()",
     "category" : "//h2[@class=\'titulo\']/a/text()",
     "sku" : "//input[@class='radio radioTamanhos opcoesProduto']/@value",

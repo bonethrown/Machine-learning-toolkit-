@@ -18,6 +18,7 @@ cosme/pipes/utils/categorizer.py
 cosme/pipes/utils/db.py
 cosme/pipes/utils/itemTools.py
 cosme/pipes/utils/solr.py
+cosme/pipes/utils/stringtools.py
 cosme/pipes/utils/utils.py
 cosme/spiders/CBot.py
 cosme/spiders/Infibot.py

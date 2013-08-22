@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def createKey(cosmeItem):
 	key = ""
-	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem["name"].replace(" ","-") + "_"+str(cosmeItem['price'][0]).replace(",","-").replace(".","-")
+	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem["name"].replace(" ","-") + "_"+str(cosmeItem['volume'][0]).replace(",","-").replace(".","-")
 	out = key.encode('ascii', 'replace')	
 	out = hashlib.md5(out).hexdigest()	
 
@@ -73,16 +73,19 @@ def greadyVolume(inputstring, suffixpattern='ml'):
 	if len(volArray)!= 0:
 		return volArray
 
-def extractGram(inputstring, suffixpattern='g(?=[r\s])/i'):
-    pattern  = r'\d+%s' % suffixpattern
-    gram = re.search(pattern,inputstring)
+
+#Gram extractor looks for gr with and without space 
+
+def extractGram(inputstring):
+    pattern  = r'\d+g(?=[r\s]|$)'
+    gram = re.search(pattern,inputstring, re.I)
     if gram is not None:
         gram = gram.group()
         return gram
     else:
-	suffixpattern = ' g(?=[r\s])/i'
+	suffixpattern = ' g(?=[r\s]|$)'
     	pattern  = r'\d+%s' % suffixpattern
-    	gram = re.search(pattern,inputstring)
+    	gram = re.search(pattern,inputstring, re.I)
 	if gram is not None:
 		gram = gram.group()
 		return gram
@@ -90,15 +93,15 @@ def extractGram(inputstring, suffixpattern='g(?=[r\s])/i'):
 		return None 
 
 def extractVolume(inputstring, suffixpattern='ml'):
-    pattern  = '\d+%s' % suffixpattern
-    vol = re.search(pattern,inputstring)
+    pattern  = r'\d+%s' % suffixpattern
+    vol = re.search(pattern,inputstring, re.I)
     if vol is not None:
         vol = vol.group()
         return vol
     else:
 	suffixpattern = ' ml'
-	pattern = '\d+%s' % suffixpattern 
-        vol = re.search(pattern, inputstring)
+	pattern = r'\d+%s' % suffixpattern 
+        vol = re.search(pattern, inputstring, re.I)
 	if vol is not None:
 		vol = vol.group()
 		vol = vol.replace(" ","")
@@ -125,9 +128,9 @@ def getElementVolume(volArray):
 		temp = extractVolume(e)
 		if not temp:
 			e = extract_ML(e) 
-			if bool(e):
+			if e:
 				out.append(e)
-		elif bool(temp):
+		elif temp:
 			out.append(temp)	
 			
 	return out
@@ -200,6 +203,18 @@ def cleanPrice(toClean):
 	for val in badChars:
 		toClean = toClean.replace(val, "").strip()
 	return toClean
+
+def cleanSymbols(toClean):
+ 
+    badChars = ["\\r","\\t","\\n",":","%",",","(",")","'","!",]
+    stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
+    toClean = toClean.lower().strip()
+    for val in badChars:
+        toClean = toClean.replace(val,"")
+    for word in stopWords:
+        toClean = toClean.replace(word,"")    
+    if toClean:
+        return toClean.strip()
 
 def cleanChars(toClean):
  

@@ -99,7 +99,6 @@ class SephaWeb(AbstractSite):
 			commentDict['date'] = self.get_date(comment, self.siteModule.get_comments()['commentDate'])
 			commentText = comment.select(self.siteModule.get_comments()['commentText']).extract()
 			commentDict['comment'] = commentText[0].strip() if len(commentText) > 0 else ''
-			commetDict['comment'] = commentDict['comment'].decode('iso-8859-1')		
 			
 			result.append(commentDict)
 		return result

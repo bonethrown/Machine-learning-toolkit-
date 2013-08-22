@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def createKey(cosmeItem):
 	key = ""
-	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem["name"].replace(" ","-") + "_"+str(cosmeItem['price'][0]).replace(",","-").replace(".","-")
+	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem["name"].replace(" ","-") + "_"+str(cosmeItem['volume'][0]).replace(",","-").replace(".","-")
 	out = key.encode('ascii', 'replace')	
 	out = hashlib.md5(out).hexdigest()	
 
@@ -73,14 +73,17 @@ def greadyVolume(inputstring, suffixpattern='ml'):
 	if len(volArray)!= 0:
 		return volArray
 
-def extractGram(inputstring, suffixpattern='g(?=[r\s])/i'):
-    pattern  = r'\d+%s' % suffixpattern
-    gram = re.search(pattern,inputstring)
+
+#Gram extractor looks for gr with and without space 
+
+def extractGram(inputstring):
+    pattern  = r'\d+g(?=[r\s]|$)'
+    gram = re.search(pattern,inputstring, re.I)
     if gram is not None:
         gram = gram.group()
         return gram
     else:
-	suffixpattern = ' g(?=[r\s])/i'
+	suffixpattern = ' g(?=[r\s]|$)'
     	pattern  = r'\d+%s' % suffixpattern
     	gram = re.search(pattern,inputstring, re.I)
 	if gram is not None:
@@ -98,7 +101,7 @@ def extractVolume(inputstring, suffixpattern='ml'):
     else:
 	suffixpattern = ' ml'
 	pattern = r'\d+%s' % suffixpattern 
-        vol = re.search(pattern, inputstring. re.I)
+        vol = re.search(pattern, inputstring, re.I)
 	if vol is not None:
 		vol = vol.group()
 		vol = vol.replace(" ","")

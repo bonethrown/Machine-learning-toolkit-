@@ -34,31 +34,17 @@ class laffayetteWeb(AbstractSite):
 			temp = item['description']
 			bad = BeautifulSoup(temp)
 			item['description'] = bad.getText()
-#		if item['name']:
-			#item['volume'] = utils.get_volume(item['name'])
-#			tempName = item['name']
-#			tempName = tempName[0]
-#			item['name'] = utils.cleanChars(tempName)
 		
 		if item['volume']:
-			if len(item['price']) > 1:
-	
-				temp = item['volume']
+			#volume can be string or list depening on item count on particular page
+			temp = item['volume']
+			if isinstance(temp, list):
 				temp = utils.getElementVolume(temp)
-				item['volume'] = temp
-				print "len price more than 1 "			
-			else:
-                        	if isinstance(item['volume'], list):
-					item['volume'] = utils.extract_ML(item['volume'][0])
-					print 'standard volume extract'
-				else:
-					item['volume'] = utils.extract_ML(item['volume'])
-				
-				if not item['volume']:
-					print "looking for ml in name"
-					tempName = item['name'] 
-					item['volume'] = utils.extractVolume(tempName, 'ml')
-	
+				if len(temp) > 1:
+					item['volume'] = temp
+				else: 
+					item['volume'] = temp[0]
+
 		if item['category']:
 			tempCat = item['category']
 			item['category'] =utils.cleanChars(tempCat[0])
