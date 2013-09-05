@@ -35,26 +35,6 @@ class SephaWeb(AbstractSite):
 			tempBrand = tempBrand[0]
 			tempBrand = utils.extractBrand(tempBrand)
 			item['brand'] = tempBrand
-		
-	#	if item['name']:
-	#		tempName = item['name']
-	#		item['name'] = tempName[0]
-			#item['name'] = utils.cleanChars(tempName)
-			#item['volume'] = utils.extractVolume(item['name']) 
-		if item['volume']:
-			temp = item['volume']
-			if len(temp)==0:
-				tempName = item['url']
-				item['volume'] = utils.greadyVolume(tempName, 'ml')
-				logger.info('volume EXTACTED : %s' %item['volume'])	
-			else:
-				temp = utils.greadyVolume(temp[0], 'ml')
-				item['volume'] = temp
-				if item['volume'] is None:
-					temp = item['url']
-					item['volume'] = utils.greadyVolume(temp, 'ml')
-					if item['volume'] is None:
-						item['volume'] ='NA'
 						
 		if item['category']:
 			tempCat = item['category']
@@ -63,7 +43,10 @@ class SephaWeb(AbstractSite):
 			temp = item['image'] 
 			temp = temp[0]
 			item['image'] = temp
-
+		if item['volume']:
+			temp = item['volume']
+			temp = utils.extractVolume(temp[0])
+			
 		if item['product_id']:
 			temp = item['product_id']
 			try:

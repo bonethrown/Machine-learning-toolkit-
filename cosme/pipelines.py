@@ -22,6 +22,10 @@ from cosme.pipes import splitPipe
 COMMENT_DB = 'itemTest'
 PROD_DB = 'lalina'
 TEST_DB = 'testLalina'
+PRICE_DB = 'historicalPrices'
+commitSolr = False
+commitDB = True	
+prodDB = True	
 
 
 class CosmePipeline(object):
@@ -82,9 +86,6 @@ class CosmePipeline(object):
 	
     def postProcess(self, item, spider):
 	
-	commitSolr = False
-	commitDB = True	
-	prodDB = False	
 	cleanItem = item
 	cleanItem['key'] = itemTools.keyGen(item)
 	#cleanItem = itemTools.checkVolume(cleanItem)
