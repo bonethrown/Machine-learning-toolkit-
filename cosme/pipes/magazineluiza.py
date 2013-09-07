@@ -26,20 +26,25 @@ class MagazineLuizaSite(AbstractSite):
 #	    item['volume'] = utils.extractVolume(item['name'])  
 	   
         #if there isn't a price make it very expensive 
-        if item['price']:
-            temp = utils.getFirst(item['price'])
-	    price = []
-            
-	    if isinstance(temp, float):
-		price = []
-		price.append(item['price']) 
-                item['price'] =  price
-            else:
-			
-                temp = temp.replace(',','.')
-                temp = float(temp) 
-                price.append(temp)
-		item['price'] = price
+        if item['price'] != 'NA':
+
+		item['price'] = utils.cleanNumberArray2(item['price'], 'float')
+
+
+
+#            temp = utils.getFirst(item['price'])
+#	    price = []
+ #           
+#	    if isinstance(temp, float):
+#		price = []
+#		price.append(item['price']) 
+ #               item['price'] =  price
+  #          else:
+#			
+ #               temp = temp.replace(',','.')
+  #              temp = float(temp) 
+   ##             price.append(temp)
+#		item['price'] = price
 	
 	if item['description']:
 		temp = item['description']

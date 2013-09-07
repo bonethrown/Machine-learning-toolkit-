@@ -25,7 +25,7 @@ class SephaWeb(AbstractSite):
 			item['url'] = item['url'].lower()					
 		if item['sku']: 
 			item['sku'] = utils.cleanSkuArray(item['sku'],'string')
-		if item['price']: 
+		if item['price'] != 'NA': 
 			item['price'] = itemTools.filterMultiPriceRadio(item)
 			logger.info('PIPELINE OP: %s' % item['price'])
 			#item['price'] = utils.cleanNumberArray(item['price'], 'float')
@@ -45,8 +45,9 @@ class SephaWeb(AbstractSite):
 			item['image'] = temp
 		if item['volume']:
 			temp = item['volume']
-			temp = utils.extractVolume(temp[0])
-			
+			temp = utils.multiStateVolume(temp)
+			item['volume'] = temp
+	
 		if item['product_id']:
 			temp = item['product_id']
 			try:

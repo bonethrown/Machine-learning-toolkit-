@@ -22,7 +22,7 @@ class InfiniteBeleza(AbstractSite):
 #            if item['name']:
          #       tempNameArr = item['name'][0]
 	#	item['name'] = utils.cleanChars(tempNameArr)
-            if item['price']:
+            if item['price'] != 'NA':
 		  temp = item['price']
 		  item['price'] = utils.cleanNumberArray(temp, 'float')
 

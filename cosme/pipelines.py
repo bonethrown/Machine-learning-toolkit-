@@ -17,12 +17,12 @@ from cosme.pipes.default import AbstractSite
 from cosme.pipes.sepha import SephaWeb
 from cosme.pipes.laffayette import laffayetteWeb
 from cosme.pipes import splitPipe
+from cosme import dataOps
 #simple pipeline for now. Drop Items with no description!
 
 COMMENT_DB = 'itemTest'
 PROD_DB = 'lalina'
 TEST_DB = 'testLalina'
-PRICE_DB = 'historicalPrices'
 commitSolr = False
 commitDB = True	
 prodDB = True	
@@ -34,6 +34,7 @@ class CosmePipeline(object):
         #Lets send to ec2 as well
         #self.solr_url_prod = "http://ec2-54-242-158-167.compute-1.amazonaws.com:8080/solr/update?"
         #Set up NonRelDB-Connection
+	self.dbManager = dataOps.databaseManager()
         self.db = db.getConnection()
         brandsList = os.path.join(os.getcwd(),"cosme","pipes","utils","brandric.list")
         self.matcher = utils.listMatcher(brandsList) 
@@ -62,9 +63,9 @@ class CosmePipeline(object):
         
 	cleanItem = sitePipe.process(item, spider, self.matcher)
 
-	if itemTools.hasMultiPrice(cleanItem): 
+	if item['price'] != 'NA' and itemTools.hasMultiPrice(cleanItem): 
 	
-		if itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
+		if  itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
 			#print "**************HAS MULTI DIFF PRICE"
 			#print cleanItem
 			itemArray = []
@@ -125,8 +126,10 @@ class CosmePipeline(object):
                 if prodDB:
 			self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True)
                 	log.msg("********* MONGO SUBMITTED ****** with response", level=log.DEBUG)
-            	else:
-			updateParams = { "$set" : { 'price' : cleanItem['price']}, "$set" : { 'volume' : cleanItem['volume']} }
+            		#self.dbManager.updateSecondaryFields(cleanItem)
+
+		else:
+			#updateParams = { "$set" : { 'price' : cleanItem['price']}, "$set" : { 'volume' : cleanItem['volume']} }
 			self.db.testLalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True)
 			log.msg('updated item %s' % cleanItem['key'])
 	    except Exception, e:

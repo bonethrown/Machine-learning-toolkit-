@@ -14,7 +14,8 @@ class AbstractSite:
     def process(self, item, spider):
         
 	if not item['price']:
-            raise DropItem("missing price DROPPING")
+            	item['price'] = 'NA' 
+		#raise DropItem("missing price DROPPING")
         
 	if  not item['name']:
             raise DropItem("Missing name in %s . Dropping" % item)

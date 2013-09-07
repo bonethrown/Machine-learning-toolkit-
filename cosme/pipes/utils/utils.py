@@ -39,6 +39,19 @@ def convertTime(time):
 def convertDate(toConvert):
     dateSplit = toConvert.split(" ")
 
+def multiStateVolume(vol):
+	if isinstance(vol, list):
+		check = vol[0]
+		check = extractVolume(check)
+		return check
+	elif isinstance (vol, str):
+		check = extractVolume(vol)
+		return check
+	elif isinstance (vol, unicode):
+		check = extractVolume(vol)
+		return check
+		
+
 def checkVolume(vol):
 	if isinstance(vol, list):
 		check = vol[0]
@@ -154,11 +167,13 @@ def arrayStringToFloat(array):
 
 def cleanNumberArray(array, strOrFloat):
 	out = []
+	
 	for e in array:
 		e = findPrice(e)
 		e = cleanPrice(e)
-		print e
 		if strOrFloat == "float":
+			e = findPrice(e)
+			e = cleanPrice(e)
 			e = strToFloat(e)		
 			out.append(e)
 		else:
@@ -170,17 +185,25 @@ def cleanNumberArray2(array, strOrFloat):
 	out = []
 	if strOrFloat =="float":
 		for e in array:
-			e = findPrice(e)
-			e = cleanPrice(e)
-			e = strToFloat(e)
-			out.append(e)
-			return out
+			if isinstance(e, float) or isinstance(e, int):
+				out.append(e)	
+			else:
+				e = findPrice(e)
+				e = cleanPrice(e)
+				e = strToFloat(e)
+				out.append(e)
+		return out
+
 	else:
 		for e in array:
-			e = findPrice(e)
-			e = cleanPrice(e)
-			out.append(e)
-			return out
+			if isinstance(e, float) or isinstance(e, int):
+				e = str(e)
+				out.append(e)
+			else:
+				e = findPrice(e)
+				e = cleanPrice(e)
+				out.append(e)
+		return out
 			
 
 def cleanElementChars(array):

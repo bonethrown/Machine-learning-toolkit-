@@ -39,6 +39,19 @@ def convertTime(time):
 def convertDate(toConvert):
     dateSplit = toConvert.split(" ")
 
+def multiStateVolume(vol):
+	if isinstance(vol, list):
+		check = vol[0]
+		check = extractVolume(check)
+		return check
+	elif isinstance (vol, str):
+		check = extractVolume(vol)
+		return check
+	elif isinstance (vol, unicode):
+		check = extractVolume(vol)
+		return check
+		
+
 def checkVolume(vol):
 	if isinstance(vol, list):
 		check = vol[0]
@@ -77,13 +90,13 @@ def greadyVolume(inputstring, suffixpattern='ml'):
 #Gram extractor looks for gr with and without space 
 
 def extractGram(inputstring):
-    pattern  = r'\d+g(?=[r\s]|$)'
+    pattern  = r'\d+g(?=[r\s-]|$)'
     gram = re.search(pattern,inputstring, re.I)
     if gram is not None:
         gram = gram.group()
         return gram
     else:
-	suffixpattern = ' g(?=[r\s]|$)'
+	suffixpattern = ' g(?=[r\s-]|$)'
     	pattern  = r'\d+%s' % suffixpattern
     	gram = re.search(pattern,inputstring, re.I)
 	if gram is not None:

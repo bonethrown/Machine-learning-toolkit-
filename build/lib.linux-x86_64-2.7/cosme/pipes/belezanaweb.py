@@ -18,7 +18,7 @@ class BelezanaWeb(AbstractSite):
             item['url'] = item['url'].lower()					
         if item['sku']: 
 		item['sku'] = utils.cleanSkuArray(item['sku'], 'string')
-	if item['price']: 
+	if item['price'] != 'NA': 
    	    item['price'] =utils.cleanNumberArray(item['price'], 'float')
 	 
         if item['brand']:

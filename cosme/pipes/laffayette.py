@@ -21,7 +21,7 @@ class laffayetteWeb(AbstractSite):
 	def process(self, item, spider, matcher):
 		if item['url']:
 			item['url'] = item['url'].lower()					
-		if item['price']: 
+		if item['price'] != 'NA': 
 			item['price'] = utils.cleanNumberArray(item['price'], 'float')
 		
 		if item['brand']:

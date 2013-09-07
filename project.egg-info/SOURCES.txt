@@ -1,5 +1,6 @@
 setup.py
 cosme/__init__.py
+cosme/dataOps.py
 cosme/items.py
 cosme/pipelines.py
 cosme/settings.py
@@ -16,6 +17,7 @@ cosme/pipes/splitPipe.py
 cosme/pipes/utils/__init__.py
 cosme/pipes/utils/categorizer.py
 cosme/pipes/utils/db.py
+cosme/pipes/utils/db2.py
 cosme/pipes/utils/itemTools.py
 cosme/pipes/utils/solr.py
 cosme/pipes/utils/stringtools.py
