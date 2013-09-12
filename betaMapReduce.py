@@ -121,8 +121,6 @@ class fuzzMatcher(object):
 			return True
 		else: 
 			return False
-			
-					
 	
 	def hasExisting(self,memory, toAdd):
 		hasItem = bool

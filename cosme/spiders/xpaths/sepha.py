@@ -1,4 +1,5 @@
 from cosme.spiders.xpaths.abstract_xpath import AbstractXPath
+from BeautifulSoup import BeautifulSoup
 class SephaXPath(AbstractXPath):
     META = {
     "image" : "//img[@id=\'imagem_descricao\']/@src",

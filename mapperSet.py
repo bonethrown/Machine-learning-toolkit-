@@ -13,9 +13,9 @@ import string
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
 
 INDB = 'matching'
-INCOLL = 'mapthree'	
+INCOLL = 'maptest'	
 OUTDB = 'matching'
-OUTCOLL = 'maptest'
+OUTCOLL = 'sep112013'
 
 class Mapreduce(object):
 
@@ -92,23 +92,73 @@ class Mapreduce(object):
 		newName = self.dupRemove(newName)
 		newName = self.removeMidWhiteSpaces(newName)
 		return newName
+
+	def floatPriceToString(self, priceFloat):
+		if isinstance(priceFloat, list):
+			priceFloat = priceFloat[0]
+			pricestr = '%.2f' % priceFloat 
+			return pricestr
+		else:
+			pricestr = '%.2f' % priceFloat 
+			return pricestr
+			
+	def dummyGroupKey(self, item):
+		if not 'groupid' in item:
+			groupid = '0000' + item['key']
+			return groupid
+		else:
+			return item['groupid']
+
+	def patchDeadArrayToString(self, field):
+		if isinstance(field, list) and not field:
+			fix = ''
+			print 'patch done %s ' % field
+			return fix
+		else:
+			return field
 	
+	def arrayToString(self, field):
+		if isinstance(field, list) and field:
+			print 'array element grab %s ' %field
+			out = field[0]
+			return out
+		else:
+			return field
+	def arrayFixer(self, field):
+		print 'fixer ran'
+		field = self.patchDeadArrayToString(field)
+		field = self.arrayToString(field)
+		return field
+
+	def lowerfields(self, item):
+		l = ['product_id','matchscore','image','comments','price','date_crawled','_id', 'matchscore', 'rank', 'sku']
+		uniq = set(l)
+		for key, value in item.items():
+			if not key in uniq:
+					if isinstance(value, list):
+						item[key] = self.arrayFixer(value)	
+						print item[key]
+					if value is not None:
+						item[key] = item[key].lower().strip()
+					else:
+						print item[key]
+						print key
+						print '$$$$$$$$$$$$$$$ VALUE WAS NONE $$$$$$$$$$$$ %s' % item['key'] 
+						value = ''
+
 	def makeMappingCopy(self):
 		for item in self.indb.find():
-			if 'name' in item:
-				pass
-			else: 
-				print item['key']
 			if 'name' in item:
 				try:
 					copyObject = item 
 					newName = self.cleaner(item['name'])
 					newVolume = self.remVolWhiteSpace(item['volume'])
-					
+					self.lowerfields(copyObject) 
+					copyObject['price_str'] = self.floatPriceToString(item['price'])		
 					copyObject['volume'] = newVolume
 					copyObject['name'] = newName
 					copyObject['key'] = item['key']
-					print 'name OUT: ' + copyObject['name']+' Name in : ' +item['name']
+					copyObject['groupid'] = self.dummyGroupKey(item)
 					self.updateInDb(copyObject)	
 					#self.mem.append(copyObject)
 				except Exception, e:
@@ -134,8 +184,7 @@ class Mapreduce(object):
 		db = connection[OUTDB]
 		db = db[collection]
 		print 'collection in use %s' %db
-		matchVolumized(db)
-
+		
 #if __name__ == "__main__":
 
     #first argument: batch size

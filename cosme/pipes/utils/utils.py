@@ -211,7 +211,11 @@ def cleanElementChars(array):
 	for e in array:
 		e = cleanChars(e)
 	    	out.append(e)
-	return out
+	if out:
+		return out
+	else:
+		empty = ''
+		return empty
 def isDotAndComma(string):
 	dot = "."
 	com = ","
@@ -250,6 +254,9 @@ def cleanChars(toClean):
         toClean = toClean.replace(word,"")    
     if toClean:
         return toClean.strip()
+    else:
+	fix = ''
+	return fix
     
 def cleanHtmlTags(strArr):
     p = re.compile(r'<.*?>')

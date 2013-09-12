@@ -25,6 +25,11 @@ class InfiniteBeleza(AbstractSite):
             if item['price'] != 'NA':
 		  temp = item['price']
 		  item['price'] = utils.cleanNumberArray(temp, 'float')
+	    if item['description']:
+			temp = item['description'] 
+			soup = BeautifulSoup(temp[0])
+			temp = soup.getText()
+			item['description'] = temp
 
 	    if item['volume']:
 		item['volume'] = utils.extractVolume(item['name'])

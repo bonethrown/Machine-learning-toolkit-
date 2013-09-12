@@ -29,44 +29,20 @@ class MagazineLuizaSite(AbstractSite):
         if item['price'] != 'NA':
 
 		item['price'] = utils.cleanNumberArray2(item['price'], 'float')
-
-
-
-#            temp = utils.getFirst(item['price'])
-#	    price = []
- #           
-#	    if isinstance(temp, float):
-#		price = []
-#		price.append(item['price']) 
- #               item['price'] =  price
-  #          else:
-#			
- #               temp = temp.replace(',','.')
-  #              temp = float(temp) 
-   ##             price.append(temp)
-#		item['price'] = price
 	
 	if item['description']:
 		temp = item['description']
 		temp = utils.cleanChars(temp)
-
+		item['description'] = temp
 	
         if item['brand']:
             if isinstance(item['brand'], list):
                 temp = item['brand']
-                item['brand'] = temp[0].lower()
-            else:
-                item['brand'] = item['category'].lower()
+		temp = utils.cleanChars(temp[0]).lower()
+                item['brand'] = temp
                 # item['brand'] = matcher.listMatch(temp)
         if item['url']:
             item['url'] = item['url'].lower()
-	
-#	if item['volume']:
-#		print "************ VOL UUU MMME EE *********" 
-#		print '**************************NAME IS %s' % item['name']
-#		tempName = item['name']
-#		item['volume'] = utils.extractVolume(tempName) 				        
-#		print "VOLUME EXTRACTION is %s" % item['volume'] 
         
 
 	if item['category']:

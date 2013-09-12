@@ -25,6 +25,7 @@ class BelezanaWeb(AbstractSite):
             tempBrand = item['brand']
             tempBrand = tempBrand[0]
             tempBrand = utils.extractBrand(tempBrand)
+	    tempBrand = utils.cleanChars(tempBrand)
             item['brand'] = tempBrand
    	if item['volume']:
 		#first check if volume array exists(if not getelement returns empty and see if the name contains volume information)
