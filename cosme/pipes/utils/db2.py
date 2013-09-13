@@ -20,7 +20,7 @@ def getConnection(mongoDatabase = MONGO_DB):
     db = connection[mongoDatabase]
     return db 
 
-def getCommentDb( mongoCollection = COMMENT_DB_FALL, mongoDatabase = MONGO_DB):
+def getOwnDb( mongoCollection = COMMENT_DB_FALL, mongoDatabase = MONGO_DB):
     connection = Connection(MONGO_DB_HOST, MONGO_DB_HOST_PORT)
     db = connection[mongoDatabase]
     db = db[mongoCollection]

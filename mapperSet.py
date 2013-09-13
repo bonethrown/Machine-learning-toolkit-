@@ -21,9 +21,9 @@ class Mapreduce(object):
 
 	def __init__(self):
 		self.pattern = r'(?x)\n  ([A-Z]\\.)+  \n | \\w+(-\\w+)*\n| \\$?\\d+(\\.\\d+)?%?\n| \\.\\.\\.\n| [][.,;"\'?():-_`]\n'
-
+		# this cleans all punction
 		self.volPattern = r'''(?i) \d+ml|\d+ ml|\d+ML|\d+ML|\d+g|\d+ g|\d+gr|\d+ gramas|\d+ gr|\d+gramas'''
-
+		#converts voluem types to generic types
 		self.connection = Connection()
 
 		self.indb = self.connection[INDB]
@@ -48,8 +48,16 @@ class Mapreduce(object):
 	def removeMidWhiteSpaces(self, name):
 		name = re.sub(r'\s+', ' ', name)
 		return name	
-	
-		
+	def punctuationStripper(self, string):
+		phrase = string.strip()
+		phrase = phrase.split(' ')
+		out = []
+		for item in phrase:
+			a = ''.join(e for e in item if e.isalnum())
+			out.append(a)
+		out = ' '.join(out)
+		return out
+
 	def cleanName(self, name):
 		exclude = set(string.punctuation)
 		out = ''.join(ch for ch in name if ch not in exclude)				
@@ -153,7 +161,10 @@ class Mapreduce(object):
 					copyObject = item 
 					newName = self.cleaner(item['name'])
 					newVolume = self.remVolWhiteSpace(item['volume'])
+					newBrand = self.punctuationStripper(item['brand'])
 					self.lowerfields(copyObject) 
+					
+					copyObject['brand'] = newBrand
 					copyObject['price_str'] = self.floatPriceToString(item['price'])		
 					copyObject['volume'] = newVolume
 					copyObject['name'] = newName
