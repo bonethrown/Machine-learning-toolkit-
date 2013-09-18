@@ -330,8 +330,13 @@ def extractRawPrice(string):
 
 def findPrice(string):
    if isinstance(string, str) or isinstance(string, unicode): 
-	    tempPrice = unidecode.unidecode(string)
-	    tempPrice = re.search(r'R\$\s(\d+.\d+)', tempPrice)
+	    
+	    if isinstance(string, unicode): 
+		tempPrice = unidecode.unidecode(string)
+	    	tempPrice = re.search(r'R\$\s(\d+.\d+)', tempPrice)
+	    else:
+	    	tempPrice = re.search(r'R\$\s(\d+.\d+)', string)
+		
 	    if tempPrice is not None:
 		    tempPrice = tempPrice.group()
 		    if isDotAndComma(tempPrice):

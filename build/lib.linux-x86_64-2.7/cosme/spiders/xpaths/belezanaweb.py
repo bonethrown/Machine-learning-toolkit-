@@ -1,18 +1,18 @@
 from cosme.spiders.xpaths.abstract_xpath import AbstractXPath
-
 class BelezanaWebXPath(AbstractXPath):
+    
     META = {
             "image" : "//img[@id=\'imagem4\']/@src",
     
-            "name" :  "//div[@class=\'title\']/h1/text()",
+            "name" :  "//div[@class='dados_topo_produto']/h1[@class='title-product']/text()",
     
-            "brand" : "//div[@class=\'header\']/span/a/text()",
+            "brand" : "//div[@class='topo_produto']/div[@class='marca_produto']/a/img/@title",
     
-            "price" : "//div[@class=\'prices\']/div[2]/div/span/text()",
+            "price" : "//li[@class='preco-promocao']",
     
-            "description" : "//div[@class=\'text\']/p/text()",
+            "description" : "//div[@id='aba-descricao']/div[@itemprop='description']",
     
-            "category" : "//div[@class=\'content\']/ul/li[2]/a/text()" ,
+            "category" : "//div[@id='aside']/div[1]/ul[@class='breadcrumbs']/li[2]/a/span/text()" ,
     
             "sku" : "//div[@class=\'title\']/p/text()" ,
             
@@ -34,7 +34,8 @@ class BelezanaWebXPath(AbstractXPath):
        "commentStar": ".//div[@class=\'content\']/div[@class=\'stars\']/span/img",
        "commentStar2": ".//div[@class=\'stars\']/span/img"
     }
-
+    def get_price_multi(self):
+	return "//@data-value"
     
     def get_comments(self):
         return self.COMMENTS

@@ -4,8 +4,10 @@ from cosme.pipes.utils.utils import get_http_response
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 import sys
 import traceback
+import ast
 import logging
-
+import re
+from BeautifulSoup import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 class BelezanaWeb(AbstractSite):
@@ -19,12 +21,44 @@ class BelezanaWeb(AbstractSite):
         if item['sku']: 
 		item['sku'] = utils.cleanSkuArray(item['sku'], 'string')
 	if item['price'] != 'NA': 
-   	    item['price'] =utils.cleanNumberArray(item['price'], 'float')
-	 
+		temp = item['price']
+		if len(temp) > 1:
+			volarray = []
+			parray = []
+			for item in temp:
+				if re.search(r'true', item):
+					item = item.replace("'disponivel': true,","")
+					dic = ast.literal_eval(item)
+					price = dic['preco_promo']
+					volume = dic['descricao']
+					parray.append(price)
+					volarray.append(volume)	
+				else:
+					item = item.replace("'disponivel': false,","")
+					dic = ast.literal_eval(item)
+					price = dic['preco_promo']
+					volume = dic['descricao']
+					parray.append(price)
+					volarray.append(volume)
+			item['price'] = utils.cleanNumberArray(parray, 'float')
+			item['volume'] = volarray
+			print 'BELEZA MULTI PASS'
+			print item['price']
+			print item['volume']	
+		else:
+			item['price'] =utils.cleanNumberArray(item['price'], 'float')
+	
+	if item['description']:
+		temp = item['description']
+		soup = BeautifulSoup(temp[0])
+		text = soup.getText()
+		item['description'] = text
+ 
         if item['brand']:
             tempBrand = item['brand']
             tempBrand = tempBrand[0]
             tempBrand = utils.extractBrand(tempBrand)
+	    tempBrand = utils.cleanChars(tempBrand)
             item['brand'] = tempBrand
    	if item['volume']:
 		#first check if volume array exists(if not getelement returns empty and see if the name contains volume information)

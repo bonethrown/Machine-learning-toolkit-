@@ -53,6 +53,13 @@ class Cosme(CrawlSpider):
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
         self.log(str(cosmeItem),log.INFO)
+	if len(cosmeItem['price']) == 0: # Check for the 'por' price
+                cosmeItem['price'] = hxs.select(siteModule.get_price_multi()).extract()
         yield cosmeItem
 
-
+    def multiVolumeExtract(self, cosmeItem, hxs, siteModule):
+        if  len(cosmeItem['price']) == 0:
+                cosmeItem['price'] = hxs.select(siteModule.get_price_multi()).extract()
+                print "*******************Second price  Check"
+                print cosmeItem['price']
+                return cosmeItem['price']

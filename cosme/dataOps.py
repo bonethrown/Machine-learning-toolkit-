@@ -42,12 +42,17 @@ class databaseManager(object):
 			log.msg('update error in db for item %s' %item['key']) 
 
 	def saveImageLocally(self, item):
-		picture = item['image'][0]			
+		picture = self.imageInstance(item['image'])			
 		site = item['site']
 		key = item['key']
 		path = self.fileToSave(key, site, picture)
 		self.imageSave(key, path)
-		
+	def imageInstance(self, image):
+		if isinstance(image, list):
+			image = image[0]
+			return image
+		else:
+			return image		
 	def updateHistPrice(self, item):
 		#save the image to filesystem and return path then save path and key to mongodb
 		self.processPrice(item)	
@@ -76,7 +81,8 @@ class databaseManager(object):
 	#price insertion and processing methods	
 	def priceInsert(self, key, priceDict, mainDict):
 		try:
-			self.hpCollection.update( {'key':key}, {'$push': { 'prices' : priceDict} }, mainDict)	
+			self.hpCollection.update( {'key': key}, mainDict, upsert = True)
+			self.hpCollection.update( {'key':key}, {'$push': { 'prices' : priceDict} })	
 		except Exception, e:
 			print 'mongo exception'
 			
