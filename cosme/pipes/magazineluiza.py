@@ -11,6 +11,8 @@ import sys
 import traceback
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 import logging
+from BeautifulSoup import BeautifulSoup
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,20 +29,32 @@ class MagazineLuizaSite(AbstractSite):
 	   
         #if there isn't a price make it very expensive 
         if item['price'] != 'NA':
-
 		item['price'] = utils.cleanNumberArray2(item['price'], 'float')
 	
 	if item['description']:
 		temp = item['description']
-		temp = utils.cleanChars(temp)
-		item['description'] = temp
+		soup = BeautifulSoup(temp[0])
+		if soup.section:
+			des = soup.section.getText()	
+			print des
+			item['description'] = des
+		else:
+			print ' *%%%%%% %%% NO DESCRIPTION' 
+			item['description'] = ""
 	
         if item['brand']:
             if isinstance(item['brand'], list):
                 temp = item['brand']
 		temp = utils.cleanChars(temp[0]).lower()
                 item['brand'] = temp
-                # item['brand'] = matcher.listMatch(temp)
+            
+	if not item['brand']:
+		brand = matcher.listMatch(item['name'])
+		print 'Lookup match found, %s' % brand
+		item['brand'] = brand
+	
+
+    # item['brand'] = matcher.listMatch(temp)
         if item['url']:
             item['url'] = item['url'].lower()
         

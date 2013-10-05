@@ -27,8 +27,8 @@ class AbstractSite:
 		raise DropItem("missing brand in %s . Dropping this" % item)
         
 	#De-array these values. 
-        if isinstance(item['description'],list) and len(item['description']) > 0:
-            item['description'] = item['description'].pop()
+        #if isinstance(item['description'],list) and len(item['description']) > 1:
+         #   item['description'] = item['description'].pop()
 
 	if item['volume']:
 		if not utils.checkVolume(item['volume']):

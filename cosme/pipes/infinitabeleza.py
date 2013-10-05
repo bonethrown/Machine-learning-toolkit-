@@ -6,7 +6,7 @@ from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 import logging
 import sys
 import traceback
-
+import re
 logger = logging.getLogger(__name__)
 
 class InfiniteBeleza(AbstractSite):
@@ -29,8 +29,14 @@ class InfiniteBeleza(AbstractSite):
 			temp = item['description'] 
 			soup = BeautifulSoup(temp[0])
 			temp = soup.getText()
-			item['description'] = temp
-
+			if re.search(r'<xml>', temp) is None:
+				item['description'] = temp
+			else:
+				print 'too long text going for else'
+				a =soup.p.findChild('span')
+				a = a.getText()
+				item['description'] = a	
+			
 	    if item['volume']:
 		item['volume'] = utils.extractVolume(item['name'])
 	    if item['comments']:

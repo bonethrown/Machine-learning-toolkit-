@@ -20,12 +20,8 @@ from cosme.pipes import splitPipe
 from cosme import dataOps
 #simple pipeline for now. Drop Items with no description!
 
-COMMENT_DB = 'itemTest'
-PROD_DB = 'lalina'
-TEST_DB = 'testLalina'
 #commitSolr = False
 commitDB = True	
-prodDB = True	
 SAVE_IMAGE = True
 
 class CosmePipeline(object):
@@ -75,11 +71,11 @@ class CosmePipeline(object):
 				finalItem = splitPipe.singularityPipe(cleanItem)
 				self.postProcess(finalItem, spider)
 		else:
-			print " multi price but not DIFFERENT ************************"
+			print " Non different multi price singularity pipe ************************"
 			finalItem = splitPipe.singularityPipe(cleanItem)
 			self.postProcess(finalItem, spider)
 	else:
-		print "*********** non multi price*************"
+		print "*********** Pipeline Singularity Pipe*************"
 		print cleanItem['volume']
 		print cleanItem
 		cleanItem = splitPipe.singularityPipe(cleanItem)
@@ -107,15 +103,6 @@ class CosmePipeline(object):
         arrItem.append(dict(cleanItem))
         #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
         singleItemJson = json.dumps(arrItem)
-        #print singleItemJson
-        #log.msg("Getting ready to send %s "%singleItemJson, level=log.DEBUG)
-
-        #if commitSolr:
-         #   try:
-          #      req  = urllib2.Request(self.solr_url, data = singleItemJson)
-           #     req.add_header("Content-type", "application/json")
-           # except Exception, e:
-            #    log.msg("************* ERROR Submitting to mongoDB error: %s "%e, level=log.ERROR)
             
 	if commitDB:
 		self.dbManager.updateLalinaItem(cleanItem)
@@ -124,24 +111,3 @@ class CosmePipeline(object):
 	if SAVE_IMAGE:
 		self.dbManager.saveImageLocally(cleanItem)
 	
-#    try	self.:
-         #       print " ****************************************************SENDING TO DB"
-	#	# SUBMIT TO DB ONLY IF RESPONSE FROM SOLR
-         #       if storeItem['comments']:
-	#		self.db.itemsTest.update({"key" : storeItem['key']},{"comments" : storeItem['comments'], "url" : storeItem['url'], "key" : storeItem['key'], "site" : storeItem['site']}, upsert=True)
-         #       if prodDB:
-	#		self.dbManager
-	#		self.db.lalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True)
-         #       	log.msg("********* MONGO SUBMITTED ****** with response", level=log.DEBUG)
-            		#self.dbManager.updateSecondaryFields(cleanItem)
-
-	#	else:
-			#updateParams = { "$set" : { 'price' : cleanItem['price']}, "$set" : { 'volume' : cleanItem['volume']} }
-	#		self.db.testLalina.update({"key" : cleanItem['key']}, cleanItem, upsert=True)
-	#		log.msg('updated item %s' % cleanItem['key'])
-	 #   except Exception, e:
-                #og.msg("***********ERROR Submitting to MONGO error: %s"%e, level=log.ERROR)
-       # else:
-        #    log.msg("*********** Not commiting to solr or DB commit set to false  ",level=log.WARNING)
-
-       # return cleanItem	 

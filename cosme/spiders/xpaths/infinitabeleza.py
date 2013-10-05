@@ -8,7 +8,7 @@ class InfinitaBelezaXPath(AbstractXPath):
     "name" : "//h1[@id='nome-produto']/text()",
     "brand" : "//span[@class='dados-valor brand']/a/strong/text()",
     "price" : "//span[@id='variacaoPreco']/text()",
-    "description" : "//div[@id='descricao']/div[@class='board']",
+    "description" : "//div[@id='descricao']",
     "comments":  "//div[@id=\"coments\"]",
     "category" : "//span[@class='link_itens'][1]/a/text()",
     "volume" : "//h1[@id='nome-produto']/text()"

@@ -9,7 +9,7 @@ class MagazineLuizaXPath(AbstractXPath):
     
             "price" : "//span[@class=\'right-price\']/strong/text()",
     	    
-	    "description" : "//strong[@class=\'fs-presentation\']/text()" ,
+	    "description" : "//div[@class='factsheet-container  active']" ,
     
             "category" : "//ul[@class='breadcrumb breadcrumb-list-product']/li[@class='category']/a/text()" ,
     

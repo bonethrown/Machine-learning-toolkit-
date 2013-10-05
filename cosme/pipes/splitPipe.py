@@ -17,9 +17,10 @@ def keySpace(item):
 def singularityPipe(item):
 	if item['price']:
 		temp = item['price']
-		item['price'] = []
-		temp = temp[0]
-		item['price'].append(temp)
+		arr = []
+		if isinstance(temp, list): temp = temp[0]
+		arr.append(temp)
+		item['price'] = arr
 	if item['volume']:
 		if isinstance(item['volume'], list):
 			item['volume'] = item['volume'][0]

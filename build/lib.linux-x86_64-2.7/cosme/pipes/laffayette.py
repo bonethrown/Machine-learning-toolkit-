@@ -32,7 +32,7 @@ class laffayetteWeb(AbstractSite):
 		if item['description']:
                 	
 			temp = item['description']
-			bad = BeautifulSoup(temp)
+			bad = BeautifulSoup(temp[0])
 			item['description'] = bad.getText()
 		
 		if item['volume']:

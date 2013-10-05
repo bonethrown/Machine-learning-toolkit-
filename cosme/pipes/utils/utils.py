@@ -14,6 +14,15 @@ import unidecode
 #convert format "13:13" to minutes
 logger = logging.getLogger(__name__)
 
+def newKey(cosmeItem):
+	key = ""
+	key = cosmeItem['url'] + "_" + str(cosmeItem['volume'][0]).replace(",","-").replace(".","-")
+	out = key.encode('ascii', 'replace')	
+	out = hashlib.md5(out).hexdigest()	
+
+	return out
+
+
 def createKey(cosmeItem):
 	key = ""
 	key = cosmeItem['site'] + "_" + cosmeItem['brand'].replace(" ","-") + "_" + cosmeItem["name"].replace(" ","-") + "_"+str(cosmeItem['volume'][0]).replace(",","-").replace(".","-")
@@ -400,7 +409,7 @@ class listMatcher:
                 print "####### match  %s"%line
                 print "######match %s"%brand		
                 print "######match found "+brand.group()
-                return brand.group()
+                return brand.group().strip()
 
 
 

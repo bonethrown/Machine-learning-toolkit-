@@ -9,7 +9,7 @@ import logging
 from copy import copy, deepcopy
 #secondCon = secondConnection('outDb')
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
-COLLECTION = 'mapvseven'
+COLLECTION = 'lalina_charlie'
 MAINDB = 'matching'
 NAME_RATIO = 92
 PARTIAL_TOKEN_SORT_RATIO = 61
@@ -45,7 +45,8 @@ class fuzzMatcher(object):
 	   db = self.db
 	 #  try :  
 	   for cursor, first in  enumerate(db.find(timeout= False)):
-			if not self.hasGroupId(first):
+			#if not self.hasGroupId(first):
+			if cursor:
 				for idx,second in enumerate(db.find(timeout = False)):
 					if first['key'] != second['key'] and self.objectMatch(first,second):
 						#hasMatch = insertOrUpdate(first, second, db)
@@ -68,7 +69,7 @@ class fuzzMatcher(object):
 						self.updateInDb(first)
 						self.memory = []
 						self.hasMatch = False 	
-			print cursor
+	   		print cursor
 						
 	   end = time.time()
 	   print "feeding finisehd in %s ms"%(end-start)
@@ -270,8 +271,7 @@ class fuzzMatcher(object):
 		
 def main(collection):
 	a = fuzzMatcher()
-	a.matchVolumized()	
-
+	a.matchVolumized()
 if __name__ == "__main__":
 
     #first argument: batch size

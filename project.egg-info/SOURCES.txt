@@ -29,6 +29,7 @@ cosme/spiders/Lafbot.py
 cosme/spiders/Megabot.py
 cosme/spiders/Sephbot.py
 cosme/spiders/Zbot.py
+cosme/spiders/ZsiteMapBot.py
 cosme/spiders/__init__.py
 cosme/spiders/xpaths/__init__.py
 cosme/spiders/xpaths/abstract_xpath.py
@@ -53,3 +54,4 @@ test/test_infinitabeleza_comment.py
 test/test_laffayette_comment.py
 test/test_magazineluiza_comment.py
 test/test_sepha_comment.py
+test/xpathtest.py

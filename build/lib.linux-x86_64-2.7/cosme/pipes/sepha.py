@@ -23,6 +23,17 @@ class SephaWeb(AbstractSite):
 	def process(self, item, spider, matcher):
 		if item['url']:
 			item['url'] = item['url'].lower()					
+		if item['image']:
+			if isinstance(item['image'], list):
+				temp = item['image'][0]
+				temp = temp.replace('//','')
+				item['image'] = temp
+			else:
+				temp = item['image']
+				temp = temp.replace('//','')
+				item['image'] = temp
+				
+		
 		if item['sku']: 
 			item['sku'] = utils.cleanSkuArray(item['sku'],'string')
 		if item['price'] != 'NA': 

@@ -13,9 +13,12 @@ import string
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
 
 INDB = 'matching'
-INCOLL = 'maptest'	
+INCOLL = 'mapthree'	
 OUTDB = 'matching'
-OUTCOLL = 'sep112013'
+OUTCOLL = 'solrtest'
+
+TESTDB = 'matching'
+TESTCOLL = 'unittest'
 
 class Mapreduce(object):
 
@@ -33,6 +36,30 @@ class Mapreduce(object):
 		outdb = outdb[OUTDB]
 		self.outdb = outdb[OUTCOLL]
 		self.mem = []
+
+		testdb = Connection()
+		testdb = testdb[TESTDB]
+		self.testdb = testdb[TESTCOLL]
+		print self.testdb
+
+	def stampDummyKey(self):
+	#this is needed for solr to group things by groupid.
+		counter = 0 
+		toPatch = self.outdb.find({ 'groupid': { '$exists': 0}}).count()
+		for item in self.outdb.find({ 'groupid': { '$exists': 0}}):
+			if not 'groupid' in item:
+				item['groupid'] =self.dummyGroupKey(item)
+				self.updateMongo(item, self.outdb)				
+				counter = counter+ 1
+		print 'items patched: %s ' % counter
+		print 'items needed patching %s ' %toPatch
+ 		
+	def dummyGroupKey(self, item):
+		if not 'groupid' in item:
+			groupid = '0000' + item['key']
+			return groupid
+		else:
+			return item['groupid']
 
 	def cleanVolume(self, name):
 		replaceList = regexp_tokenize(name, self.volPattern)
@@ -169,7 +196,7 @@ class Mapreduce(object):
 					copyObject['volume'] = newVolume
 					copyObject['name'] = newName
 					copyObject['key'] = item['key']
-					copyObject['groupid'] = self.dummyGroupKey(item)
+					#copyObject['groupid'] = self.dummyGroupKey(item)
 					self.updateInDb(copyObject)	
 					#self.mem.append(copyObject)
 				except Exception, e:
@@ -181,7 +208,14 @@ class Mapreduce(object):
 		print ' error : %s ' % len(self.mem)
 		print 'coppied %s' % self.outdb.count()
 
-	 
+
+	def updateMongo(self, item, db):
+		try:
+			db.update({'key':item['key']}, {'$set': { 'groupid': item['groupid'] } }, upsert = True) 
+		
+		except Exception, e:
+			print 'mongo exception'
+			
 	def updateInDb(self, item):
 		try:
 			self.outdb.insert(item, safe=True)

@@ -12,3 +12,24 @@ def decodeIsoComments(commentArray):
 			item['comment'] = temp
 			print 'COMMET IS HUNG %s' % temp			
 	return out
+
+def isNa(price):
+	if isinstance(price, list):
+		check = price[0]
+		if check == 'NA':
+			return True
+		else:
+			return False
+	elif isinstance(price, str):
+		check = price
+		if check == 'NA':
+			return True
+		else:
+			return False
+	elif isinstance(price, unicode):
+		check = price
+		if check == 'NA':
+			return True
+		else:
+			return False
+	
