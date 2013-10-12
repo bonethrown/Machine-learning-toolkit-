@@ -4,6 +4,12 @@ MONGO_DB_HOST = 'localhost'
 MONGO_DB_HOST_PORT = 27017
 MONGO_DB = 'comments_db'
 
+MONGO_MIRROR1_HOST = '23.96.17.252'
+MONGO_DB_HOST_PORT = 27017 
+
+
+
+
 COMMENT_DB_PRIM = 'items'
 COMMENT_DB_FALL = 'itemsTest'
 
