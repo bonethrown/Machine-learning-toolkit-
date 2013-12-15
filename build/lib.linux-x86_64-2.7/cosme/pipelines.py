@@ -62,7 +62,7 @@ class CosmePipeline(object):
 	if item['price'] != 'NA' and itemTools.hasMultiPrice(cleanItem): 
 	
 		if  itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
-			#print "**************HAS MULTI DIFF PRICE"
+			print "**************ITEMIZE BY PRICE **************"
 			#print cleanItem
 			itemArray = []
 			itemArray = splitPipe.itemizeByPrice(cleanItem)
@@ -77,7 +77,6 @@ class CosmePipeline(object):
 	else:
 		print "*********** Pipeline Singularity Pipe*************"
 		print cleanItem['volume']
-		print cleanItem
 		cleanItem = splitPipe.singularityPipe(cleanItem)
 		self.postProcess(cleanItem, spider)
 	

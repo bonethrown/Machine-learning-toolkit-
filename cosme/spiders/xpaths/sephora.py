@@ -14,3 +14,7 @@ class SephoraXPath(AbstractXPath):
 
     def get_meta(self):
         return self.META
+
+
+
+#     def  "//div[@class=\'conteudoProduto\']/div[@class=\'descricaoProduto\']/text()"

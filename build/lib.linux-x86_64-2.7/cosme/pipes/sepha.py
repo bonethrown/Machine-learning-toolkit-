@@ -5,8 +5,9 @@ import urllib3
 import re
 from cosme.settings import HTTP_NUMPOOLS, HTTP_MAXSIZE
 import logging
-from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from cosme.pipes.utils.utils import get_http_response, findPrice, strToFloat
+from cosme.spiders.xpaths.xpath_registry import XPathRegistry
+from cosme.pipes.utils import stringtools, utils
 import sys
 import traceback
 from BeautifulSoup import BeautifulSoup
@@ -24,23 +25,26 @@ class SephaWeb(AbstractSite):
 		if item['url']:
 			item['url'] = item['url'].lower()					
 		if item['image']:
+			http = 'http://'
 			if isinstance(item['image'], list):
 				temp = item['image'][0]
 				temp = temp.replace('//','')
-				item['image'] = temp
+				item['image'] = http+temp
 			else:
 				temp = item['image']
 				temp = temp.replace('//','')
-				item['image'] = temp
-				
+				item['image'] = http+temp
 		
 		if item['sku']: 
 			item['sku'] = utils.cleanSkuArray(item['sku'],'string')
-		if item['price'] != 'NA': 
+		if not stringtools.isNa(item['price']): 
 			item['price'] = itemTools.filterMultiPriceRadio(item)
-			logger.info('PIPELINE OP: %s' % item['price'])
-			#item['price'] = utils.cleanNumberArray(item['price'], 'float')
 		 	item['price'] = utils.arrayStringToFloat(item['price'])		
+			logger.info('PIPELINE OP: %s' % item['price'])
+			if not item['price'] :
+				print ' filter Multi price return %s' % item['price']
+				item['price'] = utils.cleanNumberArray(item['price'], 'float')
+
 		if item['brand']:
 			tempBrand = item['brand']
 			tempBrand = tempBrand[0]
@@ -50,10 +54,6 @@ class SephaWeb(AbstractSite):
 		if item['category']:
 			tempCat = item['category']
 			item['category'] =utils.cleanChars(tempCat[0])
-		if item['image']:
-			temp = item['image'] 
-			temp = temp[0]
-			item['image'] = temp
 		if item['volume']:
 			temp = item['volume']
 			temp = utils.multiStateVolume(temp)

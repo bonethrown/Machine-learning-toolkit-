@@ -6,196 +6,376 @@ import logging
 from fuzzywuzzy import fuzz
 import hashlib
 import logging
-
-#secondCon = secondConnection('outDb')
+from cosme.pipes.utils import utils
+from nltk import regexp_tokenize, tokenwrap, word_tokenize
+import re
+import string
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
-MAINDB = 'comments_db'
-NAME_RATIO = 92
 
-def  matchVolumized(db):
-   start = time.time()
-   quarter = 0.01
-   size =  db.count() -1
-   hasMatch = False
-   #lookup = db.find()
-   print size
-	try:
-	   for cursor, first in  enumerate(db.find()):
-		if not hasGroupKey(first):
-			for idx,second in enumerate(db.find()):
-				if first['key'] != second['key'] and objectMatch(first,second):
-					second['matchscore'] = 	
-					insertOrUpdate(first, second, db)
-					hasMatch = True
-					print 'FULL MATCH %s' %second['groupid']
 
-				if  idx == size and hasMatch:
-					first['groupid'] = hashlib.md5(first['key']).hexdigest() 
-					updateInDb(first,db)
-					hasMatch = False 	
-		print cursor
-		if cursor > size*quarter and cursor < (size+30)*quarter:
-			quarter = quarter +quarter
-			print "percantage done : %s" % quarter						
-	except Exception, e:
-		logging.debug('crash occured at cursor %s with exception %s' % (cursor, e))
-					
-   end = time.time()
-   print "feeding finisehd in %s ms"%(end-start)
+INDB = 'production'
+INCOLL = 'lalina1018'	
+OUTDB = 'matching'
+OUTCOLL = 'la1018'
 
-def insertOrUpdate(first,second, db):
+TESTDB = 'matching'
+TESTCOLL = 'unittest'
 
-	if checkForExistingMatch(second, db):
-		key = getExistingKey(second,db)
-		db.update( {'key': key}, {$unset : { groupid : 1 })
-		second['groupid'] = hashlib.md5(first['key']).hexdigest()
-		updateInDb(second, db)
-	else:
-		second['matchscore'] = ratio
-		second['groupid'] = hashlib.md5(first['key']).hexdigest() 
-		updateInDb(second, db)						
+class FieldMapReduce(object):
+	def __init__(self):
+		self.connection = Connection()
 
-def getExistingKey(item, db):
-	myDb = db
-	find = db.find( { 'groupid' : item['groupid'] })
+		self.indb = self.connection[INDB]
+		self.indb = self.indb[INCOLL]
+
+		outdb = Connection()
+		outdb = outdb[OUTDB]
+		self.outdb = outdb[OUTCOLL]
+		self.mem = []
+
+		testdb = Connection()
+		testdb = testdb[TESTDB]
+		self.testdb = testdb[TESTCOLL]
+		self.catTable = self.buildCategoryTable(self.indb, 'category.list')
+
+
+	#THIS FUNCTION OUTPUTS ALL *UNIQUE FIELDS INTO A FILE. SUCH AS ALL UNQIUE BRANDS TO A SINGLE FILE.	
+	def fieldMapToFile(self, stringfield, collection):
+		savedoc = open(stringfield+'map', 'wb')
+		temp = []
+		for item in collection.find():
+			if not any(item[stringfield] in s for s in temp):
+				temp.append(item[stringfield])
+		temp = sorted(temp)
+		for a in temp:
+			savedoc.write("%s\n" % a.encode('utf-8'))		
+		savedoc.close()
 	
-	for savedItem in find: 
-		if savedItem:
-			if item['site'] == savedItem['site']:
-				if checkScore(savedItem['matchscore'], item['matchscore']):
-					return savedItem['key']
+	def fieldMapToArray(self, stringfield, collection):
+		temp = []
+		for item in collection.find():
+			if not any(item[stringfield] in s for s in temp):
+				temp.append(item[stringfield])
+		return temp
+	#LookUP file specs:
+	#file must be coma seperated with parent brand or category as the first element
+	#example: if we want the following to be reduced to 'perfumes'
+	#a line in the file for the category would look like:
+	# perfumes,perfumaria,perfume,feminino
 
-
-def checkForExistingMatch(item, db):
-	myDb = db
-	find = db.find( { 'groupid' : item['groupid'] })
+	def buildCategoryTable(self, collection, lookupfile):
+		catlist = open(lookupfile)
+		masterList = []
+		for item in catlist.readlines():
+			item = item.split(',')
+			arr = []
+			for a in item:
+				a = a.decode('utf8')
+				a = a.rstrip()
+				arr.append(a)
+			mydic = { arr[0] : arr[1:]}
+			masterList.append(mydic)
 	
-	for savedItem in find: 
-		if savedItem:
-			if item['site'] == savedItem['site']:
-				if checkScore(savedItem['matchscore'], item['matchscore']):
-					print ' WE HAVE A NEW WINNER'
-					return True
+		return masterList
+	#field reduce method looks up a field in the value (array) then the key (string) in a list of dictionaries to mapreduce categories 
+	def fieldReduce(self, fieldValue):
+		out = ''
+		fieldValue = fieldValue.decode('utf8')
+		for item in self.catTable:
+			print item
+			print fieldValue
+			for key, value in item.iteritems():
+				arr = value
+				if fieldValue == key:
+					print 'key Match %s ' % fieldValue
+					return key
+				elif any(fieldValue in s for s in arr):
+					print 'fieldmatch %s ' % fieldValue
+					out = key
+					return out
+						
+
+	def fieldReduceCheckValue(self, fieldValue):
+		out = ''
+		for item in self.catTable:
+			for key,value in item.iteritems():
+				arr = value
+				if any(fieldValue in s for s in arr):
+					return key, value
+				
+	
+	def negativeCheck(self, name, category):
+		
+		name = name.decode('utf8')
+		name = name.split()
+		for item in name:
+			negValue = self.fieldReduce(item)
+			catKey, value = self.fieldReduceCheckValue(negValue)
+			if negValue == item:
+				print 'nothing found'
+				#found nothing
+			elif negValue == category:
+				#all is good move alongi
+				print 'category confirmed by name'
+			elif negValue == value:
+				if category == key:
+					print 'name confirms category'	
+					#all is good means the negValue lookup from name contains a synoym from the table and that the category is equal to the root of the synonym
 				else:
-					return False
+					print 'name conflict with category for word %s ' % value	
+				
+			#if neg value is equal to another element 
+				
+					
+
+
+	def name2fieldSearch(self, name):
+		name = name.decode('utf8')
+		
+
+
+class Mapreduce(object):
+
+	def __init__(self):
+		self.pattern = r'(?x)\n  ([A-Z]\\.)+  \n | \\w+(-\\w+)*\n| \\$?\\d+(\\.\\d+)?%?\n| \\.\\.\\.\n| [][.,;"\'?():-_`]\n'
+		# this cleans all punction
+		self.volPattern = r'''(?i) \d+ml|\d+ ml|\d+ML|\d+ML|\d+g|\d+ g|\d+gr|\d+ gramas|\d+ gr|\d+gramas'''
+		#converts voluem types to generic types
+		self.connection = Connection()
+
+		self.indb = self.connection[INDB]
+		self.indb = self.indb[INCOLL]
+
+		outdb = Connection()
+		outdb = outdb[OUTDB]
+		self.outdb = outdb[OUTCOLL]
+		self.mem = []
+
+		testdb = Connection()
+		testdb = testdb[TESTDB]
+		self.testdb = testdb[TESTCOLL]
+		print self.indb
+		self.fieldMapReduce = FieldMapReduce()	
+
+	def makeMappingCopy(self):
+		for item in self.indb.find():
+			if 'name' in item:
+				#try:
+					copyObject = item 
+					self.lowerfields(copyObject) 
+					newName = self.cleaner(copyObject['name'])
+					newVolume = self.remVolWhiteSpace(copyObject['volume'])
+					newBrand = self.punctuationStripper(copyObject['brand'])
+					newCategory = copyObject['category']
+						
+					copyObject['category'] = self.fieldMapReduce.fieldReduce(newCategory)
+					copyObject['brand'] = newBrand
+					copyObject['price_str'] = self.floatPriceToString(item['price'])		
+					copyObject['volume'] = self.fieldScrubber(item, 'volume')
+					copyObject['name'] = newName
+					copyObject['key'] = item['key']
+					#copyObject['groupid'] = self.dummyGroupKey(item)
+					self.updateInDb(copyObject)	
+					#self.mem.append(copyObject)
+			#	except Exception, e:
+			#		print e
+			#		self.mem.append((item['key'],e))
+					
+			#		print item['key']	
+		#self.updateInDb(self.mem.append)
+		print ' error : %s ' % len(self.mem)
+		print 'coppied %s' % self.outdb.count()
+		self.writeToFile(self.mem)
+
+	def stampDummyKey(self):
+	#this is needed for solr to group things by groupid.
+		counter = 0 
+		toPatch = self.outdb.find({ 'groupid': { '$exists': 0}}).count()
+		for item in self.outdb.find({ 'groupid': { '$exists': 0}}):
+			if not 'groupid' in item:
+				item['groupid'] =self.dummyGroupKey(item)
+				self.updateMongo(item, self.outdb)				
+				counter = counter+ 1
+		print 'items patched: %s ' % counter
+		print 'items needed patching %s ' %toPatch
+ 		
+	def cleanVolume(self, name):
+		replaceList = regexp_tokenize(name, self.volPattern)
+		crop = name
+		if len(replaceList) > 0:
+			for val in replaceList:
+				crop = crop.replace(val, "")	
+			crop = crop.strip()
+			return crop
 		else:
-			return False
+			return crop
 
-def checkScore(score1, score2):
-	if score1 < score2:
-		return True
-	else:
-		return False				
+	def removeMidWhiteSpaces(self, name):
+		name = re.sub(r'\s+', ' ', name)
+		return name	
+	
+	def punctuationStripper(self, string):
+		phrase = string.strip()
+		phrase = phrase.split(' ')
+		out = []
+		for item in phrase:
+			a = ''.join(e for e in item if e.isalnum())
+			out.append(a)
+		out = ' '.join(out)
+		return out
 
-def objectMatch(first, second):
+	def cleanName(self, name):
+		exclude = set(string.punctuation)
+		out = ''.join(ch for ch in name if ch not in exclude)				
+		
+		return out
 
-	if not hasGroupKey(second):
+	def quickExpand(self, name):
+		r = r'edt|edp|c/|p/|eau de parfum|homme'
+		expanddict = { 'p/':'para','c/':'com','edt' : 'eau de toilette', 'edp': 'eau de perfume','eau de parfum':'eau de perfume','homme':'masculino' }
+		a = re.search(r, name)
+		if a is not None:
+			a = a.group()
+			for keys in expanddict:
+				if keys == a:
+					name = name.replace(a, expanddict[keys])
+					return name
+		else:
+			return name
+			
+	def dupRemove(self, a):	
+		a = ' '.join(self.unique_list(a.split()))
+		return a
+
+	def unique_list(self, l):
+		ulist = []
+    		[ulist.append(x) for x in l if x not in ulist]
+    		return ulist 
+		
+	def remVolWhiteSpace(self, vol):
+		vol = "".join(vol.split())
+		vol = vol.lower()
+		return vol
+	
+	def fieldScrubber(self, item, fieldToClean):
+		if item[fieldToClean] is None:
+			return 'NA'
+			print 'was None %s' % item['key']
+		if item[fieldToClean] == '':
+			return 'NA'
+		elif len(item[fieldToClean]) == 0:
+			return 'NA'
+		elif item[fieldToClean] == ['NA']:
+			return 'NA'
+
+	def cleaner(self, newName):
+		newName = newName.encode('utf8')
+		newName = newName.lower()
+		newName = self.quickExpand(newName)	
+		newName = self.cleanVolume(newName)
+		newName = self.cleanName(newName)
+		newName = self.dupRemove(newName)
+		newName = self.removeMidWhiteSpaces(newName)
+		return newName
+
+	def floatPriceToString(self, priceFloat):
+		if isinstance(priceFloat, list):
+			priceFloat = priceFloat[0]
+			pricestr = '%.2f' % priceFloat 
+			return pricestr
+		else:
+			pricestr = '%.2f' % priceFloat 
+			return pricestr
+			
+	def dummyGroupKey(self, item):
+		if not 'groupid' in item:
+			groupid = '0000' + item['key']
+			return groupid
+		else:
+			return item['groupid']
+
+	def patchDeadArrayToString(self, field):
+		if isinstance(field, list) and not field:
+			fix = ''
+			print 'patch done %s ' % field
+			return fix
+		else:
+			return field
+	
+	def arrayToString(self, field):
+		if isinstance(field, list) and field:
+			print 'array element grab %s ' %field
+			out = field[0]
+			return out
+		else:
+			return field
+	def arrayFixer(self, field):
+		print 'fixer ran'
+		field = self.patchDeadArrayToString(field)
+		field = self.arrayToString(field)
+		return field
+
+	def lowerfields(self, item):
+		l = ['product_id','matchscore','image','comments','price','date_crawled','_id', 'matchscore', 'rank', 'sku']
+		uniq = set(l)
+		for key, value in item.items():
+			if not key in uniq:
+					if isinstance(value, list):
+						item[key] = self.arrayFixer(value)	
+						print item[key]
+					if value is not None:
+						item[key] = item[key].lower().strip()
+					else:
+						print item[key]
+						print key
+						print '$$$$$$$$$$$$$$$ VALUE WAS NONE $$$$$$$$$$$$ %s' % item['key'] 
+						value = ''
+	def addStringPrice(self):
+		for item in self.indb.find():
+			try:
+				copyObject = item 
+				copyObject['price_str'] = self.floatPriceToString(item['price'])		
+				self.updateInDb(copyObject)	
+			except Exception, e:
+				print e
+				self.mem.append(item['key'])
+				
+				print item['key']	
+
+	def writeToFile(self, temp):
+		savedoc = open('errorlogmap', 'wb')
+		for a in temp:
+			savedoc.write("%s\n" % a[0].encode('utf-8'), a[1].encode('utf-8'))		
+		savedoc.close()
+	
+	def updateMongo(self, item, db):
 		try:
-			if fuzzyMatchBrand(first['brand'], second['brand']):
-				if matchVolume(first['volume'], second['volume']):				
-					if matchName(first['name'], second['name']):
-						if first['site'] != second['site']:	
-							return True
-						else:
-							return False	
+			db.update({'key':item['key']}, {'$set': { 'groupid': item['groupid'] } }, upsert = True) 
+		
 		except Exception, e:
-			logging.debug(e)		
-
-
-def fuzzyMatchBrand(first, second): 
-	first = first.lower()
-	first = fuzz.asciidammit(first)
-	second = second.lower()
-	second = fuzz.asciidammit(second)
-	try: 
-		ratio = fuzz.ratio(first, second)
-	except Exception, e:
-		print 'band match error %s' % e
-	
-	if ratio == 100:
-		return True
-	else:
-		return False
-
-
-
-def matchName(name1, name2):
-	name1 = name1.lower()
-	name2 = name2.lower()
-	name1 = fuzz.asciidammit(name1)
-	name2 = fuzz.asciidammit(name2)
+			print 'mongo exception'
+			
+	def updateInDb(self, item):
+		try:
+			self.outdb.insert(item, safe=True)
 		
-	ratio = fuzz.token_set_ratio(name1,name2)	
-	if ratio > NAME_RATIO:
-		logging.debug('ratio %s and name %s' % (ratio, name2))
-		return True
-	else:
-		return False
+		except Exception, e:
+			print 'mongo exception'
+
 		
-def checkVolume(vol1, vol2):
-	if vol1 =='NA':
-		return False
-	else:
-		if vol2 == 'NA':
-			return False
-		else:
-			return True
+	def main(collection):
+		connection = Connection()
+		db = connection[OUTDB]
+		db = db[collection]
+		print 'collection in use %s' %db
 
-def matchVolume(vol1, vol2):
-
-  if checkVolume(vol1,vol2): 
-
-	ratio = fuzz.ratio(vol1, vol2)
-	if ratio == 100:
-		return True
-		print 'full volume match %s' % ratio
-	else:
-		return False
-		print 'no volume match %s' % ratio
-
-def hasGroupKey(item):
-	if 'groupkey' in item:
-		return True
-	else:
-		return False
-
-def secondConnection(secondCollection):
-	con = Connection()
-	con = con[MAINDB]	
-	con = con[secondCollection]
-	return con
-
-def outputDb(item, collection):
-        
-        groupDb = collection
-
-	try:
-		groupDb.insert(item)
+class FieldOps(Mapreduce):
 	
-	except Exception, e:
-		print 'mongo exception'
- 
-def updateInDb(item, collection):
-        groupDb = collection
-
-	try:
-		groupDb.update( {'key': item['key']}, item, safe = True)
-	
-	except Exception, e:
-		print 'mongo exception'
-
-	
-def main(collection):
-	comments_db = 'comments_db'
-        connection = Connection()
-	db = connection[comments_db]
-	db = db[collection]
-	print 'collection in use %s' %db
-	matchVolumized(db)
-
-if __name__ == "__main__":
+	def addfield(self):
+		print 'hello'		
+#if __name__ == "__main__":
 
     #first argument: batch size
     #second argument: dmp or feed
     #third argument : filename
-    main(str(sys.argv[1]))
+    

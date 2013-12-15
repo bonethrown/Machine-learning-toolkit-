@@ -16,13 +16,13 @@ TEST_LALINA = 'charlie_lalina'
 TEST_COMMENT = 'charlie_comment'
 class databaseManager(object):
 
-	def __init__(self):
+	def __init__(self, db = DATABASE_MAIN, collection = TEST_LALINA, comment_coll = TEST_COMMENT):
 		
 		self.connection = db2.getConnection()
 		self.hpCollection = db2.getOwnDb(HP, DATABASE_MAIN)
 		self.imageCollection = db2.getOwnDb(IMAGE_COL, DATABASE_MAIN)
-		self.lalinaCollection = db2.getOwnDb(TEST_LALINA, DATABASE_MAIN)
-		self.commentsCollection = db2.getOwnDb(TEST_COMMENT, DATABASE_MAIN)
+		self.lalinaCollection = db2.getOwnDb(collection, db)
+		self.commentsCollection = db2.getOwnDb(comment_coll, db)
 
 	#def updatePrimary(item):
 	#### This is the primary function to save an image to the harddrive 
@@ -40,6 +40,13 @@ class databaseManager(object):
 			self.lalinaCollection.update({"key" : item['key']}, item, upsert=True)
 		except Exception, e:
 			log.msg('update error in db for item %s' %item['key']) 
+	def updateLalinaField(self, item, field):
+		try:
+			self.lalinaCollection.update({"key" : item['key']}, {field : item[field]})
+		except Exception, e:
+			log.msg('update error in db for item %s' %item['key']) 
+		
+
 
 	def saveImageLocally(self, item):
 		picture = self.imageInstance(item['image'])			
