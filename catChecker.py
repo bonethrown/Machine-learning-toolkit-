@@ -112,6 +112,20 @@ class Tables(object):
                         masterList.append(mydic)
 
                 return masterList
+        
+	def commaFileToList(self, lookupfile):
+                catlist = open(lookupfile)
+                masterList = []
+                for item in catlist.readlines():
+                        item = item.split(',')
+                        arr = []
+                        for a in item:
+                                a = a.decode('utf8')
+                                a = a.rstrip()
+                                arr.append(a)
+                        masterList.extend(arr)
+		return masterList
+
 
 
 class FieldCreator(object):

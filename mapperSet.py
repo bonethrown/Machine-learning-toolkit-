@@ -17,13 +17,13 @@ from nltk.classify import NaiveBayesClassifier
 from catChecker import FieldCreator 
 import random
 from cosme.dataOps import databaseManager
-
+import re
 COMMIT = True
 
-INDB = 'production'
-INCOLL = 'lalina1018'	
+INDB = 'matching'
+INCOLL = 'sep112013post'	
 OUTDB = 'matching'
-OUTCOLL = 'la1018'
+OUTCOLL = 'sep112013postwork'
 
 TESTDB = 'matching'
 TESTCOLL = 'unittest'
@@ -35,36 +35,49 @@ CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maq
 class CleanAndCategorize(object):
 	
 	def __init__(self):
-		self.handler = DatabaseHandler()
 		self.mapreduce = Mapreduce()
 		self.bayes = BayesObject()
 		self.trainedmodel = self.bayes.makeModel()
-		self._handler = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
-
+		self.outdb = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
+		self.indb = databaseManager(INDB, INCOLL, COMMENT_COLL)
 	def reload(self):
-		self._handler = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
+		self.outdb = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
+		self.indb = databaseManager(INDB, INCOLL, COMMENT_COLL)
 		self.mapreduce = Mapreduce()
 		self.bayes = BayesObject()
 	def reloadModel(self):
 		self.trainedmodel = self.bayes.makeModel()
-		
  
 	def runFieldCleaner(self):
 		### RED ME BEFORE RUNNING
 			# FIRST DB IS IN TO CREATE OUTDB AS NOT TO MODIFY ORIGINAL DATA
 			# SECOND COMMANDS RUN ON OUTDB 
-		self.mapreduce.makeMappingCopy(self.handler.indb, self.handler.outdb)
-		#self.mapreduce.batchCleanVolume(self.handler.outdb)
-		#self.mapreduce.addStringPrice(self.handler.outdb)
-		#self.bayes.batchDumbClassify(self.handler.outdb)
-	def dumbClassify(self):
-		self.bayes.batchDumbClassify(self._handler.lalinaCollection)
+		self.mapreduce.makeMappingCopy(self.indb.lalinaCollection, self.outdb.lalinaCollection)
+		print 'running volume cleaner'
+		time.sleep(1)
+		self.mapreduce.batchCleanVolume(self.outdb)
+		print 'running string price generator'
+		time.sleep(1)
+		self.mapreduce.addStringPrice(self.outdb)
+		print 'running  price per volume generator'
+		time.sleep(1)
+		self.mapreduce.pricePerVolume(self.outdb)
+		print ' running dumb and smart classifiler'
+		time.sleep(1)
+		self.dumbClassify(self.outdb)
+		self.smartClassify(self.outdb)
 
-	def smartClassify(self):
-		for item in self._handler.lalinaCollection.find():
+	def dumbClassify(self, dbhandler):
+		collection = dbhandler.getCollection()
+		print 'db is: %s' % collection
+		self.bayes.batchDumbClassify(collection)
+
+	def smartClassify(self, dbhandler):
+		collection = dbhandler.getCollection()
+		for item in collection.find():
 			if not item['category']:
 				item['category'] = self.bayes.classify(self.trainedmodel, item)
-				self._handler.updateLalinaField(item, 'category')
+				dbhandler.updateLalinaItem(item)
 
 	
 class Name(object):
@@ -74,13 +87,15 @@ class Name(object):
 		self.hasMatch = False	
 		self.matches = []
 		self.url = ""
+		self.des = ""
 	def makeUnicode(self, string):
 		if not isinstance(string, unicode):
 			string = string.encode('utf-8')
 			return string
 		else:
 			return string
-	
+	def getNameDes(self):
+		return " ".join([self.name,self.des])	
 	def get(self):
 		return self
 
@@ -118,10 +133,17 @@ class Name(object):
 			for gram in ngrams:
 				if item == gram:
 					matched.append(gram)				
-
 		matched = list(set(matched))
-		
 		return matched
+	def input_featurize(self, tokens):
+		# call with name object	
+		words = [w for w in self.unigram(tokens)] 	
+		uniq = set(words)
+		features = dict()
+		for word in words:
+			features[word] = (word in uniq)
+		return features
+
 	def featurize(self):
 		# call with name object	
 		words = [w for w in self.unigram(self.name)] 	
@@ -142,9 +164,6 @@ class BayesObject(object):
 		self.corpus = self.allNames()
 	#	self.model = self.makeModel()
 	#creates the name object for each string name
-	def assignDBhandler(self, dbhandlerObject):
-		self.handler = dbhandlerObject
- 
 	def allNames(self):
 		out = []
 		for item in self.handler.indb.find():
@@ -153,14 +172,26 @@ class BayesObject(object):
 			url = item['url']
 			_name = Name(name)
 			_name.url = url
+			_name.des = item['description']
 			out.append(_name)
 		return out		
+	def initdatabase(self, db, coll):
+		self._handler = databaseManager(db,coll,coll)
+		self.collection = self._handler.getCollection()
+		print self.collection
 
 	def convertItem(self, item):
 		name = item['name']
+	
 		url = item['url']
+		des = item['description']
 		_name = Name(name)
 		_name.url = url
+		_name.volume  = item['volume']
+		_name.brand = item['brand']
+		_name.url = url
+		
+		_name.des = des
 		return _name
 
 	def singleMatch(self, item):
@@ -172,7 +203,6 @@ class BayesObject(object):
 	def batchDumbClassify(self, db):
 		
 		categories = self.ngrammer.categories()
-		print 'categories are : %s' % categories
 		for item in db.find():
 			name = self.convertItem(item)
 			isMatched = False
@@ -193,6 +223,23 @@ class BayesObject(object):
 			
 				
 		#return matched, unmatched
+	def lalinaMatchTrainSet(self, db):
+		matched = []
+		unmatched = []
+		for item in db.find():
+			_name = self.convertItem(item)
+			if 'matchscore' in item:
+				groupid = item['groupid']
+				dic = _name.featurize()
+				#dic_brand = _name.featurize()
+				#dic_volume = _name.featurize()
+				tup = (dic, groupid)
+				matched.append(tup)
+			else:
+				
+				unmatched.append(_name)
+		return matched, unmatched
+
 
 	def garanti(self):
 		unmatched = []
@@ -219,31 +266,39 @@ class BayesObject(object):
 		return matched, unmatched
 
 	def matchOne(self, nameObject):
+		print nameObject.name
 		name = nameObject
+		
 		categories = self.ngrammer.categories()	
 		
 		for cat in categories:
 			doc = name.matched(self.ngrammer.getCatRow(cat))
 		# LOOP WILL RUN AND WILL MATCH THE LAST ONE IT FINDS THIS COULD BE A PROBLEM AND NEEDS VERIFICATION
-		
-		if doc:
-			return cat
+			if doc:
+				return cat
 			
 	def makeModel(self):
 		self.matched, self.unmatched = self.garanti()
 		random.shuffle(self.matched)
 		model = NaiveBayesClassifier.train(self.matched[:1500])
 		return model			
-	
+
+	def makeMatchModel(self, db):	
+		self.matched, self.unmatched= self.lalinaMatchTrainSet(db)
+		random.shuffle(self.matched)
+		model = NaiveBayesClassifier.train(self.matched[:1500])
+		return model			
 
 	def classify(self, model, item):
 		_name = self.convertItem(item)
-		classified = NaiveBayesClassifier.classify(model, _name.featurize())	
+		tokens = _name.getNameDes()
+		print tokens	
+		classified = NaiveBayesClassifier.classify(model, _name.input_featurize(tokens))	
 		return classified
 	
-	def batchClassify(self):
+	def batchClassify(self, model):
 		for item in self.unmatched:
-			classified = NaiveBayesClassifier.classify(self.model, item.featurize())	
+			classified = NaiveBayesClassifier.classify(model, item.featurize())	
 			print 'cat is: %s, name: %s, url: %s' % (classified, item.name, item.url)
 
 	def test(self):
@@ -479,19 +534,39 @@ class Mapreduce(object):
 		self.indb = self.handler.indb
 		self.outdb = self.handler.outdb
 		self.mem = []
-	
+
+	def pricePerVolume(self, db):
+		collection = db.getCollection()
+		print 'INDB is %s' % collection
+		for item in collection.find():
+			if item['volume'] != 'na':
+				try:
+
+					number = re.search(r'\d+', item['volume'])
+					number = number.group()
+					volume = int(number)
+					price = item['price']
+					price = price[0]
+					volume = int(number)
+					costPerVol = float(price)/ float(volume)
+					costPerVol = round(costPerVol, 2)
+					item['cost_per_vol'] = costPerVol
+					db.updateLalinaItem(item)		
+				except Exception, e:
+					print e
+
 
 	def addStringPrice(self, db):
-		print 'INDB is %s' % db
-		for item in db.find():
+		collection = db.getCollection()
+		print 'INDB is %s' % collection
+		time.sleep(1)
+		for item in collection.find():
 			try:
 				copyObject = item 
 				copyObject['price_str'] = self.floatPriceToString(item['price'])		
-				self.updateInDb(copyObject)	
+				db.updateLalinaItem(copyObject)	
 			except Exception, e:
 				print e
-				self.mem.append(item['key'])
-				print item['key']	
 
 	
 	def makeMappingCopy(self, indb, outdb):
@@ -518,7 +593,6 @@ class Mapreduce(object):
 							
 					copyObject['brand'] = newBrand
 					copyObject['price_str'] = self.floatPriceToString(item['price'])		
-					copyObject['volume'] = self.fieldScrubber(item, 'volume')
 					copyObject['name'] = newName
 					copyObject['key'] = item['key']
 					copyObject['category'] = ''
@@ -557,25 +631,20 @@ class Mapreduce(object):
 		else:
 			return crop
 
-	def batchCleanVolume(db):
-                for item in db.find():
-                        print item['volume']
+	def batchCleanVolume(self, db):
+                for item in db.lalinaCollection.find():
                         if item['volume'] is None:
                                 item['volume'] = 'NA'
-                                toDb(item,db)
-                                print 'was None %s' % item['key']
+				db.updateLalinaItem(item)
                         if item['volume'] == '':
                                 item['volume'] = 'NA'
-                                toDb(item,db)
-                                print 'item was empty string %s' % item['key']
+				db.updateLalinaItem(item)
                         elif len(item['volume']) == 0:
                                 item['volume'] = 'NA'
-                                toDb(item,db)
-                                print 'item was empty ARRAY %s' % item['key']
+				db.updateLalinaItem(item)
                         elif item['volume'] == ['NA']:
                                 item['volume'] = 'NA'
-                                toDb(item,db)
-                                print 'item was empty ARRAY %s' % item['key']
+				db.updateLalinaItem(item)
 
 	def removeMidWhiteSpaces(self, name):
 		name = re.sub(r'\s+', ' ', name)

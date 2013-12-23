@@ -22,7 +22,7 @@ from cosme import dataOps
 
 #commitSolr = False
 commitDB = True	
-SAVE_IMAGE = True
+SAVE_IMAGE = False
 
 class CosmePipeline(object):
     def __init__(self):
@@ -30,7 +30,7 @@ class CosmePipeline(object):
         #Lets send to ec2 as well
         #self.solr_url_prod = "http://ec2-54-242-158-167.compute-1.amazonaws.com:8080/solr/update?"
         #Set up NonRelDB-Connection
-	self.dbManager = dataOps.databaseManager()
+	self.dbManager = dataOps.databaseManager('neworder','sephasitebot')
         self.db = db.getConnection()
         brandsList = os.path.join(os.getcwd(),"cosme","pipes","utils","brandric.list")
         self.matcher = utils.listMatcher(brandsList) 
