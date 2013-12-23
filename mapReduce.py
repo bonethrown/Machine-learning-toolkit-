@@ -7,6 +7,7 @@ from fuzzywuzzy import fuzz
 import hashlib
 import logging
 
+INDB ='lalina'
 #secondCon = secondConnection('outDb')
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
 MAINDB = 'comments_db'

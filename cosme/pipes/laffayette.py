@@ -1,5 +1,5 @@
 from BeautifulSoup import BeautifulSoup
-from utils import utils,categorizer
+from utils import utils
 import re
 from scrapy import log
 from scrapy.exceptions import DropItem
