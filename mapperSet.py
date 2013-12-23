@@ -12,10 +12,10 @@ import re
 import string
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
 
-INDB = 'matching'
-INCOLL = 'mapthree'	
-OUTDB = 'matching'
-OUTCOLL = 'solrtest'
+INDB = 'production'
+INCOLL = 'lalina_20131017'	
+OUTDB = 'production'
+OUTCOLL = 'lalina1018'
 
 TESTDB = 'matching'
 TESTCOLL = 'unittest'
@@ -40,7 +40,7 @@ class Mapreduce(object):
 		testdb = Connection()
 		testdb = testdb[TESTDB]
 		self.testdb = testdb[TESTCOLL]
-		print self.testdb
+		print self.indb
 
 	def stampDummyKey(self):
 	#this is needed for solr to group things by groupid.
@@ -120,6 +120,7 @@ class Mapreduce(object):
 	
 	def cleaner(self, newName):
 		#ORDER IMPORTTAN
+		newName =  newName.decode('utf8')
 		newName = newName.lower()
 		newName = self.quickExpand(newName)	
 		newName = self.cleanVolume(newName)

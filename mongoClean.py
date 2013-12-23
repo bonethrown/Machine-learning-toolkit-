@@ -1,11 +1,12 @@
 from cosme.pipes.utils import db 
 from pymongo import Connection
-
+import os,sys,urllib2
 
 
 
 def cleanVolume(db):
-	for item in db.testLalina.find():
+	
+	for item in db.find():
 		print item['volume']
 		if item['volume'] is None:
 			item['volume'] = 'NA'
@@ -32,10 +33,11 @@ def toDb(item, db):
 		
 
 
-def main():
+def main(spray):
 	connection = Connection()
 	
-	lalina = connection.comments_db
+	lalina = connection.production
+	lalina = lalina[spray]
 	print lalina
 	cleanVolume(lalina)
 
@@ -45,4 +47,4 @@ if __name__ == "__main__":
     #first argument: batch size
     #second argument: dmp or feed
     #third argument : filename
-    main()
+    main(str(sys.argv[1]))

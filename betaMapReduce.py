@@ -9,8 +9,8 @@ import logging
 from copy import copy, deepcopy
 #secondCon = secondConnection('outDb')
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
-COLLECTION = 'lalina_charlie'
-MAINDB = 'matching'
+COLLECTION = 'lalina1018'
+MAINDB = 'production'
 NAME_RATIO = 92
 PARTIAL_TOKEN_SORT_RATIO = 61
 TOKEN_SORT_RATIO = 75

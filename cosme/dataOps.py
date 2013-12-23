@@ -3,10 +3,12 @@ import os, sys
 from decimal import *
 import pymongo
 import urllib
+import datetime
 #databases
 OS_PATH = '/home/dev/pictureStorage/'
 
-DATABASE_MAIN = 'comments_db'
+
+DATABASE_MAIN = 'production'
 HP = 'historicalPrices'
 IMAGE_COL = 'imagecollection'
 COMMENTS_COL = 'itemsTest'
@@ -14,18 +16,52 @@ ITEMS_COL = 'lalinaTest'
 
 TEST_LALINA = 'charlie_lalina'
 TEST_COMMENT = 'charlie_comment'
+
+MIRROR1_HOST = '23.96.17.252'
+MIRROR1_PORT = 27017
+
+MIRROR1_DATABASE = 'mirror1_database'
+MIRROR1_LALINA= 'lalina_mirror1'
+MIRROR1_COMMENTS = 'commets_mirror1'
+
+
 class databaseManager(object):
 
 	def __init__(self):
-		
+		main_coll = self.databaseNameGen('lalinaraw')
+		comment_coll = self.databaseNameGen('comment')
+				
 		self.connection = db2.getConnection()
 		self.hpCollection = db2.getOwnDb(HP, DATABASE_MAIN)
 		self.imageCollection = db2.getOwnDb(IMAGE_COL, DATABASE_MAIN)
-		self.lalinaCollection = db2.getOwnDb(TEST_LALINA, DATABASE_MAIN)
-		self.commentsCollection = db2.getOwnDb(TEST_COMMENT, DATABASE_MAIN)
-
+		self.lalinaCollection = db2.getOwnDb(main_coll, DATABASE_MAIN)
+		self.commentsCollection = db2.getOwnDb(comment_coll, DATABASE_MAIN)
+		print self.lalinaCollection
+		self.remote1Lalina = db2.anyConnection(MIRROR1_DATABASE, main_coll, MIRROR1_HOST, MIRROR1_PORT) 
+		self.remote1Comments = db2.anyConnection(MIRROR1_DATABASE, comment_coll, MIRROR1_HOST, MIRROR1_PORT) 
+		
 	#def updatePrimary(item):
 	#### This is the primary function to save an image to the harddrive 
+	def databaseNameGen(self, dbtype):
+		a = datetime.datetime.utcnow()
+		b = a.date().isoformat().replace('-','')
+		name = dbtype + '_'+ b
+		return name
+
+	def updateRemote(self, item):
+		try:
+			self.remote1Lalina.update({"key" : item['key']}, item, upsert=True)
+		except Exception, e:
+			log.msg('update error in db for item %s' %item['key']) 
+	
+	def updateRemoteComment(self, storeItem):
+		if storeItem['comments']:
+			try:
+				self.remote1Comments.update({"key":storeItem['key']}, {"comments": storeItem['comments'], "url" : storeItem['url'], "key":storeItem['key'], "site": storeItem['site']}, upsert = True)
+
+			except Exception, e:
+				log.msg('update error in db for item %s' %item['key']) 
+		
 	
 	def updateComment(self, storeItem):
 		if storeItem['comments']:

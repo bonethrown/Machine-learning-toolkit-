@@ -32,7 +32,7 @@ def getOwnDb( mongoCollection = COMMENT_DB_FALL, mongoDatabase = MONGO_DB):
     db = db[mongoCollection]
     return db 
 
-def anyConnection(mongoHost = MONGO_DB_HOST, mongoPort = MONGO_DB_HOST_PORT, database, collection):
+def anyConnection(database, collection, mongoHost = MONGO_DB_HOST, mongoPort = MONGO_DB_HOST_PORT):
     connection = Connection(mongoHost, mongoPort)
     db = connection[database]
     db =db[collection]

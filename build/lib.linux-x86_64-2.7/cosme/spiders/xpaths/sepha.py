@@ -27,12 +27,16 @@ class SephaXPath(AbstractXPath):
     def get_comments(self):
         return self.COMMENTS
 
-    ## 
     # With a 'por' highlighted price
     def get_price2(self):
         return "//div[@class=\"boxPrecoProduto\"]/span[2]/span/text()"
     def get_price3(self):
 	return "//div[@class='boxPrecoProduto precoNormal']"
+    def get_price4(self):
+	return "//div[@class='boxPrecoProduto']"
     
     def get_volume2(self):
 	return "//span[@class=\'tamanho\']"
+    def get_name2(self):
+	return "//div[@class='nomeProduto']/h1[@class='marginLeft10 left']/text()"
+
