@@ -7,7 +7,7 @@
 from scrapy import log
 import json, urllib2
 from cosme.pipes import pipeMethods
-from  pipes.utils import db,utils, itemTools
+from  pipes.utils import db,utils, itemTools, db2 
 import os
 from cosme.pipes.belezanaweb import BelezanaWeb
 from cosme.pipes.sephora import SephoraSite
@@ -21,8 +21,12 @@ from cosme import dataOps
 #simple pipeline for now. Drop Items with no description!
 
 #commitSolr = False
-commitDB = True	
-SAVE_IMAGE = True
+COMMIT_DB = True	
+SAVE_IMAGE = False
+UPDATE_REMOTE = True
+MONGO_MIRROR1_HOST = '23.96.17.252'
+MONGO_DB_HOST_PORT = 7075
+
 
 class CosmePipeline(object):
     def __init__(self):
@@ -103,10 +107,14 @@ class CosmePipeline(object):
         #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
         singleItemJson = json.dumps(arrItem)
             
-	if commitDB:
+	if COMMIT_DB:
 		self.dbManager.updateLalinaItem(cleanItem)
 		self.dbManager.updateComment(storeItem)
 		self.dbManager.updateHistPrice(cleanItem)	
+	if UPDATE_REMOTE:
+		self.dbManager.updateRemote(cleanItem)
+		self.dbManager.updateRemoteComment(cleanItem)	
+	
 	if SAVE_IMAGE:
 		self.dbManager.saveImageLocally(cleanItem)
 	

@@ -11,8 +11,8 @@ from cosme.dataOps import databaseManager
 from catChecker import Tables
 #secondCon = secondConnection('outDb')
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
-COLLECTION = 'lalina_charlie'
-MAINDB = 'matching'
+COLLECTION = 'lalina1018'
+MAINDB = 'production'
 NAME_RATIO = 92
 #standard params Name : 90, partial : 61, token : 75
 PARTIAL_TOKEN_SORT_RATIO = 61

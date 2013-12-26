@@ -22,6 +22,10 @@ from betaMapreduce import fuzzMatcher
 
 COMMIT = True
 
+INDB = 'production'
+INCOLL = 'lalina_20131017'	
+OUTDB = 'production'
+OUTCOLL = 'lalina1018'
 INDB = 'matching'
 INCOLL = 'sep112013post'	
 OUTDB = 'matching'
@@ -559,6 +563,12 @@ class Mapreduce(object):
 		self.outdb = self.handler.outdb
 		self.mem = []
 
+<<<<<<< HEAD
+		testdb = Connection()
+		testdb = testdb[TESTDB]
+		self.testdb = testdb[TESTCOLL]
+		print self.indb
+=======
 	def pricePerVolume(self, db):
 		collection = db.getCollection()
 		print 'INDB is %s' % collection
@@ -624,6 +634,7 @@ class Mapreduce(object):
 					
 					self.insertToDb(copyObject, outdb)	
 		
+>>>>>>> de83eb60cf6badfa5681736b5a04f8e8b6a4a58c
 
 		#self.updateInDb(self.mem.append)
 		print ' error : %s ' % len(self.mem)
@@ -729,8 +740,13 @@ class Mapreduce(object):
 			return 'NA'
 
 	def cleaner(self, newName):
+<<<<<<< HEAD
+		#ORDER IMPORTTAN
+		newName =  newName.decode('utf8')
+=======
 		if not isinstance(newName, unicode):
 			newName = newName.decode('utf8')
+>>>>>>> de83eb60cf6badfa5681736b5a04f8e8b6a4a58c
 		newName = newName.lower()
 		newName = self.quickExpand(newName)	
 		newName = self.cleanVolume(newName)

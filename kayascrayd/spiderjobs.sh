@@ -1,11 +1,15 @@
 #!/bin/bash
-scrapy deploy  -p  cosme
  jobs(){
 curl http://localhost:7000/schedule.json -d project=cosme -d spider=CBot
+sleep 3
 curl http://localhost:7000/schedule.json -d project=cosme -d spider=Infbot
+sleep 3
 curl http://localhost:7000/schedule.json -d project=cosme -d spider=Lafbot
+sleep 3
 curl http://localhost:7000/schedule.json -d project=cosme -d spider=Megabot
+sleep 3
 curl http://localhost:7000/schedule.json -d project=cosme -d spider=Sbot
+sleep 3
 curl http://localhost:7000/schedule.json -d project=cosme -d spider=Zbot
 }
 
