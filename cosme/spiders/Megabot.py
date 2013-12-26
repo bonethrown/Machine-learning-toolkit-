@@ -7,6 +7,7 @@ from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from scrapy import log
 from scrapy.exceptions import CloseSpider
 from cosme.settings import COSME_DEBUG
+from legModule import getDomain
 
 class Cosme(CrawlSpider):
     name = 'Megabot'
@@ -28,38 +29,23 @@ class Cosme(CrawlSpider):
              ]
 
     xpathRegistry = XPathRegistry()
-       
-    def getDomain(self, url):
-        try:
-            urlSeg = url.split('/')
-            domain = urlSeg[2]
-            segDom = domain.split('.')
-            if segDom[1]=='com':
-                return segDom[0]
-            else:
-                return segDom[1]
-        except:
-                return ""
+    siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
+    gnat = Gnat(siteModule)
 
     def drop(self, response):
         pass
 
-    def parse_item(self, response):
+    def parse(self, response):
         hxs = HtmlXPathSelector(response)
         cosmeItem = CosmeItem()
-        cosmeItem['site'] = self.getDomain(response.url)
+        cosmeItem['site'] = getDomain(response.url) 
         cosmeItem['url'] = response.url
-        siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])        
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-        self.log(str(cosmeItem),log.INFO)
-	if len(cosmeItem['price']) == 0: # Check for the 'por' price
-                cosmeItem['price'] = hxs.select(siteModule.get_price_multi()).extract()
-        yield cosmeItem
 
-    def multiVolumeExtract(self, cosmeItem, hxs, siteModule):
-        if  len(cosmeItem['price']) == 0:
-                cosmeItem['price'] = hxs.select(siteModule.get_price_multi()).extract()
-                print "*******************Second price  Check"
-                print cosmeItem['price']
-                return cosmeItem['price']
+        cosmeItem['price'] = self.gnat.multiPriceExtract(cosmeItem, hxs, self.siteModule)
+        cosmeItem['volume'] = self.gnat.multiVolumeExtract(cosmeItem, hxs, self.siteModule)
+        if not cosmeItem['name']:
+                cosmeItem['name'] = self.gnat.multiNameExtract(cosmeItem, hxs, self.siteModule)
+        self.log('CosmeItem %s' % cosmeItem,log.INFO)
+        yield cosmeItem

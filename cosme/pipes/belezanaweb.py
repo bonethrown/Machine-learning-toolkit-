@@ -73,21 +73,6 @@ class BelezanaWeb(AbstractSite):
 		else:
 			print 'NON multi volume field %s' % item['volume']
 			
-
-
-		#temp = item['volume']
-		#temp = utils.getElementVolume(temp)
-		#i#tem['volume'] = temp
-
-		#if not temp:		
-		#	tempName= item['name'][0]
-		#	item['volume'] = utils.extractVolume(tempName, 'ml')				
-
-#        if item['name']:
-            #item['volume'] = utils.get_volume(item['name'], 'ml')
- #           tempName = item['name']
-  #          tempName = tempName[0]
-   #         item['name'] = utils.cleanChars(tempName)
  
         if item['category']:
             tempCat = item['category']

@@ -16,10 +16,11 @@ class Analytics(object):
 		tokensetscore = 0
 		parent = 0
 		child = 0
+		mainCount = self.getCollection().count()
 		for item in self.getCollection().find():
 			if 'matchscore' in item:
 				temp = item['matchscore']
-				if isinstance(temp,dict):
+				if isinstance(temp, dict):
 					count = count +1
 					namescore = temp['fuzzratio'] + namescore
 					partialscore = temp['partialsort']+ partialscore
@@ -35,9 +36,11 @@ class Analytics(object):
 		tokenAvg = float(tokensetscore) / float(count)
 		Average = nameAvg + partialAvg + tokenAvg
 		avg = float(Average) / 3
-		total = parent + child 		
+		total = parent + child 	
+		diff = mainCount - total	
+		print 'Items in Collection: %s' % mainCount
 		print 'total matched count: %s ' % count
-		print 'parents: %s  childs: %s , total : %s' % (parent, child, total)
+		print 'parents: %s  childs: %s , total : %s , diff: %s' % (parent, child, total, diff)
 		print 'Avg fuzzname score: %s, Avg partial : %s, Avg token: %s' % (nameAvg, partialAvg, tokenAvg)
 		print 'full average is : %s' % avg
 		

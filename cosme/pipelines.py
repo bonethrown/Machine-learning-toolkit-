@@ -22,7 +22,7 @@ from cosme import dataOps
 
 #commitSolr = False
 commitDB = True	
-SAVE_IMAGE = False
+SAVE_IMAGE = True
 
 class CosmePipeline(object):
     def __init__(self):

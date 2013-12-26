@@ -33,19 +33,25 @@ class databaseManager(object):
 		self.imageCollection = db2.getOwnDb(IMAGE_COL, DATABASE_MAIN)
 		self.lalinaCollection = db2.getOwnDb(collection, db)
 		self.commentsCollection = db2.getOwnDb(comment_coll, db)
-		self.catdbs = []
-		self.initCatCollections()
+		self.catdbs = self.initCatCollections()
 		self.remote1Lalina = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
 		self.remote1Comments = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
 	
 	def initCatCollections(self):
+		dbs =[]
 		for cat in CATEGORY_LIST:
 			dog  = cat.replace(" ","")
 			coll = self.db[dog]
-			self.catdbs.append(coll)
+			dbs.append(coll)
+		return dbs	
+	def databaseNameGen(self, dbtype):
+			a = datetime.datetime.utcnow()
+			b = a.date().isoformat().replace('-','')
+			name = dbtype + '_'+ b
+			return name	
 
 	def getCollection(self):
-		return self.lalinaCollection
+			return self.lalinaCollection
 	def getDb(self):
 		return self.db
 	#def updatePrimary(item):
@@ -61,6 +67,16 @@ class databaseManager(object):
 				splitdb.insert(item) 
 			except Exception, e:
 				print e
+	def resetMulti(self, array):
+		for db in array:
+			self.resetdb(db)
+			
+		
+	def resetdb(self, collection):
+		collection.update( {"groupid" :  { "$exists" : True } }, {"$unset" : { "groupid" : 1 } }, multi = True)	
+		collection.update( {"rank" :  { "$exists" : True } }, {"$unset" : { "rank" : 1 } }, multi = True)	
+		collection.update( {"matchscore" :  { "$exists" : True } }, {"$unset" : { "matchscore" : 1 } }, multi = True)	
+		print '%s  cleaned %s' % (collection,collection.find({ 'matchscore': { "$exists" : True }}).count()) 
 
 	def killdbs(self):
 		for db in self.catdbs:

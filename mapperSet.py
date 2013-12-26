@@ -8,7 +8,6 @@ import hashlib
 import logging
 from cosme.pipes.utils import utils
 from nltk import regexp_tokenize, tokenwrap, word_tokenize
-import re
 import string
 import catChecker
 import nltk.classify.util
@@ -18,12 +17,24 @@ from catChecker import FieldCreator
 import random
 from cosme.dataOps import databaseManager
 import re
+from betaMapreduce import fuzzMatcher
+
+
 COMMIT = True
 
 INDB = 'matching'
 INCOLL = 'sep112013post'	
 OUTDB = 'matching'
 OUTCOLL = 'sep112013postwork'
+FINAL_COLL = 'matched'
+
+#INDB is raw db rom crawlers
+#OUTDB is cleaned data 
+#OUTDB is split into 7 dbs by category after category matching
+#matching is performed on seperate Dbs
+#dbs are merged back into a single db
+
+#databasemanager is the db connection class that handles all db related things
 
 TESTDB = 'matching'
 TESTCOLL = 'unittest'
@@ -40,6 +51,8 @@ class CleanAndCategorize(object):
 		self.trainedmodel = self.bayes.makeModel()
 		self.outdb = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
 		self.indb = databaseManager(INDB, INCOLL, COMMENT_COLL)
+		self.fuzz = FuzzMatcher(OUTDB, OUTCOLL)
+
 	def reload(self):
 		self.outdb = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
 		self.indb = databaseManager(INDB, INCOLL, COMMENT_COLL)
@@ -66,6 +79,17 @@ class CleanAndCategorize(object):
 		time.sleep(1)
 		self.dumbClassify(self.outdb)
 		self.smartClassify(self.outdb)
+		print ' running Matcher this may take an hour'
+		time.sleep(1)
+		
+		self.outdb.chop2cats(self.outdb.getCollection())
+		self.fuzz.loopdbMatch()
+		self.outdb.multiMerge(FINALCOLL, self.outdb.catdbs)
+		#parent db name and array of dbs
+		
+
+		#### RUN MATCHER HERE ####
+		
 
 	def dumbClassify(self, dbhandler):
 		collection = dbhandler.getCollection()

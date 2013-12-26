@@ -34,7 +34,7 @@ class BelezanaWebXPath(AbstractXPath):
        "commentStar": ".//div[@class=\'content\']/div[@class=\'stars\']/span/img",
        "commentStar2": ".//div[@class=\'stars\']/span/img"
     }
-    def get_price_multi(self):
+    def get_price2(self):
 	return "//@data-value"
     
     def get_comments(self):

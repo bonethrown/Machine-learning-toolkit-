@@ -19,22 +19,17 @@ PARTIAL_TOKEN_SORT_RATIO = 61
 TOKEN_SORT_RATIO = 75
 FULLPROC = False
 ADD_TOP_SCORE_DUPLICATE	= True			
-
+IGNORE_VOLUME = True
+AVG_THRESH = 83
+USE_VOL = True
 
 class fuzzMatcher(object):
 
 	def __init__(self, db= MAINDB, collection= COLLECTION):
 		self.tables = Tables() 
 		self.handler = databaseManager(db, collection,collection)
-##	self.collection = self.handler.getCollection()
-#		print self.collection
 		self.stopwords = self.filterStopWords('stopwords.list')
 		self.memory = []
-#		connection = Connection()
-#		connection = connection[MAINDB]
-#
-#		db = connection[COLLECTION]
-#		self.db = db
 		self.hasMatch = False
 	def loopDbMatch(self):
 
@@ -87,12 +82,7 @@ class fuzzMatcher(object):
 			return settings
 
 	def singleMatch(self):
-		comments_db = 'matching'
-		collection = 'unittest'
-		connection = Connection()
-		db = connection[comments_db]
-		self.db = db[collection]
-		self.matchVolumized()
+		self.matchVolumized(self.handler.getCollection())
 			
 		print 'check test collection %s for results' % collection 
 	def filterStopWords(self,stopFile):
@@ -115,6 +105,7 @@ class fuzzMatcher(object):
 
 	
 	def  matchVolumized(self, selected_db):
+	   self.memory = []	
 	   db = selected_db
 	   start = time.time()
 	   size =  db.find().count()-1 
@@ -127,28 +118,26 @@ class fuzzMatcher(object):
 				for idx,second in enumerate(db.find(timeout = False)):
 					#print 'first['key']
 					keycheck = self.keycheck(first['key'], second['key'])
-					match = self.objectMatch(first, second)
-					#print 'keycheck: %s , match : %s ' %(keycheck, match) 
+					match = self.objectMatch_avg(first, second)
 					if keycheck and match:
-					#if self.keycheck(first['key'], second['key']) and self.objectMatch(first,second):
 						#hasMatch = insertOrUpdate(first, second, db)
 						second['matchscore'] = self.addScoreDictionary(second['name'],first['name'])
-						print second['matchscore']
+						#print second['matchscore']
 						if not self.hasExisting(self.memory, second) and not self.hasGroupId(second):
-							second['groupid'] = self.stamp(first)
+							print 'HAS MATCH'
 							self.memory.append(second)	
-							print 'INSERTING :' +  second['groupid'] +' KEY ' + second['key'] 
+							second['groupid'] = self.stamp(first)
 							self.hasMatch = True		
+							print 'INSERTING GROUPID:' +  second['groupid'] +' KEY ' + second['key'] 
 						else:
 							self.replaceBetterMatch(second, first)
 			
 					if  idx == size and self.hasMatch:
-						print 'PARENT %s ' % first['key']					
 						self.multiUpdate(self.memory, db)
 						#self.updateInDb(self.memory[0])
-						first['matchscore'] = 100
 						first['rank'] = '1'	
 						first['groupid'] = hashlib.md5(first['key']).hexdigest() 
+						print 'PARENT key: %s ' + first['key']	+ 'parent groupid: ' + first['groupid']			
 						self.updateInDb(first, db)
 						self.memory = []
 						self.hasMatch = False 	
@@ -188,7 +177,7 @@ class fuzzMatcher(object):
 				if item['site'] == toAdd['site']:
 					if self.checkScore(item['matchscore'], toAdd['matchscore']):
 						if self.compareOverallScores(item, toAdd):
-							print 'higer replacement score for item ' + toAdd['key'] + 'vs ' + item['key'] + 'relative to ' + first['key']
+							print 'higer replacement score for item ' + toAdd['key'] + 'vs ' + item['key'] + ' parent ' + first['key']
 							self.memory = [d for d in self.memory if d.get('site') != toAdd['site']]
 							toAdd['groupid'] = self.stamp(first)
 							self.memory.append(toAdd)
@@ -209,6 +198,9 @@ class fuzzMatcher(object):
 			return True
 		elif setBool and fuzzBool:
 			return True
+		elif fuzzBool and partialBool:
+			return True
+
 		else: 
 			return False
 	
@@ -241,6 +233,25 @@ class fuzzMatcher(object):
 			return False
 		elif score1 == score2:
 			return True				
+
+	def objectMatch_avg(self, first, second):
+		if first['site'] != second['site']:
+			if self.fuzzyMatchBrand(first['brand'], second['brand']):
+				vol_match = self.matchVolume(first['volume'], second['volume'])
+				if USE_VOL:
+					if vol_match:
+						score = self.avgScoreMatch(first['name'],second['name'])
+						return score
+					else:
+						return False 	
+				else:
+					score = self.avgScoreMatch(first['name'],second['name'])
+					return score 	
+			else:
+				return False	
+		else:
+			return False
+									
 
 	def objectMatch(self, first, second):
 	#	if not hasGroupKey(second):
@@ -282,24 +293,33 @@ class fuzzMatcher(object):
 			return True
 		else:
 			return False
+	def avgScoreMatch(self, name1, name2):
+		score  = self.triFuzzyMatch(name1,name2)
+		name = score['nameratio']
+		part = score['partial']
+		token = score['token']
+
+		total =  float(name) + float(part) + float(token)
+		avg = float(total) / 3
+		#print 'avg score : %s total score : %s ' % (avg, total)
+		if avg >= AVG_THRESH:
+			return True
+		else:
+			return False
 
 
 	def triFuzzyMatch(self, name1, name2):
-		fuzzyname, score1 = self.matchName(name1,name2)
-		partial, score2 = self.partialTokenCheck(name1,name2)
-		tokensort, score3 = self.tokenCheck(name1,name2)	
+		score1 = self.fuzzyNameMatch(name1,name2)
+		score2 = self.partialTokenMatch(name1,name2)
+		score3 = self.tokenSortMatch(name1,name2)	
 		scores = dict()
 		scores = { 'nameratio'	: score1,
 				'partial' : score2,
 				'token' : score3}
-		bools = { 'nameratio'	: fuzzyname,
-				'partial' : partial,
-				'token' : tokensort}
-		for key, value in scores.iteritems():
-			if value == False:
-				return False
-			else:
-				out = True			
+		#for key, value in scores.iteritems():
+		#	if value == False:
+		#		return False
+		#	else:
 		return scores
 
 	def fuzzyNameMatch(self, name1, name2):
