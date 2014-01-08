@@ -11,16 +11,15 @@ from superSpider import Gnat
 class Cosme(CrawlSpider):
     
 
-    name = 'Sbot'
-    allowed_domains = ["sephora.com.br"]
+    name = 'Walbot'
+    allowed_domains = ["walmart.com.br"]
     denydom = ["centralderelacionamento.sephora.com.br", "ilovebeauty.sephora.com.br", "nossaslojas.sephora.com.br", "seguro.sephora.com.br"]
     #might need to change this this is useless for now
     
-    start_urls = ["http://www.sephora.com.br/perfumes","http://www.sephora.com.br/maquiagem","http://www.sephora.com.br/cabelos"]
+    start_urls = ["http://www.walmart.com.br/departamento/beleza-e-saude/1","http://www.sephora.com.br/maquiagem","http://www.sephora.com.br/cabelos"]
     #start_urls = ['http://www.sephora.com.br/site/produto.asp?idproduto=13943']
-    #allow_exts =(r'site/produto\.asp\?id=\d+', r'imagens[\w\./{}-]+',r'site/categoria\.asp\?\w+=\d+', r'site/marca\.asp\?\w+=\d+', r'site/departamento\.asp\?\w+=\d+') 
-    deny_exts = (r'checkout\.asp', r'login\.asp', r'newsletter\.asp',r'\.php',r'busca', r'mac', r'include', r'ajax', r'basket\.asp', r'cesta\.asp',r'comprar\.asp', r'view=all', r'compartilhe\.asp', r'marca\.asp\?[\w&=]+', r'avise-me\.asp\?id=\d+', r'produtoDetalhe\.asp')
-   # allow_exts = (r'produto.asp\?idproduto=\d+')
+    allow_exts =(r'\/produto\/Beleza-e-Saude\/([\/\w \.-]*)*\/?$', r'\/categoria/beleza-e-saude\/([\/\w \.-]*)*\/?$', ) 
+    deny_exts = (r'\/produto\/Beleza-e-Saude\/Massageador\/([\/\w \.-]*)*\/?$', r'')
         #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
     rules = [
              Rule(SgmlLinkExtractor(deny_domains = denydom, allow_domains = allowed_domains,  unique = True) , follow=True, callback='parse_item'),

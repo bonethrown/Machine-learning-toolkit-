@@ -12,6 +12,22 @@ import traceback
 from cosme.pipes.utils import utils, itemTools
 	#THIS IS A GENERIC VOLUME EXTRACTOR THAT WILL CHECK THE NAME THEN URL THEN THE XPATH FOR 
 
+def brandMatch(stringOrList, matcher):
+  if stringOrList:
+	if isinstance(stringOrList, list):
+		for name in stringOrList:
+			brand = matcher.listMatch(name)
+			if brand:
+				print 'found match %s' % brand
+				return brand
+	elif isinstance(stringOrList, str):
+		brand = matcher.listMatch(name)
+		if brand:
+			print 'found match %s' % brand
+			return brand
+  else:
+	print 'brand is empty'
+
 def genericNameExtract(name):
 	if isinstance(name, list):
 		name = name[0]
@@ -35,3 +51,8 @@ def nonXpathVolume(name, url):
 			return volume
 		else:
 			return 'NA'
+
+def combineIntandDec(array):
+	#wallmart uses this number is integer and decimal
+	return array[0]+array[1]
+

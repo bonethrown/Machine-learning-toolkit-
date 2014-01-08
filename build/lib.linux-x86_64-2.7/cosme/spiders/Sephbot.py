@@ -5,27 +5,28 @@ from scrapy.selector import HtmlXPathSelector
 from cosme.items import CosmeItem
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from scrapy import log
-
+from superSpider import Gnat
 
  
 class Cosme(CrawlSpider):
+    
+
     name = 'Sbot'
     allowed_domains = ["sephora.com.br"]
     denydom = ["centralderelacionamento.sephora.com.br", "ilovebeauty.sephora.com.br", "nossaslojas.sephora.com.br", "seguro.sephora.com.br"]
     #might need to change this this is useless for now
     
-    start_urls = ["http://www.sephora.com.br", "http://www.sephora.com.br/site/departamento.asp?iddepartamento=1", "http://www.sephora.com.br/site/marca.asp?id=197"]
+    start_urls = ["http://www.sephora.com.br/perfumes","http://www.sephora.com.br/maquiagem","http://www.sephora.com.br/cabelos"]
     #start_urls = ['http://www.sephora.com.br/site/produto.asp?idproduto=13943']
-    allow_exts =(r'site/produto\.asp\?id=\d+', r'imagens[\w\./{}-]+',r'site/categoria\.asp\?\w+=\d+', r'site/marca\.asp\?\w+=\d+', r'site/departamento\.asp\?\w+=\d+') 
+    #allow_exts =(r'site/produto\.asp\?id=\d+', r'imagens[\w\./{}-]+',r'site/categoria\.asp\?\w+=\d+', r'site/marca\.asp\?\w+=\d+', r'site/departamento\.asp\?\w+=\d+') 
     deny_exts = (r'checkout\.asp', r'login\.asp', r'newsletter\.asp',r'\.php',r'busca', r'mac', r'include', r'ajax', r'basket\.asp', r'cesta\.asp',r'comprar\.asp', r'view=all', r'compartilhe\.asp', r'marca\.asp\?[\w&=]+', r'avise-me\.asp\?id=\d+', r'produtoDetalhe\.asp')
    # allow_exts = (r'produto.asp\?idproduto=\d+')
         #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
     rules = [
-             Rule(SgmlLinkExtractor(deny_domains = denydom, allow_domains = allowed_domains, allow = allow_exts, unique = True) , follow=True, callback='parse_item'),
+             Rule(SgmlLinkExtractor(deny_domains = denydom, allow_domains = allowed_domains,  unique = True) , follow=True, callback='parse_item'),
              ]
 
     xpathRegistry = XPathRegistry()
-    
         
     def getDomain(self, url):
         try:
@@ -47,9 +48,15 @@ class Cosme(CrawlSpider):
         cosmeItem = CosmeItem()
         cosmeItem['site'] = self.getDomain(response.url)
         cosmeItem['url'] = response.url
-        siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
+    	siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
+   	gnat = Gnat(siteModule) 
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-        self.log(str(cosmeItem),log.INFO)
+
+        cosmeItem['price'] = self.gnat.multiPriceExtract(cosmeItem, hxs, self.siteModule)
+        cosmeItem['volume'] = self.gnat.multiVolumeExtract(cosmeItem, hxs, self.siteModule)
+        if not cosmeItem['name']:
+                cosmeItem['name'] = self.gnat.multiNameExtract(cosmeItem, hxs, self.siteModule)
+        self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem
         

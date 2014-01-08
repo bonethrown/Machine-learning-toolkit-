@@ -1,41 +1,42 @@
 from cosme.spiders.xpaths.abstract_xpath import AbstractXPath
+from BeautifulSoup import BeautifulSoup
 class BelezanaWebXPath(AbstractXPath):
-    
     META = {
-            "image" : "//img[@id=\'imagem4\']/@src",
-    
-            "name" :  "//div[@class='dados_topo_produto']/h1[@class='title-product']/text()",
-    
-            "brand" : "//div[@class='topo_produto']/div[@class='marca_produto']/a/img/@title",
-    
-            "price" : "//li[@class='preco-promocao']",
-    
-            "description" : "//div[@id='aba-descricao']/div[@itemprop='description']",
-    
-            "category" : "//div[@id='aside']/div[1]/ul[@class='breadcrumbs']/li[2]/a/span/text()" ,
-    
-            "sku" : "//div[@class=\'title\']/p/text()" ,
-            
-            "comments":  "//div[@class=\"rateAndTips\"]",
-
-	    "volume" : "//div[@class='prices']/div[1]",
-            }
-    
-    def get_meta(self):
-        return self.META
+    "image" : "//img[@id=\'imagem4\']/@src",
+    "name" : "//h1[@class=\'title-product\']/text()",
+    "brand" : "//span[@class='fornecedor']/text()",
+    "price" : "//li[@class='preco-promocao']",
+    "description" : "//span[@id=\'textoDescricao\']/text()",
+    "category" : "//h2[@class=\'titulo\']/a/text()",
+    "sku" : "//input[@class='radio radioTamanhos opcoesProduto']/@value",
+    "volume" : "//div[@class='tamanhoPrd']/input",
+    "product_id": "//meta[@itemprop=\"productID\"]/@content"
+    }
 
     COMMENTS = {
-       "commentList":  "//div[@class=\"rate\" or @class=\"mainRate\"]",
-       "commenterName": ".//div[@class=\'content\']/div[@class=\'stars\']/span[2]/text()",
-       "commenterName2": ".//div[@class=\'stars\']/span[2]/text()",
-       "commentText": ".//div[@class=\'content\']/div[@class=\'text\']/div/p/text()",
-       "commentText2": ".//div[@class=\'text\']/div/p/text()",
-       "commentDate": ".//li[@id=\'star\']/div[@class=\'dados\']/text()",
-       "commentStar": ".//div[@class=\'content\']/div[@class=\'stars\']/span/img",
-       "commentStar2": ".//div[@class=\'stars\']/span/img"
+       "commentList"  : "//div[@id=\'opinioes_lista_counteudo\']/div",
+       "commenterName": ".//div[@class=\'nome\']/span[@itemprop=\'author\']/text()",
+       "commentText"  : ".//div[@itemprop=\'description\']/text()",
+       "commentDate"  : ".//div[@class=\'nome\']/text()",
+       "commentStar"  : ".//div[@itemprop=\'reviewRating\']/ul/li",
     }
-    def get_price2(self):
-	return "//@data-value"
+    def get_meta(self):
+        return self.META
+    
     
     def get_comments(self):
         return self.COMMENTS
+
+    # With a 'por' highlighted price
+    def get_price2(self):
+        return "//div[@class=\"boxPrecoProduto\"]/span[2]/span/text()"
+    def get_price3(self):
+	return "//div[@class='boxPrecoProduto precoNormal']"
+    def get_price4(self):
+	return "//div[@class='boxPrecoProduto']"
+    
+    def get_volume2(self):
+	return "//span[@class=\'tamanho\']"
+    def get_name2(self):
+	return "//div[@class='nomeProduto']/h1[@class='marginLeft10 left']/text()"
+

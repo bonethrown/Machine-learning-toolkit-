@@ -252,6 +252,18 @@ def cleanSymbols(toClean):
     if toClean:
         return toClean.strip()
 
+def cleanSpaces(toClean):
+    badChars = ["\n"]
+    stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
+    toClean = toClean.lower().strip()
+    for val in badChars:
+        toClean = toClean.replace(val,"")
+    for word in stopWords:
+        toClean = toClean.replace(word,"")    
+    if toClean:
+        return toClean.strip()
+	
+
 def cleanChars(toClean):
  
     badChars = ["\\r","\\t","\\n",":","%",",","(",")","'"]

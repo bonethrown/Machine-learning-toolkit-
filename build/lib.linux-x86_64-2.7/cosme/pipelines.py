@@ -21,12 +21,11 @@ from cosme import dataOps
 #simple pipeline for now. Drop Items with no description!
 
 #commitSolr = False
-COMMIT_DB = True	
+COMMIT_DB = False
 SAVE_IMAGE = False
-UPDATE_REMOTE = True
+UPDATE_REMOTE = False
 MONGO_MIRROR1_HOST = '23.96.17.252'
 MONGO_DB_HOST_PORT = 7075
-
 
 class CosmePipeline(object):
     def __init__(self):
@@ -34,7 +33,7 @@ class CosmePipeline(object):
         #Lets send to ec2 as well
         #self.solr_url_prod = "http://ec2-54-242-158-167.compute-1.amazonaws.com:8080/solr/update?"
         #Set up NonRelDB-Connection
-	self.dbManager = dataOps.databaseManager()
+	self.dbManager = dataOps.databaseManager('neworder','sephasitebot')
         self.db = db.getConnection()
         brandsList = os.path.join(os.getcwd(),"cosme","pipes","utils","brandric.list")
         self.matcher = utils.listMatcher(brandsList) 

@@ -4,6 +4,7 @@ from cosme.spiders.xpaths.laffayette import LaffayetteXPath
 from cosme.spiders.xpaths.magazineluiza import MagazineLuizaXPath
 from cosme.spiders.xpaths.sepha import SephaXPath
 from cosme.spiders.xpaths.sephora2 import Sephora2XPath  
+from cosme.spiders.xpaths.wallmart import Wallmart  
   
 class XPathRegistry:
     
@@ -16,6 +17,7 @@ class XPathRegistry:
         self.xpathDict['magazineluiza'] = MagazineLuizaXPath()
         self.xpathDict['sepha'] = SephaXPath()
         self.xpathDict['sephora'] = Sephora2XPath()
+        self.xpathDict['wallmart'] = Wallmart()
         #self.xpathDict['sephora2'] = Sephora2XPath()
         
     def getXPath(self, site):

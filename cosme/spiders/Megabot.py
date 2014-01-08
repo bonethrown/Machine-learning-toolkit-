@@ -8,7 +8,7 @@ from scrapy import log
 from scrapy.exceptions import CloseSpider
 from cosme.settings import COSME_DEBUG
 from legModule import getDomain
-
+from superSpider import Gnat
 class Cosme(CrawlSpider):
     name = 'Megabot'
     allowed_domains = ['belezanaweb.com.br']
@@ -29,23 +29,24 @@ class Cosme(CrawlSpider):
              ]
 
     xpathRegistry = XPathRegistry()
-    siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
-    gnat = Gnat(siteModule)
 
     def drop(self, response):
         pass
 
-    def parse(self, response):
+    def parse_item(self, response):
         hxs = HtmlXPathSelector(response)
         cosmeItem = CosmeItem()
-        cosmeItem['site'] = getDomain(response.url) 
+	cosmeItem['site'] = getDomain(response.url) 
         cosmeItem['url'] = response.url
+        siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
+        gnat = Gnat(siteModule)
+        
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
 
-        cosmeItem['price'] = self.gnat.multiPriceExtract(cosmeItem, hxs, self.siteModule)
-        cosmeItem['volume'] = self.gnat.multiVolumeExtract(cosmeItem, hxs, self.siteModule)
+        cosmeItem['price'] = gnat.multiPriceExtract(cosmeItem, hxs)
+        cosmeItem['volume'] = gnat.multiVolumeExtract(cosmeItem, hxs)
         if not cosmeItem['name']:
-                cosmeItem['name'] = self.gnat.multiNameExtract(cosmeItem, hxs, self.siteModule)
+                cosmeItem['name'] = gnat.multiNameExtract(cosmeItem, hxs)
         self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem

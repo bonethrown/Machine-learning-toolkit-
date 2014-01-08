@@ -3,7 +3,7 @@
 
 ##### SPIDER UTILS GO HERE
 
- def getDomain(self, url):
+def getDomain(url):
         try:
             urlSeg = url.split('/')
             domain = urlSeg[2]
