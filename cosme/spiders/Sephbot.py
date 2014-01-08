@@ -53,10 +53,10 @@ class Cosme(CrawlSpider):
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
 
-        cosmeItem['price'] = self.gnat.multiPriceExtract(cosmeItem, hxs, self.siteModule)
-        cosmeItem['volume'] = self.gnat.multiVolumeExtract(cosmeItem, hxs, self.siteModule)
-        if not cosmeItem['name']:
-                cosmeItem['name'] = self.gnat.multiNameExtract(cosmeItem, hxs, self.siteModule)
+        #cosmeItem['price'] = gnat.multiPriceExtract(cosmeItem, hxs)
+        #cosmeItem['volume'] = gnat.multiVolumeExtract(cosmeItem, hxs)
+        #if not cosmeItem['name']:
+         #       cosmeItem['name'] = gnat.multiNameExtract(cosmeItem, hxs)
         self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem
         
