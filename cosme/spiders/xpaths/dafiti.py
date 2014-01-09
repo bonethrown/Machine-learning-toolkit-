@@ -15,5 +15,6 @@ class DafitiXPath(AbstractXPath):
     }
 
 
-    # With a 'por' highlighted price
-
+    #########################
+    #Price is javascript loaded   
+    ##########################

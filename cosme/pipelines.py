@@ -16,6 +16,7 @@ from cosme.pipes.infinitabeleza import InfiniteBeleza
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.sepha import SephaWeb
 from cosme.pipes.laffayette import laffayetteWeb
+from cosme.pipes.walmart import Walmart
 from cosme.pipes import splitPipe
 from cosme import dataOps
 #simple pipeline for now. Drop Items with no description!
@@ -45,6 +46,7 @@ class CosmePipeline(object):
         self.siteDict['default'] = AbstractSite()
         self.siteDict['sepha'] = SephaWeb()
         self.siteDict['laffayette'] = laffayetteWeb()
+        self.siteDict['walmart'] = Walmart()
         self.defaultSite = AbstractSite()
 	#self.preProcess = preProcess()
     
@@ -94,17 +96,15 @@ class CosmePipeline(object):
 	cleanItem = dict(cleanItem)
         storeItem  = {}
         storeItem['url'] = cleanItem['url']
-        storeItem['comments'] =  cleanItem['comments']
         storeItem['key'] = cleanItem['key']
 	storeItem['site'] = cleanItem['site']
-        cleanItem['comments'] = []
+	
+	if 'comments' in cleanItem:
+        	storeItem['comments'] =  cleanItem['comments']
+        	cleanItem['comments'] = []
         if 'name' in cleanItem:
             # No tokenization, but just storing - used for clustering.
             cleanItem['name_noindex']= cleanItem['name']
-        arrItem = []
-        arrItem.append(dict(cleanItem))
-        #log.msg("Item ready for json %s "%arrItem, level=log.DEBUG)
-        singleItemJson = json.dumps(arrItem)
             
 	if COMMIT_DB:
 		self.dbManager.updateLalinaItem(cleanItem)
