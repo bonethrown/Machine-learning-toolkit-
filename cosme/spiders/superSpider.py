@@ -1,12 +1,60 @@
 from scrapy.contrib.spiders import CrawlSpider ,Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
-
-from cosme.items import CosmeItem
-from cosme.spiders.xpaths.xpath_registry import XPathRegistry
+import re
 from scrapy import log
 
+PERFUME_LIST = '/home/dev/kk_cosme/cosme/cosme/spiders/urllist.list'
 
+
+class PartialCrawler(object):
+	
+	def __init__(self):
+		self.perfume = self.commaFileToList(PERFUME_LIST)
+	
+		self.arr = ['perfume','cabelo','unha']
+	#	^((?=.*(trunk|tags|branches)).*)$
+	
+	def test(self, arr):
+		string = self.createLinks(arr)	
+		out = self._compile(string)
+		return out
+
+	def construct(self):
+		string = self.createLinks(self.perfume)	
+		out = self._compile(string)
+		return out
+
+	def createLinks(self, arr):
+		line = ''
+		for item in arr:
+			word = ''+item + '|'
+			line = line + word
+		line = line[:-1]
+		line = '^((?=.*('+ line + ')).*)$'
+		print line
+		return line
+
+	def commaFileToList(self, lookupfile):
+                catlist = open(lookupfile)
+                masterList = []
+                for item in catlist.readlines():
+                        item = item.split(',')
+                        arr = []
+                        for a in item:
+                                a = a.decode('utf8')
+                                a = a.rstrip()
+                                arr.append(a)
+                        masterList.extend(arr)
+                return masterList
+
+	def _compile(self, string):
+		out = re.compile(string, re.I)
+		return out
+
+
+	
+		
 
 
 class Gnat(object):

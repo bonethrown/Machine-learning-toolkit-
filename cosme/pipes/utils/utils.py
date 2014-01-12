@@ -190,6 +190,7 @@ def cleanNumberArray(array, strOrFloat):
 				
 	return out
 
+
 def cleanNumberArray2(array, strOrFloat):
 	out = []
 	if strOrFloat =="float":
@@ -266,7 +267,7 @@ def cleanSpaces(toClean):
 
 def cleanChars(toClean):
  
-    badChars = ["\\r","\\t","\\n",":","%",",","(",")","'"]
+    badChars = [".","\\r","\\t","\\n",":","%",",","(",")","'"]
     stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
     toClean = toClean.lower().strip()
     for val in badChars:
@@ -343,11 +344,17 @@ def extractSku(string):
     temp = temp.group()
     temp = int(temp)
     return temp
+
+def extractFloat(string):
+    temp = str(string)
+    temp = re.search(r'[\d.,]+', temp)
+    temp = temp.group()
+    return temp
+
 def extractRawPrice(string):
     tempPrice = unidecode.unidecode(string)
     tempPrice = re.search(r'R\$\s(\d+.\d+)', tempPrice).group()
     return tempPrice	
-
 
 def findPrice(string):
    if isinstance(string, str) or isinstance(string, unicode): 

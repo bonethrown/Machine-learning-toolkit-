@@ -16,6 +16,7 @@ from cosme.pipes.infinitabeleza import InfiniteBeleza
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.sepha import SephaWeb
 from cosme.pipes.laffayette import laffayetteWeb
+from cosme.pipes.submarino import Submarino
 from cosme.pipes.walmart import Walmart
 from cosme.pipes import splitPipe
 from cosme import dataOps
@@ -47,6 +48,7 @@ class CosmePipeline(object):
         self.siteDict['sepha'] = SephaWeb()
         self.siteDict['laffayette'] = laffayetteWeb()
         self.siteDict['walmart'] = Walmart()
+        self.siteDict['submarino'] = Submarino()
         self.defaultSite = AbstractSite()
 	#self.preProcess = preProcess()
     

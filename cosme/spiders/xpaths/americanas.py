@@ -1,20 +1,17 @@
 from cosme.spiders.xpaths.abstract_xpath import AbstractXPath
 
-class Walmart(AbstractXPath):
+class Americanas(AbstractXPath):
     META = {
     
-    "image" : "//img[@class='main-picture']/@src",
-    "name" :  "//div[@class='product-title-header']/h1/text()",
-    "brand" : "//a[@class='product-brand']/text()",
-    "price" : "//span[@class='payment-price']/strong/span/text()",
-    "description" : "//div[@class='description']/text()",
-    "category" : "//td[@class='value-field Tipo']/text()",
-    "sku" : "//td[@class='value-field Referencia-do-Modelo']/text()",
-    "volume": "//div[@class='product-title-header']/h1/text()"
+    "image" : "//div[@class='prodImage']/a/img[@id='imgProduto']/@src",
+    "name" :  "//div[@class='wtit']/h1[@class='title']/text()", 
+    "brand" : "//div[@class='infoProd']/dl/dd[1]",
+    "price" : "//p[@class='sale']/strong/span[@class='price']",
+    "description" : "//div[@class='infoProd']/p",
+    "category" : "//li[@class='category selected']/a[@class='link']/text()",
+    "sku" : "//em[@class='identifier']/span[@class='id']",
+    "volume":"//div[@class='infoProd']/dl/dd[5]/text()"
     }
 
 
-
-    def get_meta(self):
-        return self.META
     

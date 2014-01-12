@@ -1,10 +1,12 @@
-from cosme.spiders.xpaths.belezanaweb import BelezanaWebXPath
-from cosme.spiders.xpaths.infinitabeleza import InfinitaBelezaXPath
-from cosme.spiders.xpaths.laffayette import LaffayetteXPath
-from cosme.spiders.xpaths.magazineluiza import MagazineLuizaXPath
-from cosme.spiders.xpaths.sepha import SephaXPath
-from cosme.spiders.xpaths.sephora2 import Sephora2XPath  
-from cosme.spiders.xpaths.walmart import Walmart  
+from belezanaweb import BelezanaWebXPath
+from infinitabeleza import InfinitaBelezaXPath
+from laffayette import LaffayetteXPath
+from magazineluiza import MagazineLuizaXPath
+from sepha import SephaXPath
+from sephora2 import Sephora2XPath  
+from walmart import Walmart  
+from americanas import Americanas 
+from submarino import SubmarinoXPath
   
 class XPathRegistry:
     
@@ -18,6 +20,8 @@ class XPathRegistry:
         self.xpathDict['sepha'] = SephaXPath()
         self.xpathDict['sephora'] = Sephora2XPath()
         self.xpathDict['walmart'] = Walmart()
+        self.xpathDict['americanas'] = Americanas()
+        self.xpathDict['submarino'] = SubmarinoXPath()
         #self.xpathDict['sephora2'] = Sephora2XPath()
         
     def getXPath(self, site):
