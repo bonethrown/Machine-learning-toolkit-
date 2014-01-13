@@ -1,0 +1,53 @@
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#-----------------------------------------------------------------------
+#some test synonym mappings unlikely to appear in real input text
+#General synonym
+homem,men,man,masculino,homme
+mulher,feminino,women,woman,female,femme
+corpo,body,pour le corps
+perfume,parfume,eau de toilette,eau de parfum,eau de fraiche,eau de cologne,cologne,colônia,parfumée,fragrance           
+esmalte,nail polisher,nail enamel,nail lacquer,nail colour
+unha,unhas,nail,nails
+maquiagem,makeup,make
+cabelo,hair,scalp,couro cabeludo
+condicionador,conditioner,conditioning
+olho,olhos,eye,eyes 
+lápis,pencil,pen,caneta delineadora
+pincel,pincéis,brush,brushes
+creme,cream,crème 
+desodorante,deodorant,deodorant roll-on,déodorant,antiperspirant,anti-transpirante,anti-transpirant 
+lábio,boca,lábios,lip,lips 
+rosto,face,facial
+shampoo,xampu,xampoo,xampo,shampooing
+enrolado,enrolados,curly,curl,curls
+loiro,blond
+cabelo loiro,blond hair
+
+# Some synonym groups specific to this example
+MB,mib,megabyte,megabytes
+Television, Televisions, TV, TVs
+#notice we use "gib" instead of "GiB" so any WordDelimiterFilter coming
+#after us won't split it into two words.
+
+# Synonym mappings can be used for spelling correction too
+pixima => pixma
+shampoo => shampo
+lipstick => batom
+nail polisher => esmalte
+face => rosto
+cream => creme
+mask => máscara
+body => corpo
+eye => olhos
+hidratante para o corpo => hidratante corporal

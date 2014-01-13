@@ -16,8 +16,10 @@ from cosme.pipes.infinitabeleza import InfiniteBeleza
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.sepha import SephaWeb
 from cosme.pipes.laffayette import laffayetteWeb
+from cosme.pipes.americana import Americana
 from cosme.pipes.submarino import Submarino
 from cosme.pipes.walmart import Walmart
+from cosme.pipes.dafiti import Dafiti
 from cosme.pipes import splitPipe
 from cosme import dataOps
 #simple pipeline for now. Drop Items with no description!
@@ -49,6 +51,8 @@ class CosmePipeline(object):
         self.siteDict['laffayette'] = laffayetteWeb()
         self.siteDict['walmart'] = Walmart()
         self.siteDict['submarino'] = Submarino()
+        self.siteDict['americanas'] = Americana()
+        self.siteDict['dafiti'] = Dafiti()
         self.defaultSite = AbstractSite()
 	#self.preProcess = preProcess()
     

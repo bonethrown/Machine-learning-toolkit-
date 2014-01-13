@@ -69,12 +69,12 @@ def getJSPrice(body):
 	text = str(item)
 	arr = text.split('\n')
 	for element in arr:
-		ele =  re.search(r"price", element)
-		if ele:
-			num = re.search(r'[\d.]+',element)	
-			if num:
-				num = num.group()
-				return num
+		ele =  re.search(r'price', element)
+		print ele
+		if ele.group() == 'price':	
+			print element
+			return element
+
 class Gnat(object):
 
 	 def __init__(self, siteModule):

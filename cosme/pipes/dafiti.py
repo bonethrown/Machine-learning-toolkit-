@@ -6,7 +6,7 @@ from scrapy.exceptions import DropItem
 import datetime
 from  cosme.pipes.default import AbstractSite
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
-from cosme.pipes.utils.utils import get_http_response, cleanNumberArray2, multiStateVolume, cleanChars, extractSku,extractFloat
+from cosme.pipes.utils.utils import get_http_response, cleanNumberArray2, multiStateVolume, cleanChars, extractSku,extractFloat,cleanSpaces
 import sys
 import traceback
 import logging
@@ -14,7 +14,7 @@ import pipeMethods
 
 logger = logging.getLogger(__name__)
 
-class Submarino(AbstractSite):
+class Dafiti(AbstractSite):
 	
 	def __init__(self):
 		self.siteModule = XPathRegistry().getXPath('submarino')
@@ -38,7 +38,11 @@ class Submarino(AbstractSite):
 		if item['category']:
 			tempCat = item['category']
 			item['category'] = tempCat[0]
-		
+		if item['description']:
+			temp = item['description'][0]	
+			temp = cleanSpaces(temp)
+			item['description'] = temp
+
 		if item['image']:
 			temp = item['image'] 
 			temp = temp[0]
@@ -50,8 +54,6 @@ class Submarino(AbstractSite):
 			item['product_id'] = ''
 					
 		if item['sku']: 
-			temp = item['sku']
-			temp = temp[0]
-			item['sku'] = extractSku(temp) 
+			item['sku'] = '' 
 
 		return item

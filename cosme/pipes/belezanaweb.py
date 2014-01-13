@@ -21,32 +21,35 @@ class BelezanaWeb(AbstractSite):
         if item['sku']: 
 		item['sku'] = utils.cleanSkuArray(item['sku'], 'string')
 	if item['price'] != 'NA': 
-		temp = item['price']
-		if len(temp) > 1:
-			volarray = []
-			parray = []
-			for item in temp:
-				if re.search(r'true', item):
-					item = item.replace("'disponivel': true,","")
-					dic = ast.literal_eval(item)
-					price = dic['preco_promo']
-					volume = dic['descricao']
-					parray.append(price)
-					volarray.append(volume)	
-				else:
-					item = item.replace("'disponivel': false,","")
-					dic = ast.literal_eval(item)
-					price = dic['preco_promo']
-					volume = dic['descricao']
-					parray.append(price)
-					volarray.append(volume)
-			item['price'] = utils.cleanNumberArray(parray, 'float')
-			item['volume'] = volarray
-			print 'BELEZA MULTI PASS'
-			print item['price']
-			print item['volume']	
-		else:
-			item['price'] =utils.cleanNumberArray(item['price'], 'float')
+	
+
+		
+	#	temp = item['price']
+	#	if len(temp) > 1:
+	#		volarray = []
+	#		parray = []
+	#		for item in temp:
+	#			if re.search(r'true', item):
+	#				item = item.replace("'disponivel': true,","")
+	#				dic = ast.literal_eval(item)
+	#				price = dic['preco_promo']
+	#				volume = dic['descricao']
+	#				parray.append(price)
+	#				volarray.append(volume)	
+	#			else:
+	#				item = item.replace("'disponivel': false,","")
+	#				dic = ast.literal_eval(item)
+	#				price = dic['preco_promo']
+	#				volume = dic['descricao']
+	#				parray.append(price)
+	#				volarray.append(volume)
+	#		item['price'] = utils.cleanNumberArray(parray, 'float')
+	#		item['volume'] = volarray
+	#		print 'BELEZA MULTI PASS'
+	#		print item['price']
+	#		print item['volume']	
+	#	else:
+		item['price'] =utils.cleanNumberArray(item['price'], 'float')
 	
 	if item['description']:
 		temp = item['description']
@@ -81,14 +84,14 @@ class BelezanaWeb(AbstractSite):
             temp = item['image'] 
             temp = temp[0]
             item['image'] = temp
-        if item['comments']:
-            comment_html = item['comments']
-            try:
-                item['comments'] = self.get_comments(comment_html, item['url'])
-            except:
-                exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
-                logger.error('Error getting comments %s , Exception information: %s, %s, Stack trace: %s ' % (item['url'],
-                                            exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
+        #if item['comments']:
+         #   comment_html = item['comments']
+          #  try:
+           #     item['comments'] = self.get_comments(comment_html, item['url'])
+           # except:
+            #    exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+             #   logger.error('Error getting comments %s , Exception information: %s, %s, Stack trace: %s ' % (item['url'],
+              #                              exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
                 
 
         return item

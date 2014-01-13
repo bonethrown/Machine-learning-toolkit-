@@ -50,7 +50,8 @@ class Tables(object):
 
                 #KEY TABLE
                 self.catTable = self.buildTree()
-                #self.valTable = self.buildKeyTable(self.catTable)
+                self.brands = self.lineToList('brandric.list')
+		#self.valTable = self.buildKeyTable(self.catTable)
                 #print self.acc
                 #print self.cab
 
@@ -65,6 +66,10 @@ class Tables(object):
                 tree.extend(self.per)
                 return tree
 
+	def linesToList(self, filename):
+		List = open(filename).readlines()
+		return List 
+	
         #THIS FUNCTION OUTPUTS ALL *UNIQUE FIELDS INTO A FILE. SUCH AS ALL UNQIUE BRANDS TO A SINGLE FILE.
         def fieldMapToFile(self, stringfield, collection):
                 savedoc = open(stringfield+'map', 'wb')

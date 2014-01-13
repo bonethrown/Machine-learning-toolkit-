@@ -6,12 +6,12 @@ class DafitiXPath(AbstractXPath):
     "image" : "//div[@id='product-zoom-box']/img/@src",
     "name" : "//h1[@class='product-title-product']/text()",
     "brand" : "//div[@class='product-title-brand']/text()",
-    "price" : "",
+    "price" : "//div[@class='product-title-brand']/text()",
     "description" : "//div[@id='detail-description']/p/text()",
     "category" : "//li[@class='product-information-item'][4]/text()",
     "sku" : "//li[@class='product-information-item'][1]/text()",
     "volume" : "//div[@id='productSizeSelector']/div/text()",
-    "product_id": ""
+    "product_id": "//div[@class='product-title-brand']/text()"
     }
 
 

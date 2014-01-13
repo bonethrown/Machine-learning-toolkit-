@@ -14,7 +14,7 @@ import pipeMethods
 
 logger = logging.getLogger(__name__)
 
-class Submarino(AbstractSite):
+class Americana(AbstractSite):
 	
 	def __init__(self):
 		self.siteModule = XPathRegistry().getXPath('submarino')
@@ -29,7 +29,6 @@ class Submarino(AbstractSite):
 			arr = [temp]
 			clean = cleanNumberArray2(arr, 'float')
 			item['price'] = clean
-
 		if item['brand']:
 			temp = item['brand'][0]
 			temp = cleanChars(temp)
@@ -46,8 +45,6 @@ class Submarino(AbstractSite):
 		if item['volume']: 
 			temp = item['name']
 			item['volume'] = multiStateVolume(temp)
-		if item['product_id']:
-			item['product_id'] = ''
 					
 		if item['sku']: 
 			temp = item['sku']

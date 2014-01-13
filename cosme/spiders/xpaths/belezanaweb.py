@@ -1,16 +1,17 @@
 from cosme.spiders.xpaths.abstract_xpath import AbstractXPath
 from BeautifulSoup import BeautifulSoup
 class BelezanaWebXPath(AbstractXPath):
+
     META = {
-    "image" : "//img[@id=\'imagem4\']/@src",
-    "name" : "//h1[@class=\'title-product\']/text()",
-    "brand" : "//span[@class='fornecedor']/text()",
-    "price" : "//li[@class='preco-promocao']",
-    "description" : "//span[@id=\'textoDescricao\']/text()",
-    "category" : "//h2[@class=\'titulo\']/a/text()",
-    "sku" : "//input[@class='radio radioTamanhos opcoesProduto']/@value",
-    "volume" : "//div[@class='tamanhoPrd']/input",
-    "product_id": "//meta[@itemprop=\"productID\"]/@content"
+    "image" : "//div[@class='pics']/a/img[@class='zoom']/@src",
+    "name"  : "//h1[@class='title-product']/text()",
+    "brand" : "//div[@class='marca_produto']/a/img/@alt",
+    "price" : "//li[@class='preco_normal']",
+    "description" : "//div[@id='descricao_conteudo']/p",
+    "category" : "//div[@class='breadcrumbs']/ul/li/text()",
+    "sku"   : "//span[@id='cod_subproduto']/text()",
+    "volume": "//ul[@class='tamanho']/li/a/text()",
+    "product_id" : "//div[@class='footer_tooltip']/ul/li/text()"    
     }
 
     COMMENTS = {
@@ -29,7 +30,8 @@ class BelezanaWebXPath(AbstractXPath):
 
     # With a 'por' highlighted price
     def get_price2(self):
-        return "//div[@class=\"boxPrecoProduto\"]/span[2]/span/text()"
+        #return "//div[@class=\"boxPrecoProduto\"]/span[2]/span/text()"
+        return "//ul[@class='promocao']/li[@class='preco_promocao']"
     def get_price3(self):
 	return "//div[@class='boxPrecoProduto precoNormal']"
     def get_price4(self):
@@ -40,3 +42,9 @@ class BelezanaWebXPath(AbstractXPath):
     def get_name2(self):
 	return "//div[@class='nomeProduto']/h1[@class='marginLeft10 left']/text()"
 
+    #added on January 13th
+    def get_description2(self):
+        return "//div[@id='descricao']"
+
+    def get_product_id2(self):
+	return "//div[@class='result_choices']/p/text()"	

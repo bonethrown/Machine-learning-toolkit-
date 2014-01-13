@@ -1,18 +1,17 @@
 from cosme.spiders.xpaths.abstract_xpath import AbstractXPath
 from BeautifulSoup import BeautifulSoup
-class Belezanaweb2XPath(AbstractXPath):
-
+class BelezanaWebXPath(AbstractXPath):
     META = {
-    "image" : "//img[@class=\'zoom\']/@src",
-    "name" : "//h1[@class=\'title-product\']/text()",
-    "brand" : "//div[@class=\'breadcrumbs\']/ul/li/a/span/text()",
-    "price" : "//li[@class=\'preco_original\']/text()",
-    "description" : "//div[@id='descricao']/text()",
-    "category" : "//div[@class=\'breadcrumbs\']/ul/li/a/span/text()",
-    "sku" : "//div[@class=\'result_choices\']/p/text()",
-    #"sku" : "//input[@class='radio radioTamanhos opcoesProduto']/@value",
-    "volume" : "//div[@class='tamanhoPrd']/input",
-    "product_id": "//meta[@itemprop=\"productID\"]/@content"
+    "image" : "//div[@class='pics']/a/img[@class='zoom']/@src",
+    "name"  : "//h1[@class='title-product']/text()",
+    "brand" : "//div[@class='marca_produto']/a/img/@alt",
+    "price" : "//ul[@class='tamanho']/li/a/text()",
+    "description" : "//div[@id='descricao_conteudo']/p",
+    "category" : "//div[@class='breadcrumbs']/ul/li/a/span/text()",
+    "sku"   : "//span[@id='cod_subproduto']/text()",
+    "volume": "//ul[@class='tamanho']/li/a/text()",
+    "product_id" : "//div[@class='footer_tooltip']/ul/li/text()" 
+
     }
 
     COMMENTS = {
