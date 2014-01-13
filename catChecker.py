@@ -66,8 +66,8 @@ class Tables(object):
                 tree.extend(self.per)
                 return tree
 
-	def linesToList(self, filename):
-		List = open(filename).readlines()
+	def lineToList(self, filename):
+		List = [line.rstrip() for line in open(filename)]
 		return List 
 	
         #THIS FUNCTION OUTPUTS ALL *UNIQUE FIELDS INTO A FILE. SUCH AS ALL UNQIUE BRANDS TO A SINGLE FILE.

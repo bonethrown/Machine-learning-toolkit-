@@ -37,19 +37,17 @@ MASTER_COMMENTS = 'delta_comments'
 
 class databaseManager(object):
 
-	def __init__(self):
-		main_coll = self.databaseNameGen('lalinaraw')
-		comment_coll = self.databaseNameGen('comment')
-				
-		self.connection = db2.getConnection()
+	def __init__(self, db = DATABASE_MAIN, collection = TEST_LALINA, comment_coll = TEST_COMMENT):
+		
+		self.db = db2.getConnection(db)
 		self.hpCollection = db2.getOwnDb(HP, DATABASE_MAIN)
 		self.imageCollection = db2.getOwnDb(IMAGE_COL, DATABASE_MAIN)
-		self.lalinaCollection = db2.getOwnDb(main_coll, DATABASE_MAIN)
-		self.commentsCollection = db2.getOwnDb(comment_coll, DATABASE_MAIN)
-		print self.lalinaCollection
-		self.remote1Lalina = db2.anyConnection(MIRROR1_DATABASE, main_coll, MIRROR1_HOST, MIRROR1_PORT) 
-		self.remote1Comments = db2.anyConnection(MIRROR1_DATABASE, comment_coll, MIRROR1_HOST, MIRROR1_PORT) 
-		
+		self.lalinaCollection = db2.getOwnDb(collection, db)
+		self.commentsCollection = db2.getOwnDb(comment_coll, db)
+		self.catdbs = self.initCatCollections()
+		self.remote1Lalina = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
+		self.remote1Comments = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
+	
 	#def updatePrimary(item):
 	#### This is the primary function to save an image to the harddrive 
 	def databaseNameGen(self, dbtype):
@@ -72,17 +70,6 @@ class databaseManager(object):
 			except Exception, e:
 				log.msg('update error in db for item %s' %item['key']) 
 		
-	def __init__(self, db = DATABASE_MAIN, collection = TEST_LALINA, comment_coll = TEST_COMMENT):
-		
-		self.db = db2.getConnection(db)
-		self.hpCollection = db2.getOwnDb(HP, DATABASE_MAIN)
-		self.imageCollection = db2.getOwnDb(IMAGE_COL, DATABASE_MAIN)
-		self.lalinaCollection = db2.getOwnDb(collection, db)
-		self.commentsCollection = db2.getOwnDb(comment_coll, db)
-		self.catdbs = self.initCatCollections()
-		self.remote1Lalina = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
-		self.remote1Comments = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
-	
 	def initCatCollections(self):
 		dbs =[]
 		for cat in CATEGORY_LIST:
@@ -159,6 +146,12 @@ class databaseManager(object):
 
 			except Exception, e:
 				log.msg('update error in db for item %s' %item['key']) 
+	
+	def updateViaSku(self, item):
+		try:
+			self.lalinaCollection.update({"sku" : item['sku']}, item, upsert=True)
+		except Exception, e:
+			log.msg('update error in db for item %s' %item['key']) 
 
 	def updateLalinaItem(self, item):
 		try:
