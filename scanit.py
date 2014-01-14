@@ -1,25 +1,34 @@
 from urllib2 import urlopen
+from urllib3 import HTTPConnectionPool, PoolManager
+from urllib3.util import Timeout
 import json
 from cosme.dataOps import databaseManager
 from catChecker import Tables
 API_KEY = 'KhYatjV0pvcSKFDGuQmaHTJxC_XMSdqO0H8VqibCvT7'
 URL = 'https://api.scandit.com/v2/products/'
 GOOGLE = 'https://ajax.googleapis.com/ajax/services/search/web?v=1.0&'
-
+REQUEST_AMOUNT = 10
 
 class SkuGen(object):
 	def __init__(self):
 		self.tableManager = Tables()
 		self.outdb = databaseManager('sku','skudatabase')
 		self.indb = databaseManager('matching','la1018')
+		self.pool = PoolManager(REQUEST_AMOUNT)
+		self.request = self.pool.connection_from_url(URL)
 
 	def api_request(self, key):
 		api = '?key='+API_KEY
 		url = URL + key + api
-		response = urlopen(url)
-		html = response.read()
-		html = json.loads(html)
-		return html
+		data = self.request.urlopen('GET', url)
+		value = data.data
+		data.close()
+		print value
+		try:
+			out = json.loads(value)
+			return out
+		except Exception:
+			pass
 
 	def googleRequest(self, key):
 		callback = 'response_dict'
@@ -53,8 +62,6 @@ class SkuGen(object):
 		site['url'] = item['url']
 		site['price'] = item['price']
 		site['name'] = item['name']
-		site['brand'] = item['brand']
-		site['category'] = item['category']
 		site['description'] = item['description']
 		site['image'] = item['image']
 		site['price_str'] = item['price_str']
@@ -67,29 +74,32 @@ class SkuGen(object):
 		new_item['name'] = name
 		new_item['brand'] = item['brand']
 		new_item['category'] =item['category']
-		new_item['description'] = item['description']
 		new_item['sites'] = []
 		return new_item		
 
 
 	def querySku(self, integer):
 		collection = self.indb.getCollection()
+		count = 0
 		for item in collection.find({'site': 'sephora'}).limit(integer):
 			sku = item['sku']
 			print 'querying sku : %s' % sku
 			out = self.api_request(sku)
-			print 'response: %s' % out
-			name = self.api_process(out)
-			print name 
-			if name:
-				
-				new_item = self.newItem(sku,name,item)	
-				site = self.siteObject(item)
-				site['sku'] = sku
-				new_item['sites'].append(site)
-				print new_item	
-				self.outdb.updateViaSku(new_item)
-		
+			try:
+				name = self.api_process(out)
+				print name 
+				count = count + 1
+				print count
+				if name:
+					
+					new_item = self.newItem(sku,name,item)	
+					site = self.siteObject(item)
+					site['sku'] = sku
+					new_item['sites'].append(site)
+					self.outdb.updateViaSku(new_item)
+			
+			except Exception:
+				pass		
 
 
 
