@@ -13,7 +13,7 @@ class Cosme(CrawlSpider):
 
     name = 'Sbot'
     allowed_domains = ["sephora.com.br"]
-    denydom = ["centralderelacionamento.sephora.com.br", "ilovebeauty.sephora.com.br", "nossaslojas.sephora.com.br", "seguro.sephora.com.br"]
+    denydom = ["centralderelacionamento.sephora.com.br", "ilovebeauty.sephora.com.br", "nossaslojas.sephora.com.br", "seguro.sephora.com.br",'busca.sephora.com.br']
     #might need to change this this is useless for now
     
     start_urls = ["http://www.sephora.com.br/perfumes","http://www.sephora.com.br/maquiagem","http://www.sephora.com.br/cabelos"]

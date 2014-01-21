@@ -29,9 +29,19 @@ DOWNLOAD_DELAY = 0.45
 
 # Debug is Very noisy.
 LOG_LEVEL='INFO'
+
+#analytics
 EXTENSIONS = {'cosme.extensions.Analytics.Analytics':500}
 ANALYTICS_ENABLED = True
 
+
+#email
+MAIL_HOST = 'smtp.live.com' 
+MAIL_FROM = 'alptilev@hotmail.com'
+MAIL_USER = 'alptilev@hotmail.com'
+MAIL_PASS = 'Naberulan2'
+MAIL_PORT = 587
+MAIL_SSL = True
 
 COSME_DEBUG=True
 
