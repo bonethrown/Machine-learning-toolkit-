@@ -6,7 +6,6 @@ import logging
 from fuzzywuzzy import fuzz
 import hashlib
 import logging
-from cosme.pipes.utils import utils
 from nltk import regexp_tokenize, tokenwrap, word_tokenize
 import re
 import string
@@ -14,6 +13,8 @@ logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
 from fuzzywuzzy import fuzz
 from copy import deepcopy
 
+path = '/home/dev/kk_cosme/cosme/'
+brand_path = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/'
 INDB = 'production'
 INCOLL = 'lalina1018'
 OUTDB = 'matching'
@@ -40,17 +41,17 @@ class Tables(object):
                 #self.valTable = self.buildKeyTable(self.catTable)
                 #self.catExtTable = self.buildCategoryTable('category.name')
 
-                self.acc = self.buildCategoryTable('acessorios.list')
-                self.cab = self.buildCategoryTable('cabelo.list')
-                self.maq = self.buildCategoryTable('maquiagem.list')
-                self.hom = self.buildCategoryTable('homem.list')
-                self.cor = self.buildCategoryTable('corpo.list')
-                self.unh = self.buildCategoryTable('unhas.list')
-                self.per = self.buildCategoryTable('perfumes.list')
+                self.acc = self.buildCategoryTable(path+'acessorios.list')
+                self.cab = self.buildCategoryTable(path+'cabelo.list')
+                self.maq = self.buildCategoryTable(path+'maquiagem.list')
+                self.hom = self.buildCategoryTable(path+'homem.list')
+                self.cor = self.buildCategoryTable(path+'corpo.list')
+                self.unh = self.buildCategoryTable(path+'unhas.list')
+                self.per = self.buildCategoryTable(path+'perfumes.list')
 
                 #KEY TABLE
                 self.catTable = self.buildTree()
-                self.brands = self.lineToList('brandric.list')
+                self.brands = self.lineToList(brand_path+'brandric.list')
 		#self.valTable = self.buildKeyTable(self.catTable)
                 #print self.acc
                 #print self.cab
@@ -69,6 +70,11 @@ class Tables(object):
 	def lineToList(self, filename):
 		List = [line.rstrip() for line in open(filename)]
 		return List 
+
+	def arrayToFile(self, name, array):
+                savedoc = open(stringfield+'map', 'wb')
+		for item in array:
+			savedoc.write("%s\n" % item.encode('utf-8'))
 	
         #THIS FUNCTION OUTPUTS ALL *UNIQUE FIELDS INTO A FILE. SUCH AS ALL UNQIUE BRANDS TO A SINGLE FILE.
         def fieldMapToFile(self, stringfield, collection):
@@ -131,8 +137,6 @@ class Tables(object):
                         masterList.extend(arr)
 		return masterList
 
-
-
 	def makeUnicode(self, string):
 		if not isinstance(string, unicode): 
 			string = string.encode('utf-8')
@@ -145,6 +149,3 @@ class Tables(object):
 			return False
 		else:
 			return True
-
-        
-

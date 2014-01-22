@@ -8,6 +8,9 @@ from walmart import Walmart
 from americanas import Americanas 
 from submarino import SubmarinoXPath
 from dafiti import DafitiXPath
+from netfarma import Netfarma
+
+
 class XPathRegistry:
     
     xpathDict = dict()
@@ -23,6 +26,7 @@ class XPathRegistry:
         self.xpathDict['americanas'] = Americanas()
         self.xpathDict['submarino'] = SubmarinoXPath()
         self.xpathDict['dafiti'] = DafitiXPath()
+        self.xpathDict['netfarma'] = Netfarma()
         #self.xpathDict['sephora2'] = Sephora2XPath()
         
     def getXPath(self, site):

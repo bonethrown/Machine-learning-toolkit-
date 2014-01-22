@@ -6,32 +6,27 @@ import logging
 from fuzzywuzzy import fuzz
 import hashlib
 import logging
-from cosme.pipes.utils import utils
 from nltk import regexp_tokenize, tokenwrap, word_tokenize
 import string
 import catChecker
 import nltk.classify.util
 from nltk import classify
 from nltk.classify import NaiveBayesClassifier
-from catChecker import FieldCreator 
 import random
-from cosme.dataOps import databaseManager
+from dataOps import databaseManager
 import re
 from betaMapreduce import fuzzMatcher
-
+from utils import listMatcher
 
 COMMIT = True
 
-INDB = 'production'
-INCOLL = 'lalina_20131017'	
-OUTDB = 'production'
-OUTCOLL = 'lalina1018'
 INDB = 'matching'
 INCOLL = 'sep112013post'	
 OUTDB = 'matching'
 OUTCOLL = 'sep112013postwork'
 FINAL_COLL = 'matched'
 
+match_path = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandric.list'
 #INDB is raw db rom crawlers
 #OUTDB is cleaned data 
 #OUTDB is split into 7 dbs by category after category matching
@@ -107,11 +102,42 @@ class CleanAndCategorize(object):
 				item['category'] = self.bayes.classify(self.trainedmodel, item)
 				dbhandler.updateLalinaItem(item)
 
+class Normalize(object):
+	def __init__(self, db, coll):
+		self.db = databaseManager(db, coll, coll)
+		self.matcher = listMatcher(match_path)
+		self.coll= self.db.getCollection()
+	def brandNormalize(self, brand):
+		match = self.matcher.listMatch(brand)			
+		fuzz_match = self.matcher.fuzzMatch(brand)
+		return match, fuzz_match	
+
+	def dualmatch(self, brand):
+		out = self.matcher.dualMatch(brand)
+		return out
+
+	def batchnormalize(self):
+		total = self.coll.count()
+		print total
+		nomatch = []
+		count = 0 
+		_count = 0
+		for item in self.coll.find():
+			_count = _count + 1
+			print _count
+			brand  = self.dualmatch(item['brand'])
+			if brand:
+				item['brand'] = brand
+			else:
+				count = count + 1
+				nomatch.append(item['url'])
+		print 'nomatch: %s from total ; %s ' % (count, total)
+	
 	
 class Name(object):
 	
 	def __init__(self, string):	
-		self.name = string
+		self.name = string.lower()
 		self.hasMatch = False	
 		self.matches = []
 		self.url = ""
@@ -164,7 +190,6 @@ class Name(object):
 		matched = list(set(matched))
 		return matched
 	def input_featurize(self, tokens):
-		# call with name object	
 		words = [w for w in self.unigram(tokens)] 	
 		uniq = set(words)
 		features = dict()
@@ -172,6 +197,15 @@ class Name(object):
 			features[word] = (word in uniq)
 		return features
 
+	def customFeaturize(self, word):
+		# call with name object	
+		words = []
+		words.append(word) 	
+		uniq = set(words)
+		features = dict()
+		for word in words:
+			features[word] = (word in uniq)
+		return features
 	def featurize(self):
 		# call with name object	
 		words = [w for w in self.unigram(self.name)] 	
@@ -181,7 +215,22 @@ class Name(object):
 			features[word] = (word in uniq)
 		return features
 	
+class ReverseLookup(object):
+	
+	def __init__(self):
+		self.ngrammer = Ngrammer()
+		
 
+	def keyWord(self, namestr):
+		name = Name(namestr)
+		categories = self.ngrammer.categories()	
+		
+		for cat in categories:
+			doc = name.matched(self.ngrammer.getCatRow(cat))
+		# LOOP WILL RUN AND WILL MATCH THE LAST ONE IT FINDS THIS COULD BE A PROBLEM AND NEEDS VERIFICATION
+			if doc:
+				return doc
+	
 class BayesObject(object):
 
 	def __init__(self):
@@ -205,8 +254,8 @@ class BayesObject(object):
 		return out		
 	def initdatabase(self, db, coll):
 		self._handler = databaseManager(db,coll,coll)
-		self.collection = self._handler.getCollection()
-		print self.collection
+		self.db = self._handler.getCollection()
+		print self.db
 
 	def convertItem(self, item):
 		name = item['name']
@@ -251,14 +300,16 @@ class BayesObject(object):
 			
 				
 		#return matched, unmatched
-	def lalinaMatchTrainSet(self, db):
+	def lalinaMatchTrainSet(self, db, category):
 		matched = []
 		unmatched = []
-		for item in db.find():
+		for item in db.find({ 'category' : category}):
 			_name = self.convertItem(item)
 			if 'matchscore' in item:
 				groupid = item['groupid']
-				dic = _name.featurize()
+				dic_a = _name.featurize()
+			        dic_b  = _name.customFeaturize(_name.brand)
+				dic = dict(dic_a.items() + dic_b.items()) 	
 				#dic_brand = _name.featurize()
 				#dic_volume = _name.featurize()
 				tup = (dic, groupid)
@@ -267,7 +318,6 @@ class BayesObject(object):
 				
 				unmatched.append(_name)
 		return matched, unmatched
-
 
 	def garanti(self):
 		unmatched = []
@@ -296,7 +346,6 @@ class BayesObject(object):
 	def matchOne(self, nameObject):
 		print nameObject.name
 		name = nameObject
-		
 		categories = self.ngrammer.categories()	
 		
 		for cat in categories:
@@ -304,18 +353,32 @@ class BayesObject(object):
 		# LOOP WILL RUN AND WILL MATCH THE LAST ONE IT FINDS THIS COULD BE A PROBLEM AND NEEDS VERIFICATION
 			if doc:
 				return cat
-			
+	def keyWord(self, namestr):
+		name = Name(namestr)
+		categories = self.ngrammer.categories()	
+		
+		for cat in categories:
+			doc = name.matched(self.ngrammer.getCatRow(cat))
+		# LOOP WILL RUN AND WILL MATCH THE LAST ONE IT FINDS THIS COULD BE A PROBLEM AND NEEDS VERIFICATION
+			if doc:
+				return doc
+		
 	def makeModel(self):
 		self.matched, self.unmatched = self.garanti()
 		random.shuffle(self.matched)
 		model = NaiveBayesClassifier.train(self.matched[:1500])
 		return model			
 
-	def makeMatchModel(self, db):	
-		self.matched, self.unmatched= self.lalinaMatchTrainSet(db)
+	def makeMatchModel(self, db, category):	
+		self.matched, self.unmatched= self.lalinaMatchTrainSet(db, category)
 		random.shuffle(self.matched)
-		model = NaiveBayesClassifier.train(self.matched[:1500])
+		model = NaiveBayesClassifier.train(self.matched[:400])
 		return model			
+
+	def nameobj_classify(self, model, _name):
+		tokens = _name.name + name.brand
+		classified = NaiveBayesClassifier.classify(model, _name.input_featurize(tokens))	
+		return classified
 
 	def classify(self, model, item):
 		_name = self.convertItem(item)
@@ -344,13 +407,18 @@ class Ngrammer(object):
 		self.test_list = ['all', 'this', 'hayyppened', 'more', 'or', 'less']
 		self.handler = DatabaseHandler()
 		self.tables = catChecker.Tables()
-		self.creator = FieldCreator()
 		
+	def makeUnicode(self, string):
+		if not isinstance(string, unicode):
+			string = string.encode('utf-8')
+			return string
+		else:
+			return string
 	def categories(self):
 		return CATEGORY_LIST	
 	
 	def unigram(self, name):
-		name = self.creator.makeUnicode(name)
+		name = self.makeUnicode(name)
 		return  name.split()
 
 	def bigram(self, name):
@@ -563,12 +631,11 @@ class Mapreduce(object):
 		self.outdb = self.handler.outdb
 		self.mem = []
 
-<<<<<<< HEAD
 		testdb = Connection()
 		testdb = testdb[TESTDB]
 		self.testdb = testdb[TESTCOLL]
 		print self.indb
-=======
+	
 	def pricePerVolume(self, db):
 		collection = db.getCollection()
 		print 'INDB is %s' % collection
@@ -634,7 +701,6 @@ class Mapreduce(object):
 					
 					self.insertToDb(copyObject, outdb)	
 		
->>>>>>> de83eb60cf6badfa5681736b5a04f8e8b6a4a58c
 
 		#self.updateInDb(self.mem.append)
 		print ' error : %s ' % len(self.mem)
@@ -740,13 +806,9 @@ class Mapreduce(object):
 			return 'NA'
 
 	def cleaner(self, newName):
-<<<<<<< HEAD
 		#ORDER IMPORTTAN
-		newName =  newName.decode('utf8')
-=======
 		if not isinstance(newName, unicode):
 			newName = newName.decode('utf8')
->>>>>>> de83eb60cf6badfa5681736b5a04f8e8b6a4a58c
 		newName = newName.lower()
 		newName = self.quickExpand(newName)	
 		newName = self.cleanVolume(newName)

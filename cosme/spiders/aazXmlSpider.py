@@ -4,6 +4,7 @@ from cosme.items import CosmeItem
 from scrapy.contrib.spiders import SitemapSpider
 from scrapy.spider  import BaseSpider
 
+
 sitemap = '/home/dev/kk_cosme/cosme/cosme/spiders/xpaths/aazsitemap.xml'
 class SitemapSpider(XMLFeedSpider):
 
@@ -11,9 +12,13 @@ class SitemapSpider(XMLFeedSpider):
 	allowed_domains = ['aazperfumes.com.br']
 	start_urls = ['http://www.aazperfumes.com.br/XMLProdutos.asp?IDLoja=434&Any=0&IDProduto=&IDCategoria=&RamoProd=0&PrecoDe=&PrecoAte=&Adicional1=0&Adicional2=0&Adicional3=0&SelImg=0&ExibeDescricao=0&origem=&est=1&DifName=&Mult=&Juros=&UA=False&AddParURL=&Format=0&Brand=0&Size=0']
 
-	namespaces = { 'sitemap': 'http://www.aazperfumes.com.br/XMLProdutos.asp?IDLoja=434&Any=0&IDProduto=&IDCategoria=&RamoProd=0&PrecoDe=&PrecoAte=&Adicional1=0&Adicional2=0&Adicional3=0&SelImg=0&ExibeDescricao=0&origem=&est=1&DifName=&Mult=&Juros=&UA=False&AddParURL=&Format=0&Brand=0&Size=0'}
-	iterator = 'xml'
+	iterator = 'iternodes'
     	itertag = 'produto'
+
+	def adapt_response(response):
+		log.msg('Hi, this is a <%s> node!: %s')
+		print ' adapt response'
+		print response
 	
 	def parse_node(self, response, node):
 		print response, node

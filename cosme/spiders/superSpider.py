@@ -5,6 +5,8 @@ import re
 from scrapy import log
 import json
 from BeautifulSoup import BeautifulSoup
+
+
 PERFUME_LIST = '/home/dev/kk_cosme/cosme/cosme/spiders/urllist.list'
 
 
@@ -79,7 +81,12 @@ class Gnat(object):
 
 	 def __init__(self, siteModule):
 		self.siteModule = siteModule	
-		
+	 def multiBrandExtract(self, cosmeItem, hxs):
+		if len(cosmeItem['brand']) == 0: # Check for the 'por' price
+			cosmeItem['brand'] = hxs.select(self.siteModule.get_brand2()).extract()
+			print "*******SECOND brand CHECK"
+			print cosmeItem['brand']
+			
 
 	 def multiPriceExtract(self, cosmeItem, hxs):
 		if len(cosmeItem['price']) == 0: # Check for the 'por' price

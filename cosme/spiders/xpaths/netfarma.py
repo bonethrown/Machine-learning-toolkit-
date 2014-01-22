@@ -14,4 +14,6 @@ class Netfarma(AbstractXPath):
     }
 
 
-    
+    def get_brand2(self):
+	        return "//div[@class='marca']//@title"
+ 

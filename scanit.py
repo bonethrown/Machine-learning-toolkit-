@@ -2,6 +2,7 @@ from urllib2 import urlopen
 from urllib3 import HTTPConnectionPool, PoolManager
 from urllib3.util import Timeout
 import json
+from cosme.pipes.utils import utils
 from cosme.dataOps import databaseManager
 from catChecker import Tables
 API_KEY = 'KhYatjV0pvcSKFDGuQmaHTJxC_XMSdqO0H8VqibCvT7'
@@ -78,13 +79,14 @@ class SkuGen(object):
 		return new_item		
 
 
-	def querySku(self, integer):
+	def querySku(self, integer, site):
 		collection = self.indb.getCollection()
 		count = 0
-		for item in collection.find({'site': 'sephora'}).limit(integer):
+		for item in collection.find({'site': site}).limit(integer):
 			sku = item['sku']
+			_sku = str(utils.extractSku(sku))
 			print 'querying sku : %s' % sku
-			out = self.api_request(sku)
+			out = self.api_request(_sku)
 			try:
 				name = self.api_process(out)
 				print name 

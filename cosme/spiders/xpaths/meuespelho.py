@@ -3,17 +3,17 @@ from BeautifulSoup import BeautifulSoup
 class MeuEspelhoXPath(AbstractXPath):
 
     META = {
-    "image" : "//div[@id=\'img-detalhe\']/img/@src",
-    "name" : "//div[@class='container detail']/h2/span/text()OK",
-    "brand" : "//div[@class='container detail']/h2text()OK",
-    "price" : "//div[@id='comprar-desc']/p[1]/strong",
-    "description" : "//div[@id='tab2']/div[@class='desc']/p/text()OK",
-    "category" : "//div[@class=\'bread-crumb\']/p/a[@class='nv2']/text()OK",
-    "sku" : "",
-    "volume" : "//div[@id='tab1']/div[@class='cores']/ul/li/strong/text()OK",
-    "product_id": ""
+    "image" : "//img[@id='image-main']/@src",
+    "name" : "//div[@class='tpl-product-name']/h1/div/text()",
+    "brand" : "//div[@class='tpl-ref-container']//div/a/text()",
+    "price" : "//em[@class='valor-por']/strong/text()",
+    "description" : "//div[@class='tpl-short-description']/div/text()",
+    "category" : "//div[@class='bread-crumb']/ul/li/a/text()",
+    "sku" : "//input[@id='___rc-p-sku-ids']/@value",
+    "volume" : "//div[@class='nomeSku']/text()",
+    "product_id": "//input[@id='___rc-p-sku-ids']/@value"
     }
 
 
-    # With a 'por' highlighted price
-
+    def get_price2(self):
+        return "//em[@class='valor-dividido']/strong[2]/text()"

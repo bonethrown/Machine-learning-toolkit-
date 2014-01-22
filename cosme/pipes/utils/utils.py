@@ -11,6 +11,7 @@ import numpy
 from numpy import mean
 import hashlib
 import unidecode
+from fuzzywuzzy import fuzz
 #convert format "13:13" to minutes
 logger = logging.getLogger(__name__)
 
@@ -339,8 +340,7 @@ def convertDateClassOBJ(toConv):
     return date
 
 def extractSku(string):
-    temp = str(string)
-    temp = re.search(r'[\d]+', temp)
+    temp = re.search(r'[\d]+', string)
     temp = temp.group()
     temp = int(temp)
     return temp
@@ -417,21 +417,36 @@ class listMatcher:
             print e 
     
     def listMatch(self, toMatch):
-        toMatch = " "+toMatch+" "
-        for line in self.lookup: 
-           # reg = "\s?"
-           # regify = reg+"("+line+")"+reg
+        toMatch = " "+toMatch+" ".lower()
+	
+	for line in self.lookup: 
            # print regify
-            line = " "+line+" "
+            line = " "+line+" ".lower()
             brand = re.search(line ,toMatch, re.I)
-            if brand:
-                print "####### match  %s"%line
-                print "######match %s"%brand		
-                print "######match found "+brand.group()
+             
+	    if brand:
                 return brand.group().strip()
 
+    def fuzzMatch(self, toMatch):
+	toMatch = toMatch.lower().strip()
+	toMatch = toMatch.encode('utf-8')
+	for line in self.lookup: 
+           # print regify
+            line = line.lower()
+            score = fuzz.ratio(line, toMatch)
+	    if score > 94:
+			return line.strip()
 
+    def dualMatch(self,match):
+	m1 = self.listMatch(match)
+	m2 = self.fuzzMatch(match)
 
+	if m1:
+		return m1
+	elif m2:
+		return m2
+	else:
+		return ''	
 
 def get_http_response(responseBody, url):
         request = Request(url=url)
@@ -446,6 +461,7 @@ def extractBrand(toConv):
     toConv  = re.search(r'[\w]+.+', toConv)
     toConv=toConv.group()
     return toConv
+
 def groupItem(toGroup):
     if toGroup:
         myGroup = toGroup.group()
@@ -459,7 +475,3 @@ if __name__ == '__main__':
     print a
     m = listMatcher('brandric.list')
     print m.listMatch(a)
-
-
-
-
