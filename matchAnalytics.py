@@ -1,5 +1,5 @@
 from cosme.dataOps import databaseManager
-
+import pymongo
 
 class Analytics(object):
 	
@@ -43,4 +43,13 @@ class Analytics(object):
 		print 'parents: %s  childs: %s , total : %s , diff: %s' % (parent, child, total, diff)
 		print 'Avg fuzzname score: %s, Avg partial : %s, Avg token: %s' % (nameAvg, partialAvg, tokenAvg)
 		print 'full average is : %s' % avg
-		
+
+	def siteCount(self):
+		coll = self.getCollection()
+		sites = coll.distinct('site')
+		out = []
+		for item in sites:
+			count = coll.find({'site': item}).count()
+			site_count = item + " : " + str(count)
+			out.append(site_count)
+		return out		

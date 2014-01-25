@@ -37,9 +37,9 @@ class Cosme(CrawlSpider):
     mod = re.compile('http://www.walmart.com.br/produto/beleza-e-saude/modelador-de-cabelo\/[\w\-\@?^=%&amp;/~\+#]+', re.I)
     apa = re.compile('http://www.walmart.com.br/categoria/beleza-e-saude/aparador-de-pelo\/[\w\-\@?^=%&amp;/~\+#]+', re.I)
 
-    re_allow = [sec,mac,cab,cui,tre,esc,cha,esm,cut,cui,ban,des,pro,cil,pin,ace,per,col,mod,apa]
+    re_allow = [cat,sec,mac,cab,cui,tre,esc,cha,esm,cut,cui,ban,des,pro,cil,pin,ace,per,col,mod,apa]
 	    	
-    start_urls = ["http://www.walmart.com.br/departamento/beleza-e-saude/1"]
+    start_urls = ["http://www.walmart.com.br/categoria/beleza-e-saude/perfumes/?fq=C:1/1292/2812/&PS=20","http://www.walmart.com.br/departamento/beleza-e-saude/1"]
 
     deny_exts = [r'http://www.walmart.com.br/categoria/eletronicos\/[\w\-\@?^=%&amp;/~\+#]+', 
 		r'http://www.walmart.com.br/categoria/eletrodomesticos\/[\w\-\@?^=%&amp;/~\+#]+',

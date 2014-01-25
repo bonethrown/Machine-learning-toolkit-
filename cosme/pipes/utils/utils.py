@@ -14,6 +14,7 @@ import unidecode
 from fuzzywuzzy import fuzz
 #convert format "13:13" to minutes
 logger = logging.getLogger(__name__)
+MATCH_FILE = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandric.list'
 
 def newKey(cosmeItem):
 	key = ""
@@ -244,7 +245,7 @@ def cleanPrice(toClean):
 
 def cleanSymbols(toClean):
  
-    badChars = ["\\r","\\t","\\n",":","%",",","(",")","'","!",]
+    badChars = ["\\r","\\t","\\n","-",":","%",",","(",")","'","!",]
     stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
     toClean = toClean.lower().strip()
     for val in badChars:
@@ -403,7 +404,7 @@ def extractPrice(arrayOrString):
 
 class listMatcher:
 
-    def __init__(self, config):
+    def __init__(self, config = MATCH_FILE):
         self.lookup = []
 
         try:
@@ -415,36 +416,91 @@ class listMatcher:
         except Exception, e:
             print "###ERROR reading file###"
             print e 
-    
+   
+    def match(self, toMatch):
+	out = toMatch.encode('utf')
+ 	return out
     def listMatch(self, toMatch):
-        toMatch = " "+toMatch+" ".lower()
-	
+	toMatch = self.match(toMatch)
+	toMatch = toMatch.strip().lower()
+	toMatch = cleanSymbols(toMatch)
+        toMatch = " "+toMatch+" "
 	for line in self.lookup: 
            # print regify
-            line = " "+line+" ".lower()
+            line = " "+line+" "
             brand = re.search(line ,toMatch, re.I)
-             
 	    if brand:
                 return brand.group().strip()
 
-    def fuzzMatch(self, toMatch):
+    def fuzzMatch(self, toMatch, printScore = False):
 	toMatch = toMatch.lower().strip()
 	toMatch = toMatch.encode('utf-8')
+
 	for line in self.lookup: 
-           # print regify
-            line = line.lower()
             score = fuzz.ratio(line, toMatch)
-	    if score > 94:
+	    if printScore and score >50:
+		print score
+	    if score > 70:
 			return line.strip()
+
+    def recursiveFuzz(self, sentence):
+	sentence = cleanSymbols(sentence)
+	uni = sentence.split()
+	bi = self.bigrams(sentence)
+	
+	for word in uni:
+		match = self.fuzzMatch(word)	
+		if match:
+			return match
+
+	for word in bi:
+		match =self.fuzzMatch(word)
+		if match:
+			return match
+
+    def bigrams(self, sentence):
+
+                input_list = sentence.split()
+                unigram =  zip(input_list, input_list[1:])
+
+		out = []
+		for term in unigram:
+			if isinstance(term, tuple):
+				lookup = " ".join(map(unicode, term))
+				out.append(lookup)
+			else:
+				lookup = term
+				out.append(lookup)
+		return out
+
+    def robustMatch(self, sentence):
+		#VERY HEAVY NOT RECOOMENDED FOR CRAWL TIME MATCHING
+		#used to match a long sentence unigram and bigram
+	sentence = cleanSymbols(sentence)
+	uni = sentence.split()
+	bi = self.bigrams(sentence)
+
+		#this order of matching is the fastest first re uni bi then fuzz	
+	for word in uni:
+		match = self.listMatch(word)
+		if match:
+			return match
+	for word in bi:
+		match = self.listMatch(word)
+		if match:
+			return match
+	match= self.recursiveFuzz(sentence)			
+	if match:
+		return match
 
     def dualMatch(self,match):
 	m1 = self.listMatch(match)
-	m2 = self.fuzzMatch(match)
-
 	if m1:
-		return m1
-	elif m2:
-		return m2
+		return m1.decode('utf-8')
+	
+	m2 = self.recursiveFuzz(match)
+	if m2:
+		return m2.decode('utf-8')
 	else:
 		return ''	
 
@@ -456,7 +512,7 @@ def get_http_response(responseBody, url):
                             encoding = 'utf-8')
         hxs = HtmlXPathSelector(response)
         return hxs
-    
+ 
 def extractBrand(toConv):
     toConv  = re.search(r'[\w]+.+', toConv)
     toConv=toConv.group()
@@ -466,6 +522,7 @@ def groupItem(toGroup):
     if toGroup:
         myGroup = toGroup.group()
         return myGroup
+	print toMatch
     else:
         print " is not a string none error"
 

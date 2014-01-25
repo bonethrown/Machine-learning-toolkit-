@@ -35,7 +35,6 @@ class PartialCrawler(object):
 			line = line + word
 		line = line[:-1]
 		line = '^((?=.*('+ line + ')).*)$'
-		print line
 		return line
 
 	def commaFileToList(self, lookupfile):

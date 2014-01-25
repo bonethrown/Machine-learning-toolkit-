@@ -23,7 +23,7 @@ class Netfarma(AbstractSite):
 	def process(self, item, spider, matcher):
 		if item['url']:
 			item['url'] = item['url'].lower()					
-		if item['price']: 
+		if item['price']!= 'NA': 
 			temp = item['price']
 			clean = cleanNumberArray(temp, 'float')
 			item['price'] = clean

@@ -16,12 +16,12 @@ def brandMatch(stringOrList, matcher):
   if stringOrList:
 	if isinstance(stringOrList, list):
 		for name in stringOrList:
-			brand = matcher.listMatch(name)
+			brand = matcher.dualMatch(name)
 			if brand:
 				print 'found match %s' % brand
 				return brand
 	elif isinstance(stringOrList, str):
-		brand = matcher.listMatch(name)
+		brand = matcher.dualMatch(name)
 		if brand:
 			print 'found match %s' % brand
 			return brand

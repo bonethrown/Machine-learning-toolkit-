@@ -52,7 +52,8 @@ class MagazineLuizaSite(AbstractSite):
 		brand = matcher.listMatch(item['name'])
 		print 'Lookup match found, %s' % brand
 		item['brand'] = brand
-	
+	if item['sku']:
+		item['sku'] = utils.cleanSkuArray(item['sku'], 'string')			
 
     # item['brand'] = matcher.listMatch(temp)
         if item['url']:

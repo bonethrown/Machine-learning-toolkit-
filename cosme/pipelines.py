@@ -16,13 +16,14 @@ from cosme.pipes.infinitabeleza import InfiniteBeleza
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.sepha import SephaWeb
 from cosme.pipes.laffayette import laffayetteWeb
-from cosme.pipes.americana import Americana
+from cosme.pipes.americana import Americanas
 from cosme.pipes.submarino import Submarino
 from cosme.pipes.walmart import Walmart
 from cosme.pipes.dafiti import Dafiti
 from cosme.pipes.netfarma import Netfarma
 from cosme.pipes import splitPipe
 from cosme import dataOps
+from cosme.dataOps import nameGen
 #simple pipeline for now. Drop Items with no description!
 
 #commitSolr = False
@@ -38,7 +39,10 @@ class CosmePipeline(object):
         #Lets send to ec2 as well
         #self.solr_url_prod = "http://ec2-54-242-158-167.compute-1.amazonaws.com:8080/solr/update?"
         #Set up NonRelDB-Connection
-	self.dbManager = dataOps.databaseManager('neworder','rawFox','foxcomments')
+	rawdb = nameGen('raw')
+	commentdb = nameGen('rawcomment')
+	print 'db for input : %s ' % rawdb
+	self.dbManager = dataOps.databaseManager('neworder',rawdb, commentdb)
         self.db = db.getConnection()
         brandsList = os.path.join(os.getcwd(),"cosme","pipes","utils","brandric.list")
         self.matcher = utils.listMatcher(brandsList) 
@@ -52,7 +56,7 @@ class CosmePipeline(object):
         self.siteDict['laffayette'] = laffayetteWeb()
         self.siteDict['walmart'] = Walmart()
         self.siteDict['submarino'] = Submarino()
-        self.siteDict['americanas'] = Americana()
+        self.siteDict['americanas'] = Americanas()
         self.siteDict['dafiti'] = Dafiti()
         self.siteDict['netfarma'] = Netfarma()
         self.defaultSite = AbstractSite()
@@ -72,6 +76,9 @@ class CosmePipeline(object):
         
 	cleanItem = sitePipe.process(item, spider, self.matcher)
 
+        #print " *****CLEAN ITEM ********"
+        #print " *****CLEAN ITEM ********"
+	#print cleanItem
 	if item['price'] != 'NA' and itemTools.hasMultiPrice(cleanItem): 
 	
 		if  itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
@@ -88,18 +95,21 @@ class CosmePipeline(object):
 			finalItem = splitPipe.singularityPipe(cleanItem)
 			self.postProcess(finalItem, spider)
 	else:
-		print "*********** Pipeline Singularity Pipe*************"
-		print cleanItem['volume']
 		cleanItem = splitPipe.singularityPipe(cleanItem)
 		self.postProcess(cleanItem, spider)
+
+    def commentCheck(self, item):
+	if 'comments' in item:
+		#has key 
+		return True
+	else:
+		return False
 	
     def postProcess(self, item, spider):
 	
 	cleanItem = item
 	cleanItem['key'] = itemTools.keyGen(item)
 	#cleanItem = itemTools.checkVolume(cleanItem)
-        print " *****CLEAN ITEM ********"
-	print cleanItem
  
 	cleanItem = dict(cleanItem)
         storeItem  = {}
@@ -116,8 +126,9 @@ class CosmePipeline(object):
             
 	if COMMIT_DB:
 		self.dbManager.updateLalinaItem(cleanItem)
-		self.dbManager.updateComment(storeItem)
 		self.dbManager.updateHistPrice(cleanItem)	
+		if 'comments' in storeItem: 
+			self.dbManager.updateComment(storeItem)
 	if UPDATE_REMOTE:
 		self.dbManager.updateRemote(cleanItem)
 		self.dbManager.updateRemoteComment(cleanItem)	

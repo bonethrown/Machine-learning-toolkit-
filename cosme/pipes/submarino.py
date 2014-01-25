@@ -22,7 +22,7 @@ class Submarino(AbstractSite):
 	def process(self, item, spider, matcher):
 		if item['url']:
 			item['url'] = item['url'].lower()					
-		if item['price']: 
+		if item['price'] != 'NA': 
 			temp = item['price']
 			temp = extractFloat(temp)
 			#pipeline expects price inside list
@@ -30,10 +30,13 @@ class Submarino(AbstractSite):
 			clean = cleanNumberArray2(arr, 'float')
 			item['price'] = clean
 
-		if item['brand']:
-			temp = item['brand'][0]
-			temp = cleanChars(temp)
-			item['brand'] = temp
+		if item['name']:
+			brand = item['name']
+                        match = matcher.dualMatch(brand)
+                        item['brand'] = match
+                        if not item['brand']:
+                                logging.info(item['url'])
+                                raise DropItem("**** **** **** Missing brand in %s . Dropping" % item)
 
 		if item['category']:
 			tempCat = item['category']

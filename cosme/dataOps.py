@@ -3,7 +3,7 @@ import os, sys
 from decimal import *
 import pymongo
 import urllib
-import datetime
+import time
 #databases
 OS_PATH = '/home/dev/pictureStorage/'
 
@@ -34,6 +34,10 @@ MASTER_DATABASE = 'matching'
 MASTER_COLL= 'delta'
 MASTER_COMMENTS = 'delta_comments'
 
+def nameGen( dbtype):
+	a = time.strftime("%B")
+	name = dbtype + '_'+ a
+	return name
 
 class databaseManager(object):
 
@@ -50,11 +54,6 @@ class databaseManager(object):
 	
 	#def updatePrimary(item):
 	#### This is the primary function to save an image to the harddrive 
-	def databaseNameGen(self, dbtype):
-		a = datetime.datetime.utcnow()
-		b = a.date().isoformat().replace('-','')
-		name = dbtype + '_'+ b
-		return name
 
 	def updateRemote(self, item):
 		try:
@@ -69,7 +68,8 @@ class databaseManager(object):
 
 			except Exception, e:
 				log.msg('update error in db for item %s' %item['key']) 
-		
+	
+	
 	def initCatCollections(self):
 		dbs =[]
 		for cat in CATEGORY_LIST:

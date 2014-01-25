@@ -22,22 +22,22 @@ class Walmart(AbstractSite):
 	def process(self, item, spider, matcher):
 		if item['url']:
 			item['url'] = item['url'].lower()					
-		if item['price']: 
+		if item['price'] != 'NA': 
 			temp = item['price']
 			#pipeline expects price inside list
-			arr = []
-			arr.append(pipeMethods.combineIntandDec(temp))
-			clean = cleanNumberArray(arr, 'float')
-			item['price'] = clean
+			if item['price'] != 'NA':
+				arr = []
+				arr.append(pipeMethods.combineIntandDec(temp))
+				clean = cleanNumberArray(arr, 'float')
+				item['price'] = clean
 		if item['brand']:
 			temp = item['brand'][0]
 			temp = cleanChars(temp)
 			item['brand'] = temp
 
 		if item['category']:
-			tempCat = item['category']
-			item['category'] = tempCat[0]
-		
+			item['category'] = ''
+				
 		if item['image']:
 			temp = item['image'] 
 			temp = temp[0]
@@ -47,8 +47,6 @@ class Walmart(AbstractSite):
 			item['volume'] = multiStateVolume(temp)
 	
 		if item['sku']: 
-			temp = item['sku']
-			temp = temp[0]
-
+			temp = ''
 
 		return item

@@ -18,13 +18,13 @@ class AbstractSite:
 		#raise DropItem("missing price DROPPING")
         
 	if  not item['name']:
-            raise DropItem("Missing name in %s . Dropping" % item)
+            raise DropItem("Missing name in %s . Dropping" % item['url'])
 	
 	if item['name']:
 		item['name'] = pipeMethods.genericNameExtract(item['name'])
 
-        if not item['brand']:
-		raise DropItem("missing brand in %s . Dropping this" % item)
+        #if not item['brand']:
+		#raise DropItem("missing brand in %s . Dropping this" % item)
         
 	#De-array these values. 
         #if isinstance(item['description'],list) and len(item['description']) > 1:

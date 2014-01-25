@@ -8,6 +8,7 @@ from cosme.spiders.superSpider import jsPrice
 from scrapy import log
 #from superSpider import Gnat
 from superSpider import PartialCrawler, getJSPrice
+import re
  
 class Cosme(CrawlSpider):
     
@@ -17,13 +18,63 @@ class Cosme(CrawlSpider):
     #might need to change this this is useless for now
     part = PartialCrawler()
     re_allow = part.construct()
+    allow_list = [re_allow]
 
-    start_urls = ["http://www.dafiti.com.br/beleza-feminina/"]
-	    	
-
-    		
+    start = []
+    count = 2
+    start.append("http://www.dafiti.com.br/beleza-v6-novel-top/") 
+    page = 'http://www.dafiti.com.br/beleza-v6-novel-top/?page='
+    while (count <24):
+	out = page + str(count)
+	start.append(out)
+	count = count +1
+    start_urls = start
+   # start_urls = ["http://www.dafiti.com.br/beleza-v6-novel-top/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/cabelos-shampoo/",
+#		"http://www.dafiti.com.br/beleza-feminina/cabelos/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/cabelos-condicionador/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/cabelos-finalizador/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/cabelos-mascara/",
+	#	"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/cabelos-tratamentos-especificos/",
+	#	"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/cabelos-modelador/",
+	#	"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/cabelos-acessorios/",
+	#	
+	#	"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/corpo-e-banho/",
+	#	"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/corpo-e-banho-pos-sol/",
+	#	"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/corpo-e-banho-banho/",
+	#	"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/corpo-e-banho-bronzeador/",
+	#	"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/corpo-e-banho-protetor-solar/",
+	#	"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/corpo-e-banho-locao-corporal/",
+	#	"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/corpo-e-banho-desodorantes/",
+	#	
+#
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/tratamento/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/tratamento-unhas/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/tratamento-olhos/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/tratamento-corpo/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/tratamento-maos/",
+#
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/maquiagem/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/maquiagem-corpo/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/maquiagem-unhas/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/maquiagem-face/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/maquiagem-labios/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/maquiagem-olhos/",
+#
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/perfumes/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/kits-e-presentes/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/saude-e-suplemento/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/acessorios/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/acessorios-pincel/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/acessorios-pinca/",
+#		"http://www.dafiti.com.br/beleza-feminina-v6-novel-top/beleza-feminina/acessorios-espelho/",
+#		]
+    #den = r'(http://www.dafiti.com.br/((?!.*(page)).*)$)'
+    #den_1 = re.compile(den, re.I)
+    deny_list = [r'http://www.dafiti.com.br/((?=.*\/)(?!.*page).*)', r'^((?=.*(sort)).*)$',r'^((?=.*(tamanho)).*)$',r'(http://www.dafiti.com.br/((?=.*(\/)).*)$)']    	
+        		
     rules = [
-             Rule(SgmlLinkExtractor(allow_domains = allowed_domains, allow = re_allow, unique = True), follow=True, callback='parse_item')
+             Rule(SgmlLinkExtractor(allow_domains = allowed_domains, deny= deny_list, allow = allow_list, unique = True), follow=True, callback='parse_item')
              ]
 
     xpathRegistry = XPathRegistry()
@@ -58,6 +109,6 @@ class Cosme(CrawlSpider):
         #cosmeItem['volume'] = self.gnat.multiVolumeExtract(cosmeItem, hxs, self.siteModule)
         #if not cosmeItem['name']:
          #       cosmeItem['name'] = self.gnat.multiNameExtract(cosmeItem, hxs, self.siteModule)
-        self.log('CosmeItem %s' % cosmeItem,log.INFO)
+        #self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem
         

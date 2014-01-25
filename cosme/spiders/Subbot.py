@@ -7,7 +7,8 @@ from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from scrapy import log
 #from superSpider import Gnat
 from superSpider import PartialCrawler
- 
+import re
+
 class Cosme(CrawlSpider):
     
 
@@ -20,9 +21,13 @@ class Cosme(CrawlSpider):
 	    	
     start_urls = ["http://www.submarino.com.br/loja/259977/perfumaria", "http://www.submarino.com.br/linha/293730/perfumaria/corpo", "http://www.submarino.com.br/linha/335240/perfumaria/esmaltes"]
 
+    den = re.compile(r'http://www.submarino.com.br((?=.*\/)(?!.*(offset|produto)).*)', re.I)
+    den_1 = re.compile(r'((?=.*(order|limit)).*)', re.I)
+
+    deny_list = [den, den_1]
     		
     rules = [
-             Rule(SgmlLinkExtractor(allow_domains = allowed_domains, allow = re_allow, unique = True), follow=True, callback='parse_item')
+             Rule(SgmlLinkExtractor(allow_domains = allowed_domains,deny = deny_list, allow = re_allow, unique = True), follow=True, callback='parse_item')
              ]
 
     xpathRegistry = XPathRegistry()
@@ -56,6 +61,6 @@ class Cosme(CrawlSpider):
         #cosmeItem['volume'] = self.gnat.multiVolumeExtract(cosmeItem, hxs, self.siteModule)
         #if not cosmeItem['name']:
          #       cosmeItem['name'] = self.gnat.multiNameExtract(cosmeItem, hxs, self.siteModule)
-        self.log('CosmeItem %s' % cosmeItem,log.INFO)
+        #self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem
         
