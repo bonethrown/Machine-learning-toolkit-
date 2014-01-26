@@ -34,11 +34,10 @@ class Netfarma(AbstractSite):
 			out = soup.getText()
 			item['description'] = out		
 
-		if item['brand']:
+		if item['name']:
 			#temp = item['brand'][0]
 			#temp = cleanChars(temp)
-			brand = matcher.listMatch(item['name'])
-			print " Brand Match : %s " % brand 
+			brand = matcher.dualMatch(item['name'])
 			item['brand'] = brand
 			if not item['brand']:
 				raise DropItem("******* Missing BRAND in %s . Dropping" % item['name'])

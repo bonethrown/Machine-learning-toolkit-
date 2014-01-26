@@ -12,6 +12,7 @@ import traceback
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 import logging
 from BeautifulSoup import BeautifulSoup
+from scrapy.exceptions import DropItem
 
 
 logger = logging.getLogger(__name__)
@@ -36,22 +37,18 @@ class MagazineLuizaSite(AbstractSite):
 		soup = BeautifulSoup(temp[0])
 		if soup.section:
 			des = soup.section.getText()	
-			print des
 			item['description'] = des
 		else:
 			print ' *%%%%%% %%% NO DESCRIPTION' 
 			item['description'] = ""
 	
-        if item['brand']:
-            if isinstance(item['brand'], list):
-                temp = item['brand']
-		temp = utils.cleanChars(temp[0]).lower()
-                item['brand'] = temp
-            
-	if not item['brand']:
-		brand = matcher.listMatch(item['name'])
-		print 'Lookup match found, %s' % brand
-		item['brand'] = brand
+        if item['name']:
+           	brand = item['name']
+		match = matcher.dualMatch(brand)
+		item['brand'] = match
+		if not item['brand']:
+			logging.info(item['url'])
+			raise DropItem("**** **** **** Missing brand in %s . Dropping" % item) 
 	if item['sku']:
 		item['sku'] = utils.cleanSkuArray(item['sku'], 'string')			
 
@@ -61,20 +58,19 @@ class MagazineLuizaSite(AbstractSite):
         
 
 	if item['category']:
-            print "**** CATEGORY ****"
 	    if isinstance(item['category'], list):
                 temp = item['category']
                 item['category'] = temp[0].lower()
             else:
                 item['category'] = item['category'].lower()
-        if item['comments']:
-            comment_html = item['comments']
-            try:
-                item['comments'] = self.get_comments(comment_html, item['url'])
-            except:
-                exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
-                logger.error('Error getting comments %s , Exception information: %s, %s, Stack trace: %s ' % (item['url'],
-                                            exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
+#        if item['comments']:
+ #           comment_html = item['comments']
+  #          try:
+            #    item['comments'] = self.get_comments(comment_html, item['url'])
+           # except:
+            #    exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+             #   logger.error('Error getting comments %s , Exception information: %s, %s, Stack trace: %s ' % (item['url'],
+              #                              exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
                 
                 
         item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())

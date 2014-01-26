@@ -189,7 +189,6 @@ class fuzzMatcher(object):
 		tokenset = (score1['tokenset'], score2['tokenset'])
 		partialsort = (score1['partialsort'],score2['partialsort'])
 		fuzzratio = (score1['fuzzratio'], score2['fuzzratio'])
-			
 		
 		setBool = self.checkTupScore(tokenset)	
 		partialBool = self.checkTupScore(partialsort)

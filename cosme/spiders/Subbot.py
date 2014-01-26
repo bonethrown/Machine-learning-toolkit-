@@ -19,10 +19,43 @@ class Cosme(CrawlSpider):
     re_allow = part.construct()
 
 	    	
-    start_urls = ["http://www.submarino.com.br/loja/259977/perfumaria", "http://www.submarino.com.br/linha/293730/perfumaria/corpo", "http://www.submarino.com.br/linha/335240/perfumaria/esmaltes"]
+    start_urls = ["http://www.submarino.com.br/sublinha/293668/perfumaria/perfumes/perfume-feminino",
+		"http://www.submarino.com.br/sublinha/293609/perfumaria/perfumes/perfume-masculino",
+		"http://www.submarino.com.br/sublinha/293688/perfumaria/perfumes/perfume-unissex",
+		"http://www.submarino.com.br/sublinha/356112/perfumaria/perfumes/estojos-e-kits",
 
-    den = re.compile(r'http://www.submarino.com.br((?=.*\/)(?!.*(offset|produto)).*)', re.I)
-    den_1 = re.compile(r'((?=.*(order|limit)).*)', re.I)
+		"http://www.submarino.com.br/linha/293728/perfumaria/olhos",
+		"http://www.submarino.com.br/linha/293589/perfumaria/labios",
+		"http://www.submarino.com.br/linha/293729/perfumaria/face",
+		"http://www.submarino.com.br/linha/335240/perfumaria/esmaltes",
+		"http://www.submarino.com.br/linha/293748/perfumaria/demaquilantes",
+		"http://www.submarino.com.br/linha/293591/perfumaria/acessorios",
+
+		"http://www.submarino.com.br/linha/293730/perfumaria/corpo",
+		"http://www.submarino.com.br/linha/293788/perfumaria/rosto",
+		"http://www.submarino.com.br/linha/293808/perfumaria/cabelos",
+		"http://www.submarino.com.br/linha/293592/perfumaria/maos",
+		"http://www.submarino.com.br/linha/348148/perfumaria/labios",
+
+		"http://www.submarino.com.br/linha/313742/perfumaria/desodorante",
+		"http://www.submarino.com.br/linha/313872/perfumaria/banho",
+		"http://www.submarino.com.br/linha/313948/perfumaria/hidratante",
+		"http://www.submarino.com.br/linha/313743/perfumaria/pos-barba",
+		"http://www.submarino.com.br/linha/349648/perfumaria/protetor-solar",
+		"http://www.submarino.com.br/linha/349649/perfumaria/bronzeador-solar",
+		"http://www.submarino.com.br/linha/349650/perfumaria/pos-sol",
+
+		"http://www.submarino.com.br/linha/335240/perfumaria/esmaltes",
+		"http://www.submarino.com.br/linha/338693/perfumaria/lixas",
+		"http://www.submarino.com.br/linha/335293/perfumaria/removedor-de-esmalte",
+		"http://www.submarino.com.br/linha/335241/perfumaria/tesouras-e-alicates-de-unha",
+		"http://www.submarino.com.br/linha/335273/perfumaria/tratamento-de-unha",
+		"http://www.submarino.com.br/linha/335274/perfumaria/tratamento-para-pes",
+		"http://www.submarino.com.br/linha/339528/perfumaria/unhas-posticas",
+		"http://www.submarino.com.br/linha/339442/perfumaria/adesivo-de-unha"]
+
+    den = re.compile(r'http://www.submarino.com.br((?=.*\/)(?!.*(promocoes.offset|produto)).*)', re.I)
+    den_1 = re.compile(r'((?=.*(order|limit|f_)).*)', re.I)
 
     deny_list = [den, den_1]
     		
