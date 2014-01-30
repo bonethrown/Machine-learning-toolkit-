@@ -15,11 +15,11 @@ def decodeIsoComments(commentArray):
 
 def isNa(price):
 	if isinstance(price, list):
-		check = price[0]
-		if check == 'NA':
-			return True
-		else:
-			return False
+		Na = False
+		for item in price:
+			if item  == 'NA':
+				Na = True
+		return Na
 	elif isinstance(price, str):
 		check = price
 		if check == 'NA':

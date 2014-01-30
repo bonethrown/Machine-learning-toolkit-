@@ -14,7 +14,15 @@ class Cosme(CrawlSpider):
     allowed_domains = ['belezanaweb.com.br']
     #might need to change this this is useless for now
     magaRegex = ".?(\/pf\/).?"
-    start_urls = ["http://www.belezanaweb.com.br/perfumes/",]
+    start_urls = ["http://www.belezanaweb.com.br/perfumes/",
+		"http://www.belezanaweb.com.br/cabelos/"
+		"http://www.belezanaweb.com.br/cuidados-para-pele/",
+		"http://www.belezanaweb.com.br/corpo-e-banho/",
+		"http://www.belezanaweb.com.br/maquiagem/",
+		"http://www.belezanaweb.com.br/unhas/",
+		"http://www.belezanaweb.com.br/termicos-e-acessorios/",
+		"http://www.belezanaweb.com.br/perfumes/presentes-e-conjuntos/",
+		"http://www.belezanaweb.com.br/perfumes/presentes-e-conjuntos/"]
     #start = ('http://www.belezanaweb.com.br/perfumes/',)
     
     deny_exts = ('=','site', 'include', 'ajax', 'basket', 'duvidas')
@@ -48,5 +56,5 @@ class Cosme(CrawlSpider):
         cosmeItem['volume'] = gnat.multiVolumeExtract(cosmeItem, hxs)
         if not cosmeItem['name']:
                 cosmeItem['name'] = gnat.multiNameExtract(cosmeItem, hxs)
-        self.log('CosmeItem %s' % cosmeItem,log.INFO)
+        #self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem

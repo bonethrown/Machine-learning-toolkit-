@@ -31,11 +31,10 @@ class AbstractSite:
          #   item['description'] = item['description'].pop()
 
 	if item['volume']:
-		if not utils.checkVolume(item['volume']):
+		if not utils.hasCheckVolume(item['volume']):
 			item['volume'] = ''
 	if not item['volume']: 
 		item['volume'] = pipeMethods.nonXpathVolume(item['name'], item['url'])
-
 	
 	item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
 	return item

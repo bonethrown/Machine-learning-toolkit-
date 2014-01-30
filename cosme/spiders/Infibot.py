@@ -6,8 +6,7 @@ from scrapy.http import Request
 from cosme.items import CosmeItem
 from scrapy import log
 from scrapy.contrib.loader import XPathItemLoader
-
-
+import re
 from xpaths import *
 import sys
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
@@ -20,15 +19,24 @@ class Cosme(CrawlSpider):
  
     #magaRe = re.compile('.?(\/pf\/pfba\/)$')
     #allowed_domains = ['pornhub.com']
-    start_urls = []
+    start_urls = ["http://www.infinitabeleza.com.br/shampoo-ct-37-238722.htm",
+		"http://www.infinitabeleza.com.br/ofertas-ct-169-238722.htm",
+		"http://www.infinitabeleza.com.br/condicionador-ct-49-238722.htm",
+		"http://www.infinitabeleza.com.br/mascaras-ct-60-238722.htm",
+		"http://www.infinitabeleza.com.br/tratamento-p-cabelos-ct-152-238722.htm",
+		"http://www.infinitabeleza.com.br/leavein-ct-120-238722.htm",
+		"http://www.infinitabeleza.com.br/finalizadores-ct-114-238722.htm",
+		"http://www.infinitabeleza.com.br/relaxamentos-alisamentos-ct-94-238722.htm",
+		"http://www.infinitabeleza.com.br/linha-masculina-ct-158-238722.htm",
+		"http://www.infinitabeleza.com.br/maquiagem-ct-116-238722.htm",
+		"http://www.infinitabeleza.com.br/unhas-ct-188-238722.htm",
+		"http://www.infinitabeleza.com.br/corpo-e-banho-ct-85-238722.htm",
+		"http://www.infinitabeleza.com.br/acessorios-e-equipamentos-ct-89-238722.htm"]
 
-    #TODO put these in a file!
-    start = ('http://www.infinitabeleza.com.br/',)
-    deny_exts = (r'login\.php','signup\.php','tags\.html','categories\.html','upload.html','search' ,'cat','c=')
-    for i in start:
-         start_urls.append(i)
+    #TODO put these in a file!i
+    deny_1 = re.compile('^((?=.*(login|signup|photos|login|loja)).*)$', re.I)
 
-    magazine_rule = Rule(SgmlLinkExtractor(unique=True,deny_extensions=('php'),deny=deny_exts ),callback='parse_item',follow=True)
+    magazine_rule = Rule(SgmlLinkExtractor(unique=True,deny=deny_1 ),callback='parse_item',follow=True)
    
    
     rules = (

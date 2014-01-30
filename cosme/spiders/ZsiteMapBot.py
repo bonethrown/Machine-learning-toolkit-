@@ -5,7 +5,7 @@ from scrapy.selector import HtmlXPathSelector
 from cosme.items import CosmeItem
 from scrapy import log
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
-
+from superSpider import Gnat
 class LocalSgmlLinkExtractor(SgmlLinkExtractor):
     
     def __init__(self, allow=(), deny=(), allow_domains=(), deny_domains=(), restrict_xpaths=(), 
@@ -21,25 +21,25 @@ class LocalSgmlLinkExtractor(SgmlLinkExtractor):
         
 class Cosme(SitemapSpider):
     name = 'Zbotsite'
-    allowed_domains = ['sepha.com.br']
-    sitemap_urls = ['http://www.sepha.com.br/sph-sitemapprd.xml']
+    #allowed_domains = ['sepha.com.br']
+    sitemap_urls = ['http://www.sepha.com.br/sitemap-produto-index.xml']
     #might need to change this this is useless for now
     #start_urls = ["http://www.sepha.com.br","http://www.sepha.com.br/cat/perfume/"]
     #start = ('http://www.belezanaweb.com.br/perfumes/',)
     
-    deny_exts = (r'\/s',r'listagem\.php', r'site', r'include', 'ajax', 'basket', r'busca\.php', r'brindes')
-    allow_exts = (r'[\w]+([//\w.]+)')
+    #deny_exts = (r'\/s',r'listagem\.php', r'site', r'include', 'ajax', 'basket', r'busca\.php', r'brindes')
+    #allow_exts = (r'[\w]+([//\w.]+)')
     #for i in start:
      #   start_urls.append(i)
     #r'/bios/.\w+\.htm'
         #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
-    #rules = [
-     #        Rule(LocalSgmlLinkExtractor(unique = True, deny_extensions = ('\.php'), deny = deny_exts) , follow=True, callback='parse_item'),
-      #       ]
+  #  rules = [
+           # Rule(LocalSgmlLinkExtractor(unique = True, deny_extensions = ('\.php'), deny = deny_exts) , follow=True, callback='parse_item'),
+   #          ]
     
-   # sitemap_rules = [
-    #    ('/product/', 'parse_item'),
-    #]
+    sitemap_rules = [
+        (r'(http://www.sepha.com.br/(?!.*(q=|php|login)).*)', 'parse_item')
+    ]
     xpathRegistry = XPathRegistry()
    
     def getDomain(self, url):
@@ -57,47 +57,19 @@ class Cosme(SitemapSpider):
     def drop(self, response):
         pass
 
-    def parse(self, response):
+    def parse_item(self, response):
         hxs = HtmlXPathSelector(response)
         cosmeItem = CosmeItem()
         cosmeItem['site'] = self.getDomain(response.url)
         cosmeItem['url'] = response.url
         siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
-        for field in siteModule.META.keys():
+        gnat = Gnat(siteModule)
+	for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-	
-	cosmeItem['price'] = self.multiPriceExtract(cosmeItem, hxs, siteModule)
-	cosmeItem['volume'] = self.multiVolumeExtract(cosmeItem, hxs, siteModule) 	
+	cosmeItem['price'] = gnat.multiPriceExtract(cosmeItem, hxs)	
+	cosmeItem['volume'] = gnat.multiVolumeExtract(cosmeItem, hxs)	
 	if not cosmeItem['name']:
 		cosmeItem['name'] = self.multiNameExtract(cosmeItem, hxs, siteModule) 	
-	self.log('CosmeItem %s' % cosmeItem,log.INFO)
+	#self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem
  
-    def multiPriceExtract(self, cosmeItem, hxs, siteModule): 
-        if len(cosmeItem['price']) == 0: # Check for the 'por' price
-		cosmeItem['price'] = hxs.select(siteModule.get_price2()).extract()
-		print "*******SECOND PRICE CHECK"
-		print cosmeItem['price']
-        if  len(cosmeItem['price']) == 0: 
-		cosmeItem['price'] = hxs.select(siteModule.get_price3()).extract()
-		print "*******************Third price check"
-		print cosmeItem['price']
-        if  len(cosmeItem['price']) == 0: 
-		cosmeItem['price'] = hxs.select(siteModule.get_price4()).extract()
-		print "*******************Fourth price check"
-		print cosmeItem['price']
-	return cosmeItem['price']
- 
-    def multiVolumeExtract(self, cosmeItem, hxs, siteModule):
-        if  len(cosmeItem['volume']) == 0: 
-		cosmeItem['volume'] = hxs.select(siteModule.get_volume2()).extract()
-		print "*******************Second Volume Check"
-		print cosmeItem['volume']
-		return cosmeItem['volume']	
-    def multiNameExtract(self, cosmeItem, hxs, siteModule):
-        if  len(cosmeItem['name']) == 0: 
-		cosmeItem['name'] = hxs.select(siteModule.get_name2()).extract()
-		if cosmeItem['name']:
-			cosmeItem['name'] = cosmeItem['name'][0]
-		print "*******************Second Name Check"
-		return cosmeItem['name']	

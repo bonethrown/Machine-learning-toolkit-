@@ -1,17 +1,24 @@
 from utils import utils, itemTools
 from scrapy import log
-from  cosme.pipes.default import AbstractSite
+from  default import AbstractSite
 import urllib3
 import re
 from cosme.settings import HTTP_NUMPOOLS, HTTP_MAXSIZE
 import logging
-from cosme.pipes.utils.utils import get_http_response, findPrice, strToFloat
+from utils.utils import get_http_response, findPrice, strToFloat
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from cosme.pipes.utils import stringtools, utils
+from cosme.pipes.utils.utils import  extractVolume,stringPrice, strToFloat,extractUrlVolume
 import sys
+from cosme.pipes.pipeMethods import nonXpathVolume
 import traceback
 from BeautifulSoup import BeautifulSoup
 import urllib
+from cosme.pipes.utils.stringtools import isNa
+from scrapy.exceptions import DropItem
+from cosme.pipes.utils.itemTools import volume2price,hasDiffVolume
+
+
 logger = logging.getLogger(__name__)
 
 class SephaWeb(AbstractSite):
@@ -21,6 +28,33 @@ class SephaWeb(AbstractSite):
 		self.http = urllib3.PoolManager(num_pools=HTTP_NUMPOOLS, block=True,maxsize=HTTP_MAXSIZE)
 		self.siteModule = XPathRegistry().getXPath('sepha')
 			
+	def getSephaPrice(self, Arr):
+		out = []
+		for val in Arr:
+			soup = BeautifulSoup(val)
+			promoco = soup.findAll('span', {'class': 'precoPromocao'})
+			find = soup.findAll('p')
+			if promoco:
+				promoco = promoco[0]
+				pm = promoco.getText()
+				pm = stringPrice(pm)
+				pm = strToFloat(pm)
+				out.append(pm)
+			elif find:	
+				find = find[0]
+				find = find.getText()
+				if find:
+					pm = stringPrice(find)
+					pm = strToFloat(pm)
+					out.append(pm)
+				else:
+					text = soup.getText()
+					text = stringPrice(text)
+					text = strToFloat(text)
+					out.append(text)
+
+		return out
+
 	def process(self, item, spider, matcher):
 		if item['url']:
 			item['url'] = item['url'].lower()					
@@ -34,30 +68,37 @@ class SephaWeb(AbstractSite):
 				temp = item['image']
 				temp = temp.replace('//','')
 				item['image'] = http+temp
-		
+	
+		if item['volume']:
+			if isinstance(item['volume'], list):
+				temp = item['volume']
+				temp = utils.getElementVolume(temp)
+				item['volume'] = temp
+
+		if item['price']:
+				temp = item['price']
+				prices = self.getSephaPrice(temp)
+				item['price'] = prices
+				#if isinstance(item['volume'], list):
+				#	price_match, vol = volume2price(item['url'],item['volume'], prices)
+				#	item['price'] = price_match
+				#	item['volume'] = vol
+				#else:	
+				#	item['price'] = prices[0]
+					
 		if item['sku']: 
 			item['sku'] = utils.cleanSkuArray(item['sku'],'string')
-		if not stringtools.isNa(item['price']): 
-			item['price'] = itemTools.filterMultiPriceRadio(item)
-		 	item['price'] = utils.arrayStringToFloat(item['price'])		
-			logger.info('PIPELINE OP: %s' % item['price'])
-			if not item['price'] :
-				print ' filter Multi price return %s' % item['price']
-				item['price'] = utils.cleanNumberArray(item['price'], 'float')
 
 		if item['brand']:
-			tempBrand = item['brand']
-			tempBrand = tempBrand[0]
-			tempBrand = utils.extractBrand(tempBrand)
-			item['brand'] = tempBrand
-						
+			temp = item['brand'][0]
+                        temp = matcher.dualMatch(temp)
+                        item['brand'] = temp
+        	if not item['brand']:
+                     logging.info(item['url'])
+                     raise DropItem("**** **** **** Missing brand in %s . Dropping" % item)			
 		if item['category']:
 			tempCat = item['category']
 			item['category'] =utils.cleanChars(tempCat[0])
-		if item['volume']:
-			temp = item['volume']
-			temp = utils.multiStateVolume(temp)
-			item['volume'] = temp
 	
 		if item['product_id']:
 			temp = item['product_id']

@@ -10,6 +10,7 @@ from cosme.pipes.utils.utils import get_http_response
 import sys
 import traceback
 import logging
+from scrapy.exceptions import DropItem
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +24,15 @@ class laffayetteWeb(AbstractSite):
 			item['url'] = item['url'].lower()					
 		if item['price'] != 'NA': 
 			item['price'] = utils.cleanNumberArray(item['price'], 'float')
-		
+	
 		if item['brand']:
-			tempBrand = item['brand']
-			tempBrand = tempBrand[0]
-			tempBrand = utils.extractBrand(tempBrand)
-			item['brand'] = tempBrand
+			temp = item['brand'][0]
+			temp = matcher.dualMatch(temp)
+			item['brand'] = temp
+		if not item['brand']:
+			     logging.info(item['url'])
+			     raise DropItem("**** **** **** Missing brand in %s . Dropping" % item)	
+		
 		if item['description']:
                 	
 			temp = item['description']
@@ -39,11 +43,9 @@ class laffayetteWeb(AbstractSite):
 			#volume can be string or list depening on item count on particular page
 			temp = item['volume']
 			if isinstance(temp, list):
-				temp = utils.getElementVolume(temp)
 				if len(temp) > 1:
+					temp = utils.getElementVolume(temp)
 					item['volume'] = temp
-				else: 
-					item['volume'] = temp[0]
 
 		if item['category']:
 			tempCat = item['category']

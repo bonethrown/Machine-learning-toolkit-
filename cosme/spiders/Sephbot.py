@@ -6,7 +6,7 @@ from cosme.items import CosmeItem
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from scrapy import log
 from superSpider import Gnat
-
+import re
  
 class Cosme(CrawlSpider):
     
@@ -16,14 +16,20 @@ class Cosme(CrawlSpider):
     denydom = ["centralderelacionamento.sephora.com.br", "ilovebeauty.sephora.com.br", "nossaslojas.sephora.com.br", "seguro.sephora.com.br",'busca.sephora.com.br']
     #might need to change this this is useless for now
     
-    start_urls = ["http://www.sephora.com.br/perfumes","http://www.sephora.com.br/maquiagem","http://www.sephora.com.br/cabelos"]
-    #start_urls = ['http://www.sephora.com.br/site/produto.asp?idproduto=13943']
-    #allow_exts =(r'site/produto\.asp\?id=\d+', r'imagens[\w\./{}-]+',r'site/categoria\.asp\?\w+=\d+', r'site/marca\.asp\?\w+=\d+', r'site/departamento\.asp\?\w+=\d+') 
-    deny_exts = (r'checkout\.asp', r'login\.asp', r'newsletter\.asp',r'\.php',r'busca', r'mac', r'include', r'ajax', r'basket\.asp', r'cesta\.asp',r'comprar\.asp', r'view=all', r'compartilhe\.asp', r'marca\.asp\?[\w&=]+', r'avise-me\.asp\?id=\d+', r'produtoDetalhe\.asp')
-   # allow_exts = (r'produto.asp\?idproduto=\d+')
-        #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
+    start_urls = ["http://www.sephora.com.br/perfumes",
+		"http://www.sephora.com.br/maquiagem",
+		"http://www.sephora.com.br/cabelos",
+		"http://www.sephora.com.br/perfumes",
+		"http://www.sephora.com.br/maquiagem",
+		"http://www.sephora.com.br/tratamento",
+		"http://www.sephora.com.br/corpo-e-banho",
+		"http://www.sephora.com.br/presentes",
+		"http://busca.sephora.com.br/resultado.aspx?orderby=desconto"]
+	
+    deny_1 = re.compile(r'(?=.*(login|asp|newsletter|php|busca|include|basket|cesta|view=all|comprar|compartilhe|avise-me|produtoDetalhe|aspx|ajax)).*', re.I)
+	
     rules = [
-             Rule(SgmlLinkExtractor(deny_domains = denydom, allow_domains = allowed_domains,  unique = True) , follow=True, callback='parse_item'),
+             Rule(SgmlLinkExtractor(deny = deny_1, deny_domains = denydom, allow_domains = allowed_domains,  unique = True) , follow=True, callback='parse_item'),
              ]
 
     xpathRegistry = XPathRegistry()
@@ -57,6 +63,6 @@ class Cosme(CrawlSpider):
         #cosmeItem['volume'] = gnat.multiVolumeExtract(cosmeItem, hxs)
         #if not cosmeItem['name']:
          #       cosmeItem['name'] = gnat.multiNameExtract(cosmeItem, hxs)
-        self.log('CosmeItem %s' % cosmeItem,log.INFO)
+        #self.log('CosmeItem %s' % cosmeItem,log.INFO)
         yield cosmeItem
         

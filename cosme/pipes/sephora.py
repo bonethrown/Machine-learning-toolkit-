@@ -11,6 +11,7 @@ from cosme.pipes.utils import stringtools
 import HTMLParser
 from BeautifulSoup import BeautifulSoup
 import urllib
+from scrapy.exceptions import DropItem
 
 logger = logging.getLogger(__name__)
 
@@ -26,20 +27,13 @@ class SephoraSite(AbstractSite):
         if item['price'] != 'NA': 
 		item['price'] = utils.cleanNumberArray(item['price'], 'float')
     
-        if item['brand']:
-            tempBrand = item['brand']
-            tempBrand = tempBrand[0]
-            tempBrand = utils.extractBrand(tempBrand)
-            item['brand'] = tempBrand
-    
-       # if item['name']:
-        #    tempName = item['name']
-         #   tempName = tempName[0]
-          #  item['name'] = utils.cleanChars(tempName)
-   	if item['volume']:
-	 	if not bool(item['volume'][0]):
-                        tempName= item['name'][0]
-                        item['volume'] = utils.extractVolume(tempName, 'ml')	 
+   	if item['brand']:
+                        temp = item['brand'][0]
+                        temp = matcher.dualMatch(temp)
+                        item['brand'] = temp
+        if not item['brand']:
+		     logging.info(item['url'])
+		     raise DropItem("**** **** **** Missing brand in %s . Dropping" % item) 
         
 	if item['category']:
             tempCat = item['category']

@@ -76,15 +76,12 @@ class CosmePipeline(object):
         
 	cleanItem = sitePipe.process(item, spider, self.matcher)
 
-        #print " *****CLEAN ITEM ********"
-        #print " *****CLEAN ITEM ********"
-	#print cleanItem
-	if item['price'] != 'NA' and itemTools.hasMultiPrice(cleanItem): 
-		print item['price']	
-		if  itemTools.hasDiffPrices(cleanItem) and not item['site'] == 'sepha':
+	if item['price'] != 'NA' and itemTools.hasDiffVolume(cleanItem['volume']): 
+		
+		if  itemTools.hasDiffPrices(cleanItem):
 			itemArray = []
 			itemArray = splitPipe.itemizeByPrice(cleanItem)
-			print itemArray
+			print 'Split pipe created : %s items' % itemArray
 			for cleanItem in itemArray:
 				finalItem = splitPipe.singularityPipe(cleanItem)
 				self.postProcess(finalItem, spider)

@@ -2,6 +2,7 @@ from utils import utils, itemTools
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.utils.utils import get_http_response
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
+from scrapy.exceptions import DropItem
 import sys
 import traceback
 import ast
@@ -22,8 +23,6 @@ class BelezanaWeb(AbstractSite):
 		item['sku'] = utils.cleanSkuArray(item['sku'], 'string')
 	if item['price'] != 'NA': 
 	
-
-		
 	#	temp = item['price']
 	#	if len(temp) > 1:
 	#		volarray = []
@@ -49,7 +48,7 @@ class BelezanaWeb(AbstractSite):
 	#		print item['price']
 	#		print item['volume']	
 	#	else:
-		item['price'] =utils.cleanNumberArray(item['price'], 'float')
+			item['price'] =utils.cleanNumberArray(item['price'], 'float')
 	
 	if item['description']:
 		temp = item['description']
@@ -62,10 +61,13 @@ class BelezanaWeb(AbstractSite):
             tempBrand = tempBrand[0]
             tempBrand = utils.extractBrand(tempBrand)
 	    tempBrand = utils.cleanChars(tempBrand)
-            item['brand'] = tempBrand
+            item['brand'] = matcher.dualMatch(tempBrand)
+	    if not item['brand']:
+			logging.info(item['url'])
+			raise DropItem("**** **** **** Missing brand in %s . Dropping" % item)	
+
    	if item['volume']:
 		#first check if volume array exists(if not getelement returns empty and see if the name contains volume information)
-		print 'PIPELINE INPUT volume is %s' % item['volume']
 		
 		temp = item['volume']
 		if isinstance(temp, list):
@@ -73,6 +75,7 @@ class BelezanaWeb(AbstractSite):
 			print "multi value volume %s" % temp
 			
 			item['volume'] = utils.getElementVolume(temp)
+			print 'PIPELINE OUT volume is %s' % item['volume']
 		else:
 			print 'NON multi volume field %s' % item['volume']
 			

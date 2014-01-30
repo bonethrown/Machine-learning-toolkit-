@@ -1,5 +1,6 @@
 from BeautifulSoup import BeautifulSoup
 from utils import utils
+from scrapy.exceptions import DropItem
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.utils.utils import get_http_response
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
@@ -17,12 +18,14 @@ class InfiniteBeleza(AbstractSite):
     #do all default processing here
     def process(self, item,spider,matcher):
    	    if item['brand']:
-		item['brand'] = item['brand'][0] 
-#  	NAME PROVSSED IN DEFAULT PIPLE LINE 
-#            if item['name']:
-         #       tempNameArr = item['name'][0]
-	#	item['name'] = utils.cleanChars(tempNameArr)
-            if item['price'] != 'NA':
+		temp = item['brand'][0] 
+            	temp = matcher.dualMatch(temp)
+		item['brand'] = temp
+            if not item['brand']:
+                     logging.info(item['url'])
+                     raise DropItem("**** **** **** Missing brand in %s . Dropping" % item)
+
+	    if item['price'] != 'NA':
 		  temp = item['price']
 		  item['price'] = utils.cleanNumberArray(temp, 'float')
 	    if item['description']:
@@ -34,9 +37,12 @@ class InfiniteBeleza(AbstractSite):
 			else:
 				print 'too long text going for else'
 				a =soup.p.findChild('span')
-				a = a.getText()
-				item['description'] = a	
-			
+				if a:
+					a = a.getText()
+					item['description'] = a	
+				else:
+					print ' no decription extracted'
+				
 	    if item['volume']:
 		item['volume'] = utils.extractVolume(item['name'])
 	    if item['comments']:

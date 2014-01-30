@@ -1,34 +1,47 @@
 from scrapy.contrib.spiders import CrawlSpider ,Rule
+from scrapy.contrib.spiders import SitemapSpider
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
-
 from cosme.items import CosmeItem
-from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from scrapy import log
-import sys
-from scrapy.exceptions import CloseSpider
-from cosme.settings import COSME_DEBUG
+from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 
-
- 
-class Cosme(CrawlSpider):
-    name = 'Sbot'
-    allowed_domains = ['sephora.com.br']
-    #might need to change this this is useless for now
+class LocalSgmlLinkExtractor(SgmlLinkExtractor):
     
-    start_urls = ["http://www.sephora.com.br", "http://www.sephora.com.br/site/departamento.asp?iddepartamento=1", "http://www.sephora.com.br/site/marca.asp?id=197"]
-    #start_urls = ['http://www.sephora.com.br/site/produto.asp?idproduto=13943']
-    allow_exts =(r'produto\.asp\?idproduto=\d+') 
-    deny_exts = (r'busca', r'mac', r'include', r'ajax', r'basket', r'orderby', r'cesta\.asp',r'comprar\.asp', r'view=all', r'compartilhe\.asp', r'produto\.asp\?id=\d+', r'marca\.asp\?[\w&=]+', r'avise-me\.asp\?id=\d+', r'produtoDetalhe\.asp')
-   # allow_exts = (r'produto.asp\?idproduto=\d+')
-        #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
-    rules = [
-             Rule(SgmlLinkExtractor(deny = deny_exts, unique = True) , follow=True, callback='parse_item'),
-             ]
-
-    xpathRegistry = XPathRegistry()
-    
+    def __init__(self, allow=(), deny=(), allow_domains=(), deny_domains=(), restrict_xpaths=(), 
+                 tags=('a', 'area'), attrs=('href'), canonicalize=True, unique=True, process_value=None,
+                 deny_extensions=None):
+        SgmlLinkExtractor.__init__(self, allow=allow, deny=deny, allow_domains=allow_domains, deny_domains=deny_domains,
+                                   restrict_xpaths = restrict_xpaths, tags=tags, attrs=attrs, canonicalize=canonicalize,
+                                   unique = unique, process_value = process_value, deny_extensions = deny_extensions)
         
+    def extract_links(self, response):
+        response.body = response.body.replace('<! ', '<!--')
+        return SgmlLinkExtractor.extract_links(self, response)
+        
+class Cosme(SitemapSpider):
+    name = 'Zbotsite'
+    #allowed_domains = ['sepha.com.br']
+    sitemap_urls = ['http://www.sepha.com.br/sitemap.xml']
+    #might need to change this this is useless for now
+    #start_urls = ["http://www.sepha.com.br","http://www.sepha.com.br/cat/perfume/"]
+    #start = ('http://www.belezanaweb.com.br/perfumes/',)
+    
+    #deny_exts = (r'\/s',r'listagem\.php', r'site', r'include', 'ajax', 'basket', r'busca\.php', r'brindes')
+    #allow_exts = (r'[\w]+([//\w.]+)')
+    #for i in start:
+     #   start_urls.append(i)
+    #r'/bios/.\w+\.htm'
+        #site_rule = RWWule(SgmlLinkExtractor(), follow=True, callback='parse_item')
+  #  rules = [
+           # Rule(LocalSgmlLinkExtractor(unique = True, deny_extensions = ('\.php'), deny = deny_exts) , follow=True, callback='parse_item'),
+   #          ]
+    
+    sitemap_rules = [
+        (r'(http://www.sepha.com.br/(?!.*(q=|php|login)).*)', 'parse_item')
+    ]
+    xpathRegistry = XPathRegistry()
+   
     def getDomain(self, url):
         try:
             urlSeg = url.split('/')
@@ -52,49 +65,39 @@ class Cosme(CrawlSpider):
         siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
         for field in siteModule.META.keys():
             cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-        cosmeItem['comments'] = self.get_comments(hxs, siteModule)
-        self.log(str(cosmeItem),log.INFO)
-        if COSME_DEBUG:
-            raise CloseSpider('Ad-hoc closing for debugging')
-        else:
-            yield cosmeItem
-        
-    def get_comments(self, hxs, siteModule):
-        pattern =  siteModule.get_comments()['commentList']        
-        comments = hxs.select(pattern)
-        result = []
-        for comment in comments:
-            commentDict = dict()
-            commentDict['star'] = self.get_star(comment, siteModule.get_comments()['commentStar'])
-            commentDict['name'] = comment.select(siteModule.get_comments()['commenterName']).extract()[0].strip()
-            commentDict['date'] = self.get_date(comment, siteModule.get_comments()['commentDate'])
-            commentDict['comment'] = comment.select(siteModule.get_comments()['commentText']).extract()[0].strip()
-            result.append(commentDict)
-        return result
-    
-    def get_date(self, comment, pattern):
-        datestr  = ''.join(comment.select(pattern).extract()).strip()
-        needle= 'em'
-        idx = datestr.find(needle)
-        if idx > -1:
-            return datestr[idx + len(needle):].strip()
-        else:
-            return datestr
-
-    def get_star(self, comment, pattern):
-            star = 0
-            possiblestars  = comment.select(pattern).extract()
-            if len(possiblestars) == 1:
-                stars = possiblestars[0]
-                if 'Avaliacao10' in stars:
-                    star = 1
-                elif 'Avaliacao20' in stars:
-                    star = 2
-                elif 'Avaliacao30' in stars:
-                    star = 3
-                elif 'Avaliacao40' in stars:
-                    star = 4
-                elif 'Avaliacao50' in stars:
-                    star = 5
-            return star
-
+	
+	cosmeItem['price'] = self.multiPriceExtract(cosmeItem, hxs, siteModule)
+	cosmeItem['volume'] = self.multiVolumeExtract(cosmeItem, hxs, siteModule) 	
+	if not cosmeItem['name']:
+		cosmeItem['name'] = self.multiNameExtract(cosmeItem, hxs, siteModule) 	
+	#self.log('CosmeItem %s' % cosmeItem,log.INFO)
+        yield cosmeItem
+ 
+    def multiPriceExtract(self, cosmeItem, hxs, siteModule): 
+        if len(cosmeItem['price']) == 0: # Check for the 'por' price
+		cosmeItem['price'] = hxs.select(siteModule.get_price2()).extract()
+		print "*******SECOND PRICE CHECK"
+		print cosmeItem['price']
+        if  len(cosmeItem['price']) == 0: 
+		cosmeItem['price'] = hxs.select(siteModule.get_price3()).extract()
+		print "*******************Third price check"
+		print cosmeItem['price']
+        if  len(cosmeItem['price']) == 0: 
+		cosmeItem['price'] = hxs.select(siteModule.get_price4()).extract()
+		print "*******************Fourth price check"
+		print cosmeItem['price']
+	return cosmeItem['price']
+ 
+    def multiVolumeExtract(self, cosmeItem, hxs, siteModule):
+        if  len(cosmeItem['volume']) == 0: 
+		cosmeItem['volume'] = hxs.select(siteModule.get_volume2()).extract()
+		print "*******************Second Volume Check"
+		print cosmeItem['volume']
+		return cosmeItem['volume']	
+    def multiNameExtract(self, cosmeItem, hxs, siteModule):
+        if  len(cosmeItem['name']) == 0: 
+		cosmeItem['name'] = hxs.select(siteModule.get_name2()).extract()
+		if cosmeItem['name']:
+			cosmeItem['name'] = cosmeItem['name'][0]
+		print "*******************Second Name Check"
+		return cosmeItem['name']	

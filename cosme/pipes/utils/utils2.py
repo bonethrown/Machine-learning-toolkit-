@@ -35,9 +35,6 @@ def allToString(anything):
 	elif isinstance(anything, str):
 		return anything
 
-
-
-
 def arrayToFile(name, array):
                 savedoc = open(stringfield+'map', 'wb')
                 for item in array:

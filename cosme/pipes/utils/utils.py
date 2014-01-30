@@ -63,7 +63,7 @@ def multiStateVolume(vol):
 		return check
 		
 
-def checkVolume(vol):
+def hasCheckVolume(vol):
 	if isinstance(vol, list):
 		check = vol[0]
 		check = extractVolume(check)
@@ -99,9 +99,30 @@ def greadyVolume(inputstring, suffixpattern='ml'):
 
 
 #Gram extractor looks for gr with and without space 
-
+def extractUrlVolume(url):
+	pattern = r'((?!0)\d{1,4}ml)(?=[r\s-]|$)'
+	p_gram = r'((?!0)\d{1,4}ml)(?=[r\s-]|$)'
+	p_gr = r'(?!0)\d{1,4}gr(?=[r\s-]|$)'
+	
+	pat = re.search(pattern, url, re.I)
+	pat1 = re.search(p_gram, url, re.I)
+	if pat:
+		pat =pat.group()
+		return pat
+	 
+	elif pat1:
+		pat1 = pat1.group()
+		return pat1
+	else:
+		pat2 = re.search(p_gr, url, re.I)
+		if pat2:
+			pat2 = pat2.group()
+			return pat2
+		else:
+			return 'NA'
+	
 def extractGram(inputstring):
-    pattern  = r'\d+g(?=[r\s-]|$)'
+    pattern  = r'(\d+g)(?=(\<|[r\s-]|>|))'
     gram = re.search(pattern,inputstring, re.I)
     if gram is not None:
         gram = gram.group()
@@ -192,6 +213,10 @@ def cleanNumberArray(array, strOrFloat):
 				
 	return out
 
+def stringPrice(string):
+	string = findPrice(string)
+	string = cleanPrice(string)
+	return string
 
 def cleanNumberArray2(array, strOrFloat):
 	out = []
@@ -349,8 +374,9 @@ def extractSku(string):
 def extractFloat(string):
     temp = str(string)
     temp = re.search(r'[\d.,]+', temp)
-    temp = temp.group()
-    return temp
+    if temp:
+	    temp = temp.group()
+	    return temp
 
 def extractRawPrice(string):
     tempPrice = unidecode.unidecode(string)
@@ -399,7 +425,7 @@ def extractPrice(arrayOrString):
 		return price
 	elif isinstance(arrayOrString, str):
 		temp = arrayOrString
-		price = temp(findPrice)
+		price = findPrice(temp)
 		return price	
 
 class listMatcher:

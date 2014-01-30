@@ -405,7 +405,7 @@ class Ngrammer(object):
 	def __init__(self):
 		
 		self.test_list = ['all', 'this', 'hayyppened', 'more', 'or', 'less']
-		self.handler = DatabaseHandler()
+		#self.handler = DatabaseHandler()
 		self.tables = catChecker.Tables()
 		
 	def makeUnicode(self, string):
@@ -453,30 +453,30 @@ class Ngrammer(object):
 			arr.append(tup)
 		return arr
 
-	def uniProbDist(self):
+	def uniProbDist(self, coll):
 		uniArray = []
 		wordcount = 0
-		for item in self.handler.indb.find():
+		for item in coll.find():
 			name = self.unigram(item['name'])
 			uniArray.extend(name)
 			b = len(name)
 			wordcount = wordcount + b
 		return uniArray
 	
-	def biProbDist(self):
+	def biProbDist(self, coll):
 		biArray = []
 		wordcount = 0
-		for item in self.handler.indb.find():
+		for item in coll.find():
 			name = self.bigram(item['name'])
 			biArray.extend(name)
 			b = len(name)
 			wordcount = wordcount + b
 		return biArray
 
-	def triProbDist(self):
+	def triProbDist(self, coll):
 		triArray = []
 		wordcount = 0
-		for item in self.handler.indb.find():
+		for item in coll.find():
 			name = self.trigram(item['name'])
 			triArray.extend(name)
 			b = len(name)
@@ -585,6 +585,12 @@ class Ngrammer(object):
 		features['contains(%s)' % word] = (word in document_words)
 	    return features
 
+
+###################
+####DEPRECEATED USE DATAOPs.PY
+###############################
+################################
+###############################
 
 class DatabaseHandler(object):
 	def __init__(self):

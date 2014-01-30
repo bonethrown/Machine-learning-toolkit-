@@ -2,7 +2,7 @@
 Pipelines per site are stored in their own folder for minumum chaos
 """
 import copy
-from cosme.pipes.default import AbstractSite
+#from cosme.pipes.default import AbstractSite
 from utils import utils, itemTools
 from scrapy.exceptions import DropItem
 from scrapy import log
@@ -44,6 +44,20 @@ def addItemVolume(item):
 			out.append(newItem)
 		return Out
 
+
+def itemize(item):
+	out = []
+	prices = item['price']
+	volumes = item['volume']
+	for price in prices:
+		count = prices.index(price)
+		newItem = copy.deepcopy(item)
+		newItem['price'] = [price]
+		newItem['volume'] = volumes[count]
+		out.append(newItem)
+	return out
+
+
 def itemizeByPrice(item):
                 responseArray = []
                 temp = item['price']
@@ -56,10 +70,10 @@ def itemizeByPrice(item):
                                 newItem['price'].append(price)
                                 i = temp.index(price)
                                 newItem['volume'] = volume[i]
-				print "METRICS GOING IN ***************"
-				print volume[i]
-				print price
-				print newItem
+				#print "METRICS GOING IN ***************"
+				#print volume[i]
+				#print price
+				#print newItem
 				responseArray.append(newItem)
 				del newItem
 		return responseArray		
