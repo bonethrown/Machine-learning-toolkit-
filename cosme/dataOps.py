@@ -104,7 +104,6 @@ class databaseManager(object):
 		for db in array:
 			self.resetdb(db)
 			
-		
 	def resetdb(self, collection):
 		collection.update( {"groupid" :  { "$exists" : True } }, {"$unset" : { "groupid" : 1 } }, multi = True)	
 		collection.update( {"rank" :  { "$exists" : True } }, {"$unset" : { "rank" : 1 } }, multi = True)	
@@ -119,7 +118,6 @@ class databaseManager(object):
 		for item in CATEGORY_LIST:
 			self.splitByCat(item)
 			print 'chopped %s' % item
-
 
 	def merge(self, parent, slave):
 		for item in slave.find():
