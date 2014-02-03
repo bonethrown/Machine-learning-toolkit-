@@ -271,7 +271,7 @@ def cleanPrice(toClean):
 def cleanSymbols(toClean):
  
     badChars = ["\\r","\\t","\\n","-",":","%",",","(",")","'","!",]
-    stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
+    stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","votes"]
     toClean = toClean.lower().strip()
     for val in badChars:
         toClean = toClean.replace(val,"")
@@ -282,7 +282,7 @@ def cleanSymbols(toClean):
 
 def cleanSpaces(toClean):
     badChars = ["\n"]
-    stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","sec","votes"]
+    stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","votes"]
     toClean = toClean.lower().strip()
     for val in badChars:
         toClean = toClean.replace(val,"")

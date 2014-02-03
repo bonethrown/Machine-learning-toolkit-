@@ -25,7 +25,9 @@ class PartialCrawler(object):
 
 	def construct(self):
 		string = self.createLinks(self.perfume)	
+		print string
 		out = self._compile(string)
+		
 		return out
 
 	def createLinks(self, arr):

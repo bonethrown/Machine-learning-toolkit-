@@ -19,6 +19,7 @@ class Cosme(CrawlSpider):
     allowed_domains = ['magazineluiza.com.br']   #Add one by one, comment out as necassary
     part = PartialCrawler()
     re_allow = part.construct()
+    print re_allow
     #magaRegex = ".?(\/pf\/).?"
     #magaRe = re.compile('.?(\/pf\/pfba\/)$')
     #allowed_domains = ['pornhub.com']i

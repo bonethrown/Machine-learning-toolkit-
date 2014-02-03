@@ -105,10 +105,12 @@ class databaseManager(object):
 			self.resetdb(db)
 			
 	def resetdb(self, collection):
+		count = collection.find({ 'matchscore': { "$exists" : True }}).count()
 		collection.update( {"groupid" :  { "$exists" : True } }, {"$unset" : { "groupid" : 1 } }, multi = True)	
 		collection.update( {"rank" :  { "$exists" : True } }, {"$unset" : { "rank" : 1 } }, multi = True)	
 		collection.update( {"matchscore" :  { "$exists" : True } }, {"$unset" : { "matchscore" : 1 } }, multi = True)	
-		print '%s  cleaned %s' % (collection,collection.find({ 'matchscore': { "$exists" : True }}).count()) 
+		count_done = collection.find({ 'matchscore': { "$exists" : True }}).count()
+		print 'Pre clean Items: %s, post Clean: %s ' % (count, count_done)
 
 	def killdbs(self):
 		for db in self.catdbs:
@@ -156,6 +158,16 @@ class databaseManager(object):
 			self.lalinaCollection.update({"key" : item['key']}, item, upsert=True)
 		except Exception, e:
 			log.msg('update error in db for item %s' %item['key']) 
+	
+	def updateByField(self, field, value, newValue):
+		num = self.lalinaCollection.find({field: value}).count()
+		
+		print 'updating : %s' % num 
+		try:
+			self.lalinaCollection.update({field : value}, {field : newValue}, mult=True)
+		except Exception, e:
+			log.msg('update error in db for item') 
+	
 	def updateLalinaField(self, item, field):
 		try:
 			self.lalinaCollection.update({"key" : item['key']}, {field : item[field]})
