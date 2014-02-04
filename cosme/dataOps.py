@@ -122,6 +122,7 @@ class databaseManager(object):
 			print 'chopped %s' % item
 
 	def merge(self, parent, slave):
+		parent = self.db.create_collection(parent)
 		for item in slave.find():
 			try:
 				parent.insert(item)
@@ -129,6 +130,7 @@ class databaseManager(object):
 				print e
 
 	def multiMerge(self, parent, slaveArr):
+		parent = self.db.create_collection('parent')
 		for coll in slaveArr:
 			for item in coll.find():
 				try:
