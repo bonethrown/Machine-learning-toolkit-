@@ -1,4 +1,5 @@
 from pymongo import Connection
+from betaMapreduce import FuzzMatcher
 import os,sys,urllib2
 import time
 import json
@@ -15,17 +16,15 @@ from nltk.classify import NaiveBayesClassifier
 import random
 from dataOps import databaseManager
 import re
-from betaMapreduce import fuzzMatcher
 from utils import listMatcher
-
 COMMIT = True
 
-INDB = 'matching'
-INCOLL = 'sep112013post'	
-OUTDB = 'matching'
-OUTCOLL = 'sep112013postwork'
-FINAL_COLL = 'matched'
-
+INDB = 'neworder'
+INCOLL = 'raw_January'	
+OUTDB = 'neworder'
+OUTCOLL = 'januarypost'
+FINAL_COLL = 'january_proccessed'
+MAP_PATH = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandmaptable.list'
 match_path = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandric.list'
 #INDB is raw db rom crawlers
 #OUTDB is cleaned data 
@@ -44,14 +43,17 @@ CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maq
 
 class CleanAndCategorize(object):
 	
-	def __init__(self):
-		self.mapreduce = Mapreduce()
+	def __init__(self, launch_with_model = True):
 		self.bayes = BayesObject()
-		self.trainedmodel = self.bayes.makeModel()
 		self.outdb = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
 		self.indb = databaseManager(INDB, INCOLL, COMMENT_COLL)
 		self.fuzz = FuzzMatcher(OUTDB, OUTCOLL)
-
+		self.mapreduce = Mapreduce()
+		self.init_Model(launch_with_model)
+		self.norm = Normalize(OUTDB, OUTCOLL)
+	def init_Model(self, toLoad = True):
+		if toLoad:
+			self.trainedmodel = self.bayes.makeModel()
 	def reload(self):
 		self.outdb = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
 		self.indb = databaseManager(INDB, INCOLL, COMMENT_COLL)
@@ -60,36 +62,22 @@ class CleanAndCategorize(object):
 	def reloadModel(self):
 		self.trainedmodel = self.bayes.makeModel()
  
-	def runFieldCleaner(self):
+	def Execute(self):
 		### RED ME BEFORE RUNNING
 			# FIRST DB IS IN TO CREATE OUTDB AS NOT TO MODIFY ORIGINAL DATA
 			# SECOND COMMANDS RUN ON OUTDB 
 		self.mapreduce.makeMappingCopy(self.indb.lalinaCollection, self.outdb.lalinaCollection)
-		print 'running volume cleaner'
-		time.sleep(1)
-		self.mapreduce.batchCleanVolume(self.outdb)
-		print 'running string price generator'
-		time.sleep(1)
-		self.mapreduce.addStringPrice(self.outdb)
-		print 'running  price per volume generator'
-		time.sleep(1)
-		self.mapreduce.pricePerVolume(self.outdb)
-		print ' running dumb and smart classifiler'
-		time.sleep(1)
+		self.norm.brandReduce()	
 		self.dumbClassify(self.outdb)
-		self.smartClassify(self.outdb)
-		print ' running Matcher this may take an hour'
-		time.sleep(1)
-		
-		self.outdb.chop2cats(self.outdb.getCollection())
-		self.fuzz.loopdbMatch()
-		self.outdb.multiMerge(FINALCOLL, self.outdb.catdbs)
-		#parent db name and array of dbs
-		
-
+		#self.smartClassify(self.outdb)
+		#print ' running Matcher this may take an hour'
+		self.runMatcher()
 		#### RUN MATCHER HERE ####
-		
-
+	def runMatcher(self):
+		self.outdb.chop2cats(self.outdb.getCollection())
+		self.fuzz.loopMatch()
+		self.outdb.multiMerge(FINALCOLL, self.outdb.catdbs)
+			
 	def dumbClassify(self, dbhandler):
 		collection = dbhandler.getCollection()
 		print 'db is: %s' % collection
@@ -107,6 +95,8 @@ class Normalize(object):
 		self.db = databaseManager(db, coll, coll)
 		self.matcher = listMatcher(match_path)
 		self.coll= self.db.getCollection()
+		self.table = catChecker.Tables()
+		self._map = self.table.buildCategoryTable(MAP_PATH)
 	def brandNormalize(self, brand):
 		match = self.matcher.listMatch(brand)			
 		fuzz_match = self.matcher.fuzzMatch(brand)
@@ -115,7 +105,39 @@ class Normalize(object):
 	def dualmatch(self, brand):
 		out = self.matcher.dualMatch(brand)
 		return out
+	
+	def brandReduce(self):
+		count = 0 
+		for item in self.coll.find():
+			brand = unicode(item['brand'])
+			for element in self._map:
+				key = element.keys()
+				key = key[0]
+				arr=  element.values()		
+				arr= arr[0]	#return brand
+				if brand == key:
+					pass
+						#print 'IN: %s    OUT: %s' % (brand,key)
+				elif brand in arr:
+					#print 'IN : %s MATCH: %s KEY: %s' % (brand,element.values(), key)
+					item['brand'] = key
+					count = count + 1
+					self.db.updateLalinaItem(item)
+				#else:
+				#	return brand
+		print 'REDUCED: %s' % count
 
+	def getCatRow(self, category):
+                catList = []
+                arr = []
+                for item in self._map:
+                        for key, value in item.iteritems():
+                                if key == category:
+                                        catList.extend(value)
+                                        catList.append(unicode(category))
+
+                return catList
+	
 	def batchnormalize(self):
 		total = self.coll.count()
 		print total
@@ -132,7 +154,6 @@ class Normalize(object):
 				count = count + 1
 				nomatch.append(item['url'])
 		print 'nomatch: %s from total ; %s ' % (count, total)
-	
 	
 class Name(object):
 	
@@ -152,7 +173,7 @@ class Name(object):
 		return " ".join([self.name,self.des])	
 	def get(self):
 		return self
-
+	
 	def unigram(self, name):
 		name = self.makeUnicode(self.name)
 		return  name.split()
@@ -179,7 +200,6 @@ class Name(object):
 				lookup = term	
 				out.append(lookup)	
 		return out
-	
 	def matched(self, synList):
 		ngrams = set(self.grams())
 		matched = []
@@ -196,7 +216,6 @@ class Name(object):
 		for word in words:
 			features[word] = (word in uniq)
 		return features
-
 	def customFeaturize(self, word):
 		# call with name object	
 		words = []
@@ -238,25 +257,28 @@ class BayesObject(object):
 		self.unmatched = []
 		self.handler = DatabaseHandler()
 		self.ngrammer = Ngrammer()
-		self.corpus = self.allNames()
+		#self.corpus = self.allNames()
 	#	self.model = self.makeModel()
 	#creates the name object for each string name
+	def loadCorpus(self, arr):
+		out = []
+		for item in arr:	
+			_name = self.convertItem(item)
+			out.append(_name)
+		return out
+
 	def allNames(self):
 		out = []
 		for item in self.handler.indb.find():
-			
-			name = item['name']
-			url = item['url']
-			_name = Name(name)
-			_name.url = url
-			_name.des = item['description']
+			_name = self.convertItem(item)
 			out.append(_name)
-		return out		
+		return out
+	#used to refresh the databas or switch to another database withoud killing the object		
 	def initdatabase(self, db, coll):
 		self._handler = databaseManager(db,coll,coll)
 		self.db = self._handler.getCollection()
-		print self.db
-
+		print 'Bayes DB: %s ' % self.db
+	
 	def convertItem(self, item):
 		name = item['name']
 	
@@ -266,17 +288,18 @@ class BayesObject(object):
 		_name.url = url
 		_name.volume  = item['volume']
 		_name.brand = item['brand']
+		_name.cat = item['category']
 		_name.url = url
 		
 		_name.des = des
 		return _name
-
+	#match a single ITEM to a category
 	def singleMatch(self, item):
 			
 		_name = self.convertItem(item)
 		category = self.matchOne(_name)
 		return category
-
+	#run a dumbclassification on a database
 	def batchDumbClassify(self, db):
 		
 		categories = self.ngrammer.categories()
@@ -299,7 +322,7 @@ class BayesObject(object):
 			#if not isMatched:
 			
 				
-		#return matched, unmatched
+	#training match set for item matching	#return matched, unmatched
 	def lalinaMatchTrainSet(self, db, category):
 		matched = []
 		unmatched = []
@@ -319,6 +342,10 @@ class BayesObject(object):
 				unmatched.append(_name)
 		return matched, unmatched
 
+	#this is the DUMB classify method
+	#returns to arrays to self, Unmatched and MATCHED
+	#used for categorization
+	#used mainly in shell to play around and see matched and unmatched array
 	def garanti(self):
 		unmatched = []
 		matched = []
@@ -342,9 +369,8 @@ class BayesObject(object):
 				unmatched.append(name)	
 				
 		return matched, unmatched
-
+	#category match a single item expects name object
 	def matchOne(self, nameObject):
-		print nameObject.name
 		name = nameObject
 		categories = self.ngrammer.categories()	
 		
@@ -353,44 +379,36 @@ class BayesObject(object):
 		# LOOP WILL RUN AND WILL MATCH THE LAST ONE IT FINDS THIS COULD BE A PROBLEM AND NEEDS VERIFICATION
 			if doc:
 				return cat
-	def keyWord(self, namestr):
-		name = Name(namestr)
-		categories = self.ngrammer.categories()	
-		
-		for cat in categories:
-			doc = name.matched(self.ngrammer.getCatRow(cat))
-		# LOOP WILL RUN AND WILL MATCH THE LAST ONE IT FINDS THIS COULD BE A PROBLEM AND NEEDS VERIFICATION
-			if doc:
-				return doc
-		
+	
+	#standard model for categorization	
 	def makeModel(self):
 		self.matched, self.unmatched = self.garanti()
 		random.shuffle(self.matched)
 		model = NaiveBayesClassifier.train(self.matched[:1500])
 		return model			
-
+	#experimental model to extend ML to  ITEM MATCHING 
 	def makeMatchModel(self, db, category):	
 		self.matched, self.unmatched= self.lalinaMatchTrainSet(db, category)
 		random.shuffle(self.matched)
 		model = NaiveBayesClassifier.train(self.matched[:400])
 		return model			
-
+	#classify via ML must recieve a NAME object
 	def nameobj_classify(self, model, _name):
 		tokens = _name.name + name.brand
 		classified = NaiveBayesClassifier.classify(model, _name.input_featurize(tokens))	
 		return classified
-
+	#classify for ML, expects an Item and converts it onto name object
+	#This is used to run via mogodb collection.find() loop
 	def classify(self, model, item):
 		_name = self.convertItem(item)
 		tokens = _name.getNameDes()
-		print tokens	
 		classified = NaiveBayesClassifier.classify(model, _name.input_featurize(tokens))	
 		return classified
-	
+	#batch classify the unmatched array 
 	def batchClassify(self, model):
 		for item in self.unmatched:
 			classified = NaiveBayesClassifier.classify(model, item.featurize())	
-			print 'cat is: %s, name: %s, url: %s' % (classified, item.name, item.url)
+			#print 'cat is: %s, name: %s, url: %s' % (classified, item.name, item.url)
 
 	def test(self):
 		testArr= self.matched[100:]
@@ -407,7 +425,6 @@ class Ngrammer(object):
 		self.test_list = ['all', 'this', 'hayyppened', 'more', 'or', 'less']
 		#self.handler = DatabaseHandler()
 		self.tables = catChecker.Tables()
-		
 	def makeUnicode(self, string):
 		if not isinstance(string, unicode):
 			string = string.encode('utf-8')
@@ -632,49 +649,35 @@ class Mapreduce(object):
 		self.volPattern = r'''(?i) \d+ml|\d+ ml|\d+ML|\d+ML|\d+g|\d+ g|\d+gr|\d+ gramas|\d+ gr|\d+gramas'''
 		#converts voluem types to generic types
 		
-		self.handler = DatabaseHandler()
-		self.indb = self.handler.indb
-		self.outdb = self.handler.outdb
 		self.mem = []
 
-		testdb = Connection()
-		testdb = testdb[TESTDB]
-		self.testdb = testdb[TESTCOLL]
-		print self.indb
-	
-	def pricePerVolume(self, db):
-		collection = db.getCollection()
-		print 'INDB is %s' % collection
-		for item in collection.find():
+	def pricePerVolume(self, item):
 			if item['volume'] != 'na':
 				try:
 
 					number = re.search(r'\d+', item['volume'])
-					number = number.group()
-					volume = int(number)
-					price = item['price']
-					price = price[0]
-					volume = int(number)
-					costPerVol = float(price)/ float(volume)
-					costPerVol = round(costPerVol, 2)
-					item['cost_per_vol'] = costPerVol
-					db.updateLalinaItem(item)		
+					if number:
+						number = number.group()
+						volume = float(number)
+						price = item['price']
+						price = price[0]
+						volume = float(number)
+						costPerVol = float(price)/ float(volume)
+						costPerVol = round(costPerVol, 2)
+						return costPerVol
+					else:
+						return 'NA'
 				except Exception, e:
-					print e
+					print 'PRice per volume error: %s, item: %s ' % (e, item['key'])
 
-
-	def addStringPrice(self, db):
-		collection = db.getCollection()
-		print 'INDB is %s' % collection
-		time.sleep(1)
-		for item in collection.find():
-			try:
-				copyObject = item 
-				copyObject['price_str'] = self.floatPriceToString(item['price'])		
-				db.updateLalinaItem(copyObject)	
-			except Exception, e:
-				print e
-
+	def checkPrice(self, item):
+		price = item['price'][0]
+		key = item['key']
+		if not item['price'] == 'NA':
+			if isinstance(price, float):
+			 	pass
+			else:
+				print 'Price not Float: %s : key %s' % (price, key)
 	
 	def makeMappingCopy(self, indb, outdb):
 		print 'INDB is %s' % indb
@@ -685,24 +688,24 @@ class Mapreduce(object):
 			if 'name' in item:
 				#try:
 					copyObject = item 
-					self.lowerfields(copyObject) 
+					#copyObject = self.lowerfields(copyObject) 
 					newName = self.cleaner(copyObject['name'])
-					newVolume = self.remVolWhiteSpace(copyObject['volume'])
 					newBrand = self.punctuationStripper(copyObject['brand'])
 					#newCategory = self.cleaner(copyObject['category'])
 					
-					#print 'START'
-					#print 'INCOMING Name IS: %s' % newName
-					#print 'LOOP DONE, CAT OUT IS: %s' % copyObject['category']
-
 						#toMem = 'name: '+ newName+', brand: '+newBrand 
 						#self.mem.append(toMem)
-							
-					copyObject['brand'] = newBrand
+					#copyObject['price'] = self.fieldScrubber(copyObject, 'price')
 					copyObject['price_str'] = self.floatPriceToString(item['price'])		
+					
+					copyObject['volume'] = self.cleanSingleVolume(copyObject['volume'])
+					copyObject['volume'] = self.removeAllSpaces(copyObject['volume'])
+					copyObject['brand'] = newBrand
 					copyObject['name'] = newName
+					copyObject['price_per_vol'] = self.pricePerVolume(copyObject)
 					copyObject['key'] = item['key']
 					copyObject['category'] = ''
+					self.checkPrice(copyObject)
 					#cat is set to empty as matcher will do a pass afterwards then machine learning
 					
 					self.insertToDb(copyObject, outdb)	
@@ -714,7 +717,7 @@ class Mapreduce(object):
 		print 'coppied %s' % outdb.count()
 		self.writeToFile(self.mem, 'emptycat.list')
 		self.writeToFile(logdump, 'validate_'+logName)
-		self.mem = []	
+		self.mem = []
 	def stampDummyKey(self):
 	#this is needed for solr to group things by groupid.
 		counter = 0 
@@ -737,7 +740,17 @@ class Mapreduce(object):
 			return crop
 		else:
 			return crop
-
+ 	def cleanSingleVolume(self, field):	
+		if field is None:
+			field = 'NA'
+		if field == '':
+			field = 'NA'
+		elif len(field) == 0:
+			field = 'NA'
+		elif field == ['NA']:
+                        field = 'NA'
+		return field.lower()
+	
 	def batchCleanVolume(self, db):
                 for item in db.lalinaCollection.find():
                         if item['volume'] is None:
@@ -795,43 +808,56 @@ class Mapreduce(object):
     		[ulist.append(x) for x in l if x not in ulist]
     		return ulist 
 		
-	def remVolWhiteSpace(self, vol):
-		vol = "".join(vol.split())
-		vol = vol.lower()
-		return vol
-	
 	def fieldScrubber(self, item, fieldToClean):
-		if item[fieldToClean] is None:
+		
+
+		if not item[fieldToClean]:
 			return 'NA'
-			print 'was None %s' % item['key']
-		if item[fieldToClean] == '':
+		elif item[fieldToClean] == None:
+			print 'OOPS None price scrubber: %s ' % item['key']
 			return 'NA'
 		elif len(item[fieldToClean]) == 0:
 			return 'NA'
 		elif item[fieldToClean] == ['NA']:
 			return 'NA'
-
+		else:
+			return item[fieldToClean]
+	# USED TO CLEAN NAME FIELD
 	def cleaner(self, newName):
 		#ORDER IMPORTTAN
 		if not isinstance(newName, unicode):
 			newName = newName.decode('utf8')
 		newName = newName.lower()
-		newName = self.quickExpand(newName)	
-		newName = self.cleanVolume(newName)
+		newName = self.quickExpand(newName)
+		newName = self.punctuationStripper(newName)
 		newName = self.cleanName(newName)
+		newName = self.cleanVolume(newName)
+		newName = self.removeMidWhiteSpaces(newName)
 		newName = self.dupRemove(newName)
 		newName = self.removeMidWhiteSpaces(newName)
 		return newName
+	
+	def removeAllSpaces(self, string):
+		return "".join(string.split())
 
 	def floatPriceToString(self, priceFloat):
 		if isinstance(priceFloat, list):
-			priceFloat = priceFloat[0]
-			pricestr = '%.2f' % priceFloat 
-			return pricestr
+			if priceFloat != 'NA':	
+				priceFloat = priceFloat[0]
+				try:
+					pricestr = '%.2f' % float(priceFloat) 
+					return pricestr
+				except Exception, e:
+					print e
+					return priceFloat
+				
 		else:
-			pricestr = '%.2f' % priceFloat 
-			return pricestr
-			
+			if priceFloat != 'NA':
+				print priceFloat
+				pricestr = '%.2f' % priceFloat 
+				return pricestr
+			else:
+				return priceFloat		
 	def dummyGroupKey(self, item):
 		if not 'groupid' in item:
 			groupid = '0000' + item['key']
@@ -842,26 +868,23 @@ class Mapreduce(object):
 	def patchDeadArrayToString(self, field):
 		if isinstance(field, list) and not field:
 			fix = ''
-			print 'patch done %s ' % field
 			return fix
 		else:
 			return field
 	
 	def arrayToString(self, field):
 		if isinstance(field, list) and field:
-			print 'array element grab %s ' %field
 			out = field[0]
 			return out
 		else:
 			return field
 	def arrayFixer(self, field):
-		print 'fixer ran'
 		field = self.patchDeadArrayToString(field)
 		field = self.arrayToString(field)
 		return field
 
 	def lowerfields(self, item):
-		l = ['product_id','matchscore','image','comments','price','date_crawled','_id', 'matchscore', 'rank', 'sku']
+		l = ['volume','product_id','matchscore','image','comments','price','date_crawled','_id', 'matchscore', 'rank', 'sku']
 		uniq = set(l)
 		for key, value in item.items():
 			if not key in uniq:
@@ -871,10 +894,8 @@ class Mapreduce(object):
 					if value is not None:
 						item[key] = item[key].lower().strip()
 					else:
-						print item[key]
-						print key
-						print '$$$$$$$$$$$$$$$ VALUE WAS NONE $$$$$$$$$$$$ %s' % item['key'] 
 						value = ''
+		return item
 
 	def writeToFile(self, arr, logname):
 	

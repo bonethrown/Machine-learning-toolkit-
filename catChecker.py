@@ -117,7 +117,7 @@ class Tables(object):
                         arr = []
                         for a in item:
                                 a = a.decode('utf8')
-                                a = a.rstrip()
+                                a = a.rstrip().lower()
                                 arr.append(a)
                         mydic = { arr[0] : arr[1:]}
                         masterList.append(mydic)

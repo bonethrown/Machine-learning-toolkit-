@@ -158,13 +158,27 @@ class databaseManager(object):
 			self.lalinaCollection.update({"key" : item['key']}, item, upsert=True)
 		except Exception, e:
 			log.msg('update error in db for item %s' %item['key']) 
-	
+
+
+	def removeByField(self, field, valueArr):
+		num = self.lalinaCollection.find( { field : { '$all': valueArr }}).count()
+		print 'Removing : %s' % num 
+		try:
+
+			for value in valueArr:
+				self.lalinaCollection.remove({field : value})
+			done = self.lalinaCollection.find( { field : { '$all': valueArr }}).count()
+			print 'Remaining: %s' % done
+		except Exception, e:
+			log.msg('update error in db for item') 
+			
 	def updateByField(self, field, value, newValue):
 		num = self.lalinaCollection.find({field: value}).count()
-		
-		print 'updating : %s' % num 
+		print 'To update : %s' % num 
 		try:
-			self.lalinaCollection.update({field : value}, {field : newValue}, mult=True)
+			self.lalinaCollection.update({field : value}, {"$set" : {field : newValue}}, multi=True)
+			done = self.lalinaCollection.find({field: value}).count()
+			print 'Remaining: %s' % done
 		except Exception, e:
 			log.msg('update error in db for item') 
 	
