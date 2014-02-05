@@ -76,7 +76,7 @@ class CleanAndCategorize(object):
 	def runMatcher(self):
 		self.outdb.chop2cats(self.outdb.getCollection())
 		self.fuzz.loopMatch()
-		self.outdb.multiMerge(FINALCOLL, self.outdb.catdbs)
+		self.outdb.multiMerge(FINAL_COLL, self.outdb.catdbs)
 			
 	def dumbClassify(self, dbhandler):
 		collection = dbhandler.getCollection()
@@ -257,7 +257,7 @@ class BayesObject(object):
 		self.unmatched = []
 		self.handler = DatabaseHandler()
 		self.ngrammer = Ngrammer()
-		#self.corpus = self.allNames()
+		self.corpus = self.allNames()
 	#	self.model = self.makeModel()
 	#creates the name object for each string name
 	def loadCorpus(self, arr):
@@ -625,7 +625,6 @@ class DatabaseHandler(object):
 		except Exception, e:
 			print 'mongo exception'
 		
-
 	def updateFieldInDb(self, item, field, db):
 
 		try:
@@ -648,13 +647,11 @@ class Mapreduce(object):
 		# this cleans all punction
 		self.volPattern = r'''(?i) \d+ml|\d+ ml|\d+ML|\d+ML|\d+g|\d+ g|\d+gr|\d+ gramas|\d+ gr|\d+gramas'''
 		#converts voluem types to generic types
-		
 		self.mem = []
 
 	def pricePerVolume(self, item):
 			if item['volume'] != 'na':
 				try:
-
 					number = re.search(r'\d+', item['volume'])
 					if number:
 						number = number.group()
@@ -669,6 +666,8 @@ class Mapreduce(object):
 						return 'NA'
 				except Exception, e:
 					print 'PRice per volume error: %s, item: %s ' % (e, item['key'])
+
+			return item[field]
 
 	def checkPrice(self, item):
 		price = item['price'][0]
@@ -718,17 +717,6 @@ class Mapreduce(object):
 		self.writeToFile(self.mem, 'emptycat.list')
 		self.writeToFile(logdump, 'validate_'+logName)
 		self.mem = []
-	def stampDummyKey(self):
-	#this is needed for solr to group things by groupid.
-		counter = 0 
-		toPatch = self.outdb.find({ 'groupid': { '$exists': 0}}).count()
-		for item in self.outdb.find({ 'groupid': { '$exists': 0}}):
-			if not 'groupid' in item:
-				item['groupid'] =self.dummyGroupKey(item)
-				self.updateMongo(item, self.outdb)				
-				counter = counter+ 1
-		print 'items patched: %s ' % counter
-		print 'items needed patching %s ' %toPatch
  		
 	def cleanVolume(self, name):
 		replaceList = regexp_tokenize(name, self.volPattern)
@@ -832,7 +820,6 @@ class Mapreduce(object):
 		newName = self.punctuationStripper(newName)
 		newName = self.cleanName(newName)
 		newName = self.cleanVolume(newName)
-		newName = self.removeMidWhiteSpaces(newName)
 		newName = self.dupRemove(newName)
 		newName = self.removeMidWhiteSpaces(newName)
 		return newName
@@ -858,12 +845,6 @@ class Mapreduce(object):
 				return pricestr
 			else:
 				return priceFloat		
-	def dummyGroupKey(self, item):
-		if not 'groupid' in item:
-			groupid = '0000' + item['key']
-			return groupid
-		else:
-			return item['groupid']
 
 	def patchDeadArrayToString(self, field):
 		if isinstance(field, list) and not field:

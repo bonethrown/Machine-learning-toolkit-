@@ -21,7 +21,8 @@ FULLPROC = False
 ADD_TOP_SCORE_DUPLICATE	= True			
 IGNORE_VOLUME = True
 AVG_THRESH = 83
-USE_VOL = False
+USE_VOL = True
+SWAP_THRESH = 3
 
 class FuzzMatcher(object):
 
@@ -102,9 +103,6 @@ class FuzzMatcher(object):
 			return False
 		else:
 			return True
-	
-
-
 
 	def dumbMatch(self, db):
 		self.memory = []
@@ -174,11 +172,11 @@ class FuzzMatcher(object):
 						#self.updateInDb(self.memory[0])
 						first['rank'] = '1'	
 						first['groupid'] = hashlib.md5(first['key']).hexdigest() 
-						print 'PARENT key: %s ' + first['key']	+ 'parent groupid: ' + first['groupid']			
+						print 'PARENT key: %s ' + first['key']	+ ' groupid: ' + first['groupid']			
 						self.updateInDb(first, db)
 						self.memory = []
 						self.hasMatch = False 	
-	   		print cursor
+	   			print cursor
 						
 	   end = time.time()
 	   print "feeding finisehd in %s ms"%(end-start)
@@ -219,19 +217,6 @@ class FuzzMatcher(object):
 							toAdd['groupid'] = self.stamp(first)
 							self.memory.append(toAdd)
 							print 'Adding score: %s removing : %s ' %(toAdd['matchscore'], item['matchscore'])
-
-
-
-	def replaceBetterMatch(self, toAdd, first):
-		if self.hasExisting(self.memory, toAdd):
-			for item in self.memory:
-				if item['site'] == toAdd['site']:
-					if self.checkScore(item['matchscore'], toAdd['matchscore']):
-						if self.compareOverallScores(item, toAdd):
-							print 'higer replacement score for item ' + toAdd['key'] + 'vs ' + item['key'] + ' parent ' + first['key']
-							self.memory = [d for d in self.memory if d.get('site') != toAdd['site']]
-							toAdd['groupid'] = self.stamp(first)
-							self.memory.append(toAdd)
 
 
 	def compareOverallScores(self, item1, itemNew):
@@ -276,8 +261,8 @@ class FuzzMatcher(object):
 			return True				
 
 	def checkScore(self,score1, score2):
-			
-		if score1 < score2:
+		score1 = score1 + SWAP_THRESH	
+		if score1  < score2:
 			return True
 		elif score1 > score2:
 			return False
@@ -285,7 +270,7 @@ class FuzzMatcher(object):
 			return False				
 
 	def objectMatch_avg(self, first, second):
-		if first['url'] != second['url'] or first['volume'] != second['volume']:
+		if first['site'] != second['site']:
 			if self.fuzzyMatchBrand(first['brand'], second['brand']):
 				if USE_VOL:
 					vol_match = self.matchVolume(first['volume'], second['volume'])
@@ -302,36 +287,6 @@ class FuzzMatcher(object):
 		else:
 			return False, 0
 									
-
-	def objectMatch(self, first, second):
-	#	if not hasGroupKey(second):
-		try:
-			if first['site'] != second['site']:
-				#if self.matchVolume(first['volume'], second['volume']):		
-					if self.fuzzyMatchBrand(first['brand'], second['brand']):
-						match, score = self.matchName(first['name'], second['name'])
-						if match:
-							
-							tri = self.triFuzzyMatch(first['name'], second['name'])
-							print ' 0##: %s ' %tri 
-							#tri = self.triFuzzyMatch(self.stopfilter(first['name']), self.stopfilter(second['name']))
-							#print ' 1^^: %s ' % tri
-							return True
-							#else:
-							#	print a 
-	
-						else: 
-							return False
-					else:		
-						return False
-				#else: 
-				#	return False
-			else:
-				return False
-
-		except Exception, e:
-			logging.debug(e)		
-
 
 	def fuzzyMatchBrand(self, first, second): 
 		first = first.lower().strip()
@@ -418,8 +373,8 @@ class FuzzMatcher(object):
 
 	def matchVolume(self, vol1, vol2):
 
-	  if self.checkVolume(vol1,vol2): 
-
+		if vol1 == 'na' or vol2 == 'na':
+			return True
 		ratio = fuzz.ratio(vol1, vol2)
 		if ratio == 100:
 			return True

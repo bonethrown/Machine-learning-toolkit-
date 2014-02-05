@@ -42,7 +42,8 @@ def nameGen( dbtype):
 class databaseManager(object):
 
 	def __init__(self, db = DATABASE_MAIN, collection = TEST_LALINA, comment_coll = TEST_COMMENT):
-		
+	
+		self.db_name = db	
 		self.db = db2.getConnection(db)
 		self.hpCollection = db2.getOwnDb(HP, DATABASE_MAIN)
 		self.imageCollection = db2.getOwnDb(IMAGE_COL, DATABASE_MAIN)
@@ -123,6 +124,7 @@ class databaseManager(object):
 
 	def merge(self, parent, slave):
 		parent = self.db.create_collection(parent)
+		print parent
 		for item in slave.find():
 			try:
 				parent.insert(item)
@@ -130,7 +132,8 @@ class databaseManager(object):
 				print e
 
 	def multiMerge(self, parent, slaveArr):
-		parent = self.db.create_collection('parent')
+		parent = db2.getOwnDb(parent, self.db_name)
+		print parent
 		for coll in slaveArr:
 			for item in coll.find():
 				try:
@@ -140,28 +143,11 @@ class databaseManager(object):
 	def feedRemote(self, localdb):
 		for item in localdb.find():
 			self.updateRemote(item)	
-				
-	def updateComment(self, storeItem):
-		if storeItem['comments']:
-			try:
-				self.commentsCollection.update({"key":storeItem['key']}, {"comments": storeItem['comments'], "url" : storeItem['url'], "key":storeItem['key'], "site": storeItem['site']}, upsert = True)
-
-			except Exception, e:
-				log.msg('update error in db for item %s' %item['key']) 
 	
-	def updateViaSku(self, item):
-		try:
-			self.lalinaCollection.update({"sku" : item['sku']}, item, upsert=True)
-		except Exception, e:
-			log.msg('update error in db for item %s' %item['key']) 
-
-	def updateLalinaItem(self, item):
-		try:
-			self.lalinaCollection.update({"key" : item['key']}, item, upsert=True)
-		except Exception, e:
-			log.msg('update error in db for item %s' %item['key']) 
-
-
+	def killField(self, field):
+		self.lalinaCollection.update( { field : {"$exists" : True}}, {"$unset": { field : ""}}, multi=True)
+		count = self.lalinaCollection.find( { field : {"$exists" : True}}).count()
+		
 	def removeByField(self, field, valueArr):
 		num = self.lalinaCollection.find( { field : { '$all': valueArr }}).count()
 		print 'Removing : %s' % num 
@@ -174,6 +160,24 @@ class databaseManager(object):
 		except Exception, e:
 			log.msg('update error in db for item') 
 			
+	def updateLalinaItem(self, item):
+		try:
+			self.lalinaCollection.update({"key" : item['key']}, item, upsert=True)
+		except Exception, e:
+			log.msg('update error in db for item %s' %item['key']) 
+
+
+	def conditionalFieldUpdate(self, query_field, q_value, field, newValue):
+		num = self.lalinaCollection.find({query_field: q_value}).count()
+		print 'To update : %s' % num 
+		try:
+			self.lalinaCollection.update({query_field : q_value}, {"$set" : {field : newValue}}, multi=True)
+			done = self.lalinaCollection.find({query_field: q_value}).count()
+			print 'Remaining: %s' % done
+		except Exception, e:
+			log.msg('update error in db for item') 
+		
+
 	def updateByField(self, field, value, newValue):
 		num = self.lalinaCollection.find({field: value}).count()
 		print 'To update : %s' % num 
@@ -190,12 +194,24 @@ class databaseManager(object):
 		except Exception, e:
 			log.msg('update error in db for item %s' %item['key']) 
 		
+	def updateViaSku(self, item):
+		try:
+			self.lalinaCollection.update({"sku" : item['sku']}, item, upsert=True)
+		except Exception, e:
+			log.msg('update error in db for item %s' %item['key']) 
 	def updateRemote(self, item):
                 try:
                         self.remote1Lalina.update({"key" : item['key']}, item, upsert=True)
                 except Exception, e:
                         log.msg('update error in db for item %s' %item['key'])
 
+	def updateComment(self, storeItem):
+		if storeItem['comments']:
+			try:
+				self.commentsCollection.update({"key":storeItem['key']}, {"comments": storeItem['comments'], "url" : storeItem['url'], "key":storeItem['key'], "site": storeItem['site']}, upsert = True)
+
+			except Exception, e:
+				log.msg('update error in db for item %s' %item['key']) 
         def updateRemoteComment(self, storeItem):
                 if storeItem['comments']:
                         try:

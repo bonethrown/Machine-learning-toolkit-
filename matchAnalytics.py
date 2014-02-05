@@ -7,42 +7,51 @@ class Analytics(object):
 		self.manager = databaseManager(db, coll, coll)
 
 	def getCollection(self):
-		print self.manager.getCollection()
 		return self.manager.getCollection()
 
-	def fieldValueCount(self, field):
-		list_count = 0
-		string_count = 0
-		float_count = 0
-		na_count = 0
-			
-		for item in self.getCollection().find():
-			temp = item[field][0]
-			if isinstance(temp, float):
-				float_count = float_count +1
-			elif temp == 'NA':
-				na_count = na_count + 1
-			else: 
-				string_count = string_count +1
-		print 'Float : %s NA : %s OTher: %s ' % (float_count,na_count,string_count)
-				 			
-	def countfield(self, field):
+	def allFieldsType(self):
+		coll = self.getCollection()
+		sample = list(coll.find().limit(1))
+		sample = sample[0]
+		keys = sample.keys()
+		keys.remove('_id')
+		out = []
+		print 'keys: %s' % keys
+		for key in keys:
+			response = self.countType(key)
+			print response
+			out.append((key, response))
+		return out
+	
+	def countType(self, field):
 		list_count = 0
 		string_count = 0
 		float_count = 0
 		uni_count = 0
+		int_count =0 
+		_None = 0
+		no_field = 0
 		total = self.getCollection().count()
 		for item in self.getCollection().find():
-			if isinstance(item[field], list):
-				list_count = list_count +1 
-			elif isinstance(item[field], str):
-				string_count = string_count +1
-			elif isinstance(item[field], float):
-				float_count = float_count +1
-			elif isinstance(item[field], unicode):
-				uni_count = uni_count +1
-		print 'List : %s string : %s float: %s unicode: %s total: %s' % (list_count,string_count,float_count,uni_count,total)
-				
+			
+			if field in item:
+				if  isinstance(item[field], list):
+					list_count = list_count +1 
+				elif isinstance(item[field], int):
+					int_count = int_count +1
+				elif isinstance(item[field], str):
+					string_count = string_count +1
+				elif isinstance(item[field], float):
+					float_count = float_count +1
+				elif isinstance(item[field], unicode):
+					uni_count = uni_count +1
+				elif isinstance(item[field], None):
+					_None = _None + 1
+			else:
+				no_field = 1 + no_field
+
+		out = 'Int: %s List: %s string: %s float: %s unicode: %s None: %s NoField: %s total: %s' % (int_count,list_count,string_count,float_count,uni_count, _None, no_field, total)
+		return out		
 	def avgScores(self):
 		count = 0
 		namescore = 0
@@ -146,6 +155,3 @@ class Analytics(object):
 							
 		print '(site, average words count, unique words)'
 		return arr							 
-	
-
-	
