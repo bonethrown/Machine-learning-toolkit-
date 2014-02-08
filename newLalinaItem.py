@@ -19,7 +19,7 @@ class Itemgenerator(object):
 				item[key] = value
 
 			item['sites'] = []
-			item['sites'].append(self.addMember(crawl_item))
+			item['sites'].append(self.firstMember(crawl_item))
 		return item
 
 	def addMember(self, crawl_item):
@@ -32,6 +32,24 @@ class Itemgenerator(object):
 
 	def firstMember(self, crawl_item):
 		item = self.addMember(crawl_item)
-		item['parent'] = 1
+
+	def getItem(parent_key):
+		coll = self.manager.getCollection()
+		item = list(coll.find( { "key" : parent_key }))
+		if item:
+			out = list[0]
+		else:
+			print 'NO Item with that key in db : %s' % coll
 				
+	def setItem(parent_item):	
+		if key in parent_item:
+			self.manager.
+	
+	#def getMembers(parent_key):
 		
+#	def attachMember(parent_key, member):
+	
+#	def removeMember(self, parent_key, member_site):
+
+#	def removeItem(self, parent_key):	
+

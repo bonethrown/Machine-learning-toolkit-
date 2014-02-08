@@ -4,6 +4,8 @@
 #################
 # ALL BATCH CODE REQURED A dataOps. databasemanager object passed to them 
 ###############
+import urllib
+import unicodedata
 from pymongo import Connection
 from betaMapreduce import FuzzMatcher
 import os,sys,urllib2
@@ -27,6 +29,23 @@ from utils import listMatcher
 class Batchwork(object):
 	def __init__(self, db, coll):
 		self.manager = databaseManager(db,coll)
+	
+
+	def genericBatch(self, _function,field1, field2):
+		coll = self.manager.getCollection()
+		for item in coll.find():
+			mod = item[field1]
+			out =_function(mod)
+			item[field2] = out
+			self.manager.updateLalinaItem(item)
+			
+
+	def urlquote(self, string):
+		string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
+		string = string.replace(" ","-")
+		string = urllib.quote(string)
+		return string
+
 	def runBatch(self):
 		self.batchNullFix(self.manager, 'price_per_vol')
 		self.batchNullFix(self.manager, 'price_str')

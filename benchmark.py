@@ -3,13 +3,14 @@ import pymongo
 from random import shuffle
 from mapperSet import BayesObject, Name
 CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maquiagem', 'cabelo']
+from nltk import FreqDist
+import math
 
 class Benchmark(object):
 
 	def __init__(self, db, coll):
 		self.manager = databaseManager(db, coll, coll)
 		self.rand_list = self.randomExtract()
-		self.cursor = self.cursor('') 
 		self.bayes = BayesObject()
 		self.bayes.initdatabase(db, coll)
 	
@@ -29,7 +30,15 @@ class Benchmark(object):
 				features = item.customFeaturize(item.name)
 				out.append(features)
 		return out
-	
+	def setCat(self, arr):
+		for item in arr:
+			itemm['category'] = ''
+
+	def entropy(labels):
+		freqdist = FreqDist(labels)
+    		probs = [freqdist.freq(l) for l in nltk.FreqDist(labels)]
+    		return -sum([p * math.log(p,2) for p in probs])
+
 	def createDataSets(self):
 		main = self.bayes.loadCorpus(self.devTestSet(1000))
 		shuffle(main)
@@ -55,13 +64,3 @@ class Benchmark(object):
 	 	arr =  list(self.getCollection().find({'category' : ''}))
 		shuffle(arr)
 		extract = arr[:amount]
-		arr = []
-		return extract
-
-	def cursor(self,category):
-		cursor =self.getCollection().find( { 'category': category }).batch_size(10)
-		return cursor
-
-	def clearCats(self, itemArr):
-		for item in itemArr:
-			item['category'] = ''
