@@ -8,8 +8,8 @@ def allToString(anything):
 					string = item.encode('utf-8')
 					out = out+string
 
-				elif isintance(item,str):
-					out = out+item
+				else:
+					out = anyToString(item)
 			return out
 		else:
 			for item in anything:
@@ -17,11 +17,16 @@ def allToString(anything):
 					string = item.encode('utf-8')
 					out = out+"/"+string
 
-				elif isintance(item,str):
-					out = out+"/"+item
+				elif isinstance(item,str):
+					out = out+"/"+anyToString(item)
 			return out
-				
-	elif isinstance(anything, int):
+	else:
+		out = anyToString(anything)
+		return out
+
+def anyToString(anything):
+
+	if isinstance(anything, int):
 		out = str(anything)
 		return out
 

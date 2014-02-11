@@ -6,6 +6,7 @@ import logging
 from fuzzywuzzy import fuzz
 import hashlib
 import logging
+from newLalinaItem import Itemgenerator
 from copy import copy, deepcopy
 from dataOps import databaseManager
 from catChecker import Tables
@@ -23,6 +24,13 @@ IGNORE_VOLUME = True
 AVG_THRESH = 83
 USE_VOL = True
 SWAP_THRESH = 3
+MASTER = 'belezanaweb'
+MATCH_ORDER = ['sepha','sephora','magazineluiza','laffayette','dafiti','infinitabeleza','americanas','submarino','walmart','netfarma']
+
+
+
+
+
 
 class FuzzMatcher(object):
 
@@ -32,6 +40,15 @@ class FuzzMatcher(object):
 		self.stopwords = self.filterStopWords('stopwords.list')
 		self.memory = []
 		self.hasMatch = False
+	#def siteOrderMatch(self):
+	#	generator = Itemgenerator
+	#	coll = self.handler.getCollection()
+	#	for site in MATCH_ORDER:
+	#		
+	#		for cursor, first in enumerate(coll.find( { 'site' : MASTER }, timeout = False)):
+	#			for idx, second in enumerate(coll.find( { 'site': site}, timeout = False):
+							
+
 	def loopMatch(self):
 
 		for db in self.handler.catdbs:
@@ -90,7 +107,6 @@ class FuzzMatcher(object):
 		stopList = self.tables.commaFileToList('stopwords.list')	
 		#filtered = res = [k for k in lst if 'ab' in k]	
 		return stopList
-
 	
 	def stopfilter(self, name):
 		name = name.decode('utf-8')

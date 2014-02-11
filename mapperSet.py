@@ -820,6 +820,7 @@ class Mapreduce(object):
 		newName = self.punctuationStripper(newName)
 		newName = self.cleanName(newName)
 		newName = self.cleanVolume(newName)
+		newName = self.removeMidWhiteSpaces(newName)
 		newName = self.dupRemove(newName)
 		newName = self.removeMidWhiteSpaces(newName)
 		return newName

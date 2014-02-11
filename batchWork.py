@@ -29,7 +29,7 @@ from utils import listMatcher
 class Batchwork(object):
 	def __init__(self, db, coll):
 		self.manager = databaseManager(db,coll)
-	
+
 
 	def genericBatch(self, _function,field1, field2):
 		coll = self.manager.getCollection()
@@ -38,7 +38,7 @@ class Batchwork(object):
 			out =_function(mod)
 			item[field2] = out
 			self.manager.updateLalinaItem(item)
-			
+	#does two operations, takes two functions 1 a matcher function and 2 a function 
 
 	def urlquote(self, string):
 		string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
@@ -46,11 +46,12 @@ class Batchwork(object):
 		string = urllib.quote(string)
 		return string
 
+
 	def runBatch(self):
 		self.batchNullFix(self.manager, 'price_per_vol')
 		self.batchNullFix(self.manager, 'price_str')
 		self.batchNoToUni('price_per_vol')
-		self.batch
+
 	def batchNoToUni(self, field):
 		coll = self.manager.getCollection()
 		count = coll.count()

@@ -469,6 +469,16 @@ class listMatcher:
 	    if score > 70:
 			return line.strip()
 
+
+    def removeMatch(self, sentence):
+	sentence = sentence.lower()
+	match = self.dualMatch(sentence)
+	if match:
+		
+		sentence = sentence.replace(match, "")
+		return sentence
+	return sentence
+
     def recursiveFuzz(self, sentence):
 	sentence = cleanSymbols(sentence)
 	uni = sentence.split()
