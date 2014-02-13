@@ -70,7 +70,6 @@ class databaseManager(object):
 			except Exception, e:
 				log.msg('update error in db for item %s' %item['key']) 
 	
-	
 	def initCatCollections(self):
 		dbs =[]
 		for cat in CATEGORY_LIST:
@@ -90,6 +89,11 @@ class databaseManager(object):
 		return self.db
 	#def updatePrimary(item):
 	#### This is the primary function to save an image to the harddrive 
+	def chop2cats(self, coll):
+		for item in CATEGORY_LIST:
+			self.splitByCat(item)
+			print 'chopped %s' % item
+
 	def splitByCat(self, cat):
 		coll = self.getCollection()
 		splitName = cat.replace(" ","")
@@ -117,11 +121,6 @@ class databaseManager(object):
 		for db in self.catdbs:
 			db.drop()
 	
-	def chop2cats(self, coll):
-		for item in CATEGORY_LIST:
-			self.splitByCat(item)
-			print 'chopped %s' % item
-
 	def merge(self, parent, slave):
 		parent = self.db.create_collection(parent)
 		print parent

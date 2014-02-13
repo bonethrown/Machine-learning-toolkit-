@@ -22,7 +22,7 @@ COMMIT = True
 INDB = 'neworder'
 INCOLL = 'raw_January'	
 OUTDB = 'neworder'
-OUTCOLL = 'januarypost'
+OUTCOLL = 'test_set'
 FINAL_COLL = 'january_proccessed'
 MAP_PATH = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandmaptable.list'
 match_path = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandric.list'
@@ -73,6 +73,11 @@ class CleanAndCategorize(object):
 		#print ' running Matcher this may take an hour'
 		self.runMatcher()
 		#### RUN MATCHER HERE ####
+	def seqMatcher(self):
+		self.outdb.chop2cats(self.outdb.getCollection())
+		self.fuzz.orderLoopMatch()
+		self.outdb.multiMerge(FINAL_COLL, self.outdb.catdbs)
+	
 	def runMatcher(self):
 		self.outdb.chop2cats(self.outdb.getCollection())
 		self.fuzz.loopMatch()

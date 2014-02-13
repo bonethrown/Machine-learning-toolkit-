@@ -1,3 +1,4 @@
+from operator import itemgetter
 from pymongo import Connection
 import os,sys,urllib2
 import time
@@ -22,91 +23,76 @@ FULLPROC = False
 ADD_TOP_SCORE_DUPLICATE	= True			
 IGNORE_VOLUME = True
 AVG_THRESH = 83
-USE_VOL = True
+USE_VOL = False
 SWAP_THRESH = 3
 MASTER = 'belezanaweb'
 MATCH_ORDER = ['sepha','sephora','magazineluiza','laffayette','dafiti','infinitabeleza','americanas','submarino','walmart','netfarma']
-
-
-
-
-
 
 class FuzzMatcher(object):
 
 	def __init__(self, db= MAINDB, collection= COLLECTION):
 		self.tables = Tables() 
 		self.handler = databaseManager(db, collection,collection)
-		self.stopwords = self.filterStopWords('stopwords.list')
+		#self.stopwords = self.filterStopWords('stopwords.list')
 		self.memory = []
 		self.hasMatch = False
-	#def siteOrderMatch(self):
-	#	generator = Itemgenerator
-	#	coll = self.handler.getCollection()
-	#	for site in MATCH_ORDER:
-	#		
-	#		for cursor, first in enumerate(coll.find( { 'site' : MASTER }, timeout = False)):
-	#			for idx, second in enumerate(coll.find( { 'site': site}, timeout = False):
-							
+		self.gen = Itemgenerator(db, MASTER)
 
+
+	## THE FOLLOWING THREE METHODS ARE A NEW MATCHER THEY MATCH BY ORDER WITH THE NEW LALINAITEM OBJECT
+	# MASTER : THE PARENT SITE KNOWN AS THE NBENCHMARK COPIED INTO A DATABASE
+	#SEQUENTIALLY EACH SITE IS USED TO MATCH AGAINST THE PARENT
+	#DESIGINED TO WORK WITH CATEGORY SPLIT DATABSES VIA DATAOPS.SPLITBYCAT
+	#RUN WITH CLEANANDCATEGORIZE.PY IN MAPPERSET
+
+	def createMaster(self, db):
+                for item in db.find( { 'site' : MASTER }):
+                        new_item = self.gen.createParent(item)
+                        self.gen.setParent(new_item)
+
+	def getBest(self):
+		best = sorted(self.memory, key=itemgetter('score')) 	
+		return best[0]
+
+	def siteOrderMatch(self, db):
+		master = self.gen.manager.getCollection()
+		match_arr = []
+		for site in MATCH_ORDER:
+			print site
+			for cursor, first in master.find(timeout = False):
+				size = coll.find( { 'site': site}).count()
+				for idx, second in enumerate(db.find( {'site': site} ) ):
+					isMatch, score = self.objectMatch_avg(first, second)
+					if isMatch:
+						second['matchscore'] = score
+						self.memory.append(second)
+						self.hasMatch = True
+					if idx == size and self.hasMatch:
+						push = self.getBest(self.memoery)
+						push = self.gen.createMember(push)	
+						self.gen.setMember(first['key'], push)
+						print 'parent: %s  member: %s ' % (first['key'], push)
+
+
+	def orderLoopMatch(self):
+		for db in self.handler.catdbs:
+			self.createMaster(db)
+			self.siteOrderMatch(db)
+		
 	def loopMatch(self):
 
 		for db in self.handler.catdbs:
 			print 'working Db : %s' % db
 			self.dumbMatch(db)
 		
-	def settings(self, stringCategory):
-		if stringCategory == 'perfume':
-			settings = {'name_ratio' : 92,
-					'partial_ratio' : 70,
-					'token_ratio' : 75,
-					} 
-			return settings
-		elif stringCategory == 'cabelo':
-			settings = {'name_ratio' : 92,
-					'partial_ratio' : 70,
-					'token_ratio' : 75,
-					} 
-			return settings
-		elif stringCategory == 'unha':
-			settings = {'name_ratio' : 92,
-					'partial_ratio' : 70,
-					'token_ratio' : 75,
-					} 
-			return settings
-		elif stringCategory == 'cabelo':
-			settings = {'name_ratio' : 92,
-					'partial_ratio' : 70,
-					'token_ratio' : 75,
-					} 
-			return settings
-		elif stringCategory == 'corpo e banho':
-			settings = {'name_ratio' : 92,
-					'partial_ratio' : 70,
-					'token_ratio' : 75,
-					} 
-			return settings
-		elif stringCategory == 'acessorios':
-			settings = {'name_ratio' : 92,
-					'partial_ratio' : 70,
-					'token_ratio' : 75,
-					} 
-			return settings
-		elif stringCategory == 'homem':
-			settings = {'name_ratio' : 92,
-					'partial_ratio' : 70,
-					'token_ratio' : 75,
-					} 
-			return settings
-
 	def singleMatch(self):
 		self.matchVolumized(self.handler.getCollection())
 			
 		print 'check test collection %s for results' % collection 
-	def filterStopWords(self,stopFile):
-		stopList = self.tables.commaFileToList('stopwords.list')	
+	#def filterStopWords(self,stopFile):
+	#	stopList = self.tables.commaFileToList('stopwords.list')	
 		#filtered = res = [k for k in lst if 'ab' in k]	
-		return stopList
+	#	return stopList
 	
 	def stopfilter(self, name):
 		name = name.decode('utf-8')
@@ -155,47 +141,7 @@ class FuzzMatcher(object):
 		end = time.time()
 		print "feeding finisehd in %s ms"%(end-start)
 		
-						
 							
-	def  matchVolumized(self, selected_db):
-	   self.memory = []	
-	   db = selected_db
-	   start = time.time()
-	   size =  db.find().count()-1 
-	   print db
-	   print 'Item Count: %s' % size
-	 #  try :  
-	   for cursor, first in  enumerate(db.find(timeout= False)):
-			#if not self.hasGroupId(first):
-			if cursor:
-				for idx,second in enumerate(db.find(timeout = False)):
-					#print 'first['key']
-					keycheck = self.isNotSameKey(first['key'], second['key'])
-					isMatch, score = self.objectMatch_avg(first, second)
-					if keycheck and isMatch:
-						#hasMatch = insertOrUpdate(first, second, db)
-						second['matchscore'] = score
-						if not self.hasExisting(self.memory, second) and not self.hasGroupId(second):
-							second['groupid'] = self.stamp(first)
-							self.memory.append(second)	
-							self.hasMatch = True		
-							print 'INSERTING GROUPID:' +  second['groupid'] +' KEY ' + second['key'] 
-						else:
-							self.replaceBetterMatch(second, first)
-			
-					if  idx == size and self.hasMatch:
-						self.multiUpdate(self.memory, db)
-						#self.updateInDb(self.memory[0])
-						first['rank'] = '1'	
-						first['groupid'] = hashlib.md5(first['key']).hexdigest() 
-						print 'PARENT key: %s ' + first['key']	+ ' groupid: ' + first['groupid']			
-						self.updateInDb(first, db)
-						self.memory = []
-						self.hasMatch = False 	
-	   			print cursor
-						
-	   end = time.time()
-	   print "feeding finisehd in %s ms"%(end-start)
 	#assign score value to object
 	def stamp(self,first):
 		groupid = hashlib.md5(first['key']).hexdigest()
