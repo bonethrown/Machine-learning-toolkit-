@@ -71,6 +71,11 @@ class CleanAndCategorize(object):
 		#print ' running Matcher this may take an hour'
 		self.runMatcher()
 		#### RUN MATCHER HERE ####
+	def seqMatcher(self):
+		self.outdb.chop2cats(self.outdb.getCollection())
+		self.fuzz.orderLoopMatch()
+		self.outdb.multiMerge(FINAL_COLL, self.outdb.catdbs)
+	
 	def runMatcher(self):
 		self.outdb.chop2cats(self.outdb.getCollection())
 		self.fuzz.loopMatch()

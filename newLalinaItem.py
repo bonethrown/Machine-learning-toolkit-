@@ -2,13 +2,13 @@
 from dataOps import databaseManager
 import string
 OUTDB = 'new_collection'
-PARENT= ['product_id','price_per_vol','price_str','date_crawled','key','url','site','volume','price','description']
-MEMBER= ['date_crawled','name_noindex','key','product_id',' matches']
+PARENT= ['_id','product_id','price_per_vol','price_str','date_crawled','key','url','site','volume','price','description']
+MEMBER= ['_id','date_crawled','name_noindex','key','product_id',' matches']
 CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maquiagem', 'cabelo']
 class Itemgenerator(object):
 	def __init__(self, db, coll):
 		self.manager = databaseManager(db,coll,coll)
-		self.manager = databaseManager(db,OUTDB)
+		#self.manager = databaseManager(db,OUTDB)
 	
 	@staticmethod
 	def keyGen(item):
