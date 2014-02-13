@@ -36,17 +36,26 @@ class FuzzMatcher(object):
 
 	def __init__(self, db= MAINDB, collection= COLLECTION):
 		self.tables = Tables() 
+		self.db = MAINDB
 		self.handler = databaseManager(db, collection,collection)
 		self.stopwords = self.filterStopWords('stopwords.list')
 		self.memory = []
 		self.hasMatch = False
-	#def siteOrderMatch(self):
-	#	generator = Itemgenerator
-	#	coll = self.handler.getCollection()
-	#	for site in MATCH_ORDER:
-	#		
-	#		for cursor, first in enumerate(coll.find( { 'site' : MASTER }, timeout = False)):
-	#			for idx, second in enumerate(coll.find( { 'site': site}, timeout = False):
+		#self.gen = Itemgerenrator(db, MASTER)
+
+	def createMaster(self):
+		coll = self.handler.getCollection()
+		for item in coll.find( { 'site' : MASTER }):
+			new_item = gen.createParent(item)
+			gen.setParent(new_item)
+			
+	def siteOrderMatch(self):
+		coll = self.handler.getCollection()
+		master_coll = self.gen.manager.getCollection()
+#		for site in MATCH_ORDER:
+#			
+#			for cursor, first in enumerate(coll.find( { 'site' : MASTER }, timeout = False)):
+#				for idx, second in enumerate(coll.find( { 'site': site}, timeout = False):
 							
 
 	def loopMatch(self):
@@ -151,7 +160,7 @@ class FuzzMatcher(object):
 						self.updateInDb(first, db)
 						self.memory = []
 						self.hasMatch = False 
-		print cursor
+			print cursor
 		end = time.time()
 		print "feeding finisehd in %s ms"%(end-start)
 		

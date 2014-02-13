@@ -87,6 +87,9 @@ class Analytics(object):
 		print 'Avg fuzzname score: %s, Avg partial : %s, Avg token: %s' % (nameAvg, partialAvg, tokenAvg)
 		print 'full average is : %s' % avg
 
+	
+	
+
 	#count how many distinct field values there are:
 	#USe only for fields that can take a finite number of vlalues, liek Site, category
 	def fieldCount(self, field):

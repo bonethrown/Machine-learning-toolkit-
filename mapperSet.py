@@ -22,7 +22,7 @@ COMMIT = True
 INDB = 'neworder'
 INCOLL = 'raw_January'	
 OUTDB = 'neworder'
-OUTCOLL = 'januarypost'
+OUTCOLL = 'test_set'
 FINAL_COLL = 'january_proccessed'
 MAP_PATH = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandmaptable.list'
 match_path = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandric.list'
@@ -34,8 +34,6 @@ match_path = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandric.list'
 
 #databasemanager is the db connection class that handles all db related things
 
-TESTDB = 'matching'
-TESTCOLL = 'unittest'
 COMMENT_COLL = 'test'
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
 
