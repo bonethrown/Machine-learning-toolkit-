@@ -1,3 +1,4 @@
+from dataclean import Dataclean
 from operator import itemgetter
 from pymongo import Connection
 import os,sys,urllib2
@@ -34,55 +35,102 @@ class FuzzMatcher(object):
 		self.tables = Tables() 
 		self.db = MAINDB
 		self.handler = databaseManager(db, collection,collection)
-		#self.stopwords = self.filterStopWords('stopwords.list')
 		self.memory = []
 		self.hasMatch = False
-		#self.gen = Itemgerenrator(db, MASTER)
+		self.gen = Itemgenerator(db, MASTER)
 
-	def createMaster(self):
-		coll = self.handler.getCollection()
-		for item in coll.find( { 'site' : MASTER }):
-			new_item = gen.createParent(item)
-			gen.setParent(new_item)
-			
 	## THE FOLLOWING THREE METHODS ARE A NEW MATCHER THEY MATCH BY ORDER WITH THE NEW LALINAITEM OBJECT
 	# MASTER : THE PARENT SITE KNOWN AS THE NBENCHMARK COPIED INTO A DATABASE
 	#SEQUENTIALLY EACH SITE IS USED TO MATCH AGAINST THE PARENT
 	#DESIGINED TO WORK WITH CATEGORY SPLIT DATABSES VIA DATAOPS.SPLITBYCAT
 	#RUN WITH CLEANANDCATEGORIZE.PY IN MAPPERSET
 
-	def createMaster(self, db):
-                for item in db.find( { 'site' : MASTER }):
-                        new_item = self.gen.createParent(item)
-                        self.gen.setParent(new_item)
+	def createMaster(self, db, site, is_matched_int):
+		site_coll = self.handler.create(db, site)
+		_gen = Itemgenerator(db, site)
 
-	def getBest(self):
-		best = sorted(self.memory, key=itemgetter('score')) 	
+		for item in db.find( { 'site' : site, 'is_matched' : is_matched_int}):
+                        new_item = self.gen.createParent(item)
+			_gen.setParent(new_item)
+		print 'Confirm : %s' % _gen.manager.getCollection().count()
+		#create the site colletion and return the item generator object 
+		return _gen
+
+	def getBest(self, arr):
+		best = sorted(arr, key=itemgetter('matchscore')) 	
 		return best[0]
 
-	def siteOrderMatch(self, db):
+	def markAll(self):
+		self.handler.addField('is_matched', 0)
+
+	def designate_match(self, item, handler):
+		item['is_matched'] = 1
+		handler.updateLalinaItem(item)
+
+	def siteMatch(self,db):
+		sites = []
+		handler = self.handler.create(db)
+
+		for site in MATCH_ORDER:
+			if MATCH_ORDER.index(site) == 0:
+				item_gen_obj =createMaster(db, site, 1)
+				#starting with first db take all matches = 1 
+			else:
+				item_gen_obj = createMaster(self, db, site, 0)
+			#sites to iterate less the one designated as primary
+			sites.extend(MATCH_ORDER)
+			sites.pop(sites.index(site))
+
+			master = item_gen_obj.manager.getCollection()	
+		
+			for slave_site in sites:
+				for cursor, first in enumerate(master.find(timeout = False)):
+					size = db.find( { 'site': site}).count()-1 
+					for idx, second in enumerate(db.find( {'site': slave_site, 'is_matched': 0} ) ):
+						isMatch, score = self.sitelessMatch(first, second)
+						if isMatch:
+							second['matchscore'] = score
+							self.memory.append(second)
+							self.hasMatch = True
+						if idx == size and self.hasMatch:
+							push = self.getBest(self.memory)
+							#tells that object has a match
+							self.designate_match(push, handler)
+
+							push = self.gen.createMember(push)	
+							self.gen.setMember(first['key'], push)
+							self.hasMatch = False
+							self.memory = []
+					print size - cursor + " " + site
+		
+	def siteOrderMatch(self, primary_db, secondary_db):
+		
 		master = self.gen.manager.getCollection()
 		match_arr = []
 		for site in MATCH_ORDER:
-			print site
-			for cursor, first in master.find(timeout = False):
-				size = coll.find( { 'site': site}).count()
+			for cursor, first in enumerate(master.find(timeout = False)):
+				size = db.find( { 'site': site}).count()-1 
 				for idx, second in enumerate(db.find( {'site': site} ) ):
-					isMatch, score = self.objectMatch_avg(first, second)
+					
+					isMatch, score = self.sitelessMatch(first, second)
 					if isMatch:
 						second['matchscore'] = score
 						self.memory.append(second)
 						self.hasMatch = True
 					if idx == size and self.hasMatch:
-						push = self.getBest(self.memoery)
+						push = self.getBest(self.memory)
+						#tells that object has a match
+						self.designate_match(push, marker_db)
 						push = self.gen.createMember(push)	
 						self.gen.setMember(first['key'], push)
-						print 'parent: %s  member: %s ' % (first['key'], push)
+						self.hasMatch = False
+						print first['key']
+						self.memory = []
+				print size - cursor + " " + site
 
-
+			
 	def orderLoopMatch(self):
 		for db in self.handler.catdbs:
-			self.createMaster(db)
 			self.siteOrderMatch(db)
 		
 	def loopMatch(self):
@@ -237,6 +285,13 @@ class FuzzMatcher(object):
 		elif score1 == score2:
 			return False				
 
+	def sitelessMatch(self, first, second):
+			if self.fuzzyMatchBrand(first['brand'], second['brand']):
+					hasMatch, score = self.avgScoreMatch(first['name'],second['name'])
+					return hasMatch, score	
+			else:
+				return False, 0	
+	
 	def objectMatch_avg(self, first, second):
 		if first['site'] != second['site']:
 			if self.fuzzyMatchBrand(first['brand'], second['brand']):

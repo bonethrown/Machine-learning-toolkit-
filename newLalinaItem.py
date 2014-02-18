@@ -1,9 +1,9 @@
-
+import uuid
 from dataOps import databaseManager
 import string
 OUTDB = 'new_collection'
 PARENT= ['_id','product_id','price_per_vol','price_str','date_crawled','key','url','site','volume','price','description']
-MEMBER= ['_id','date_crawled','name_noindex','key','product_id',' matches']
+MEMBER= ['_id','date_crawled','name_noindex','product_id',' matches']
 CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maquiagem', 'cabelo']
 class Itemgenerator(object):
 	def __init__(self, db, coll):
@@ -36,9 +36,11 @@ class Itemgenerator(object):
 			if key not in PARENT:
 				item[key] = value
 
-			item['key'] = Itemgenerator.keyGen(crawl_item)
+			item['key'] = str(uuid.uuid4())
+
 			item['sites'] = []
 			item['sites'].append(Itemgenerator.create_firstMember(crawl_item))
+			item['members'] = len(item['sites'])
 		return item
 
 	@staticmethod
@@ -63,12 +65,15 @@ class Itemgenerator(object):
 		else:
 			print 'NO Item with that key in db : %s' % coll
 				
-	def setParent(self, parent):	
-		if 'key' in parent:
-			self.manager.updateLalinaItem(parent)
+	def setParent(self, parent, safe = False):	
+		if safe:
+			if 'key' in parent:
+				self.manager.updateLalinaItem(parent)
+			else:
+				print 'wrong key unable'
 		else:
-			'wrong key unable'
-	
+			self.manager.updateLalinaItem(parent)
+				
 	def getMembers(self, parent_key):
 		coll = self.manager.getCollection()
 		out = list(coll.find( { "key" : parent_key}))

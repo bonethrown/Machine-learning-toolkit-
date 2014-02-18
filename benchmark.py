@@ -22,13 +22,14 @@ class Benchmark(object):
 		return self.manager.getCollection()
 	# extract random amount from unmatched category
 	#int num is total items to extract i
-	def featurizeName(self):
+	def featurizeName(self, arr):
 		
 		out = []
 		for item in arr:
 			if isinstance(item, Name):
-				features = item.customFeaturize(item.name)
-				out.append(features)
+				features = item.input_featurize(item.name)
+				tup = (features, item.cat)
+				out.append(tup)
 		return out
 	def setCat(self, arr):
 		for item in arr:
@@ -47,7 +48,8 @@ class Benchmark(object):
 		
 		training_set = dev_set[:250]
 		dev = dev_set[250:]
-		return test_set,dev, training_set
+		return test_set, dev, training_set
+
 	def devTestSet(self,number=1000):
 		out = []
 		grab = float(number) / float(len(CATEGORY_LIST))

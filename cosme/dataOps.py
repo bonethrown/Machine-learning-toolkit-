@@ -52,9 +52,14 @@ class databaseManager(object):
 		self.catdbs = self.initCatCollections()
 		self.remote1Lalina = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
 		self.remote1Comments = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
-	
-	#def updatePrimary(item):
-	#### This is the primary function to save an image to the harddrive 
+
+	def assignOther(self, db):
+		self.lalinaCollection = db
+		print self.lalinaCollection	
+
+	def create(self, db, coll):
+		_new = db2.getOwnDb(db, coll)
+		return _new
 
 	def updateRemote(self, item):
 		try:
@@ -143,6 +148,10 @@ class databaseManager(object):
 		for item in localdb.find():
 			self.updateRemote(item)	
 	
+	def addField(self, field, value):
+		self.lalinaCollection.update({'category': {"$exists" : True}}, { '$set' : {field : value}}, multi=True)
+
+
 	def killField(self, field):
 		self.lalinaCollection.update( { field : {"$exists" : True}}, {"$unset": { field : ""}}, multi=True)
 		count = self.lalinaCollection.find( { field : {"$exists" : True}}).count()
@@ -163,8 +172,7 @@ class databaseManager(object):
 		try:
 			self.lalinaCollection.update({"key" : item['key']}, item, upsert=True)
 		except Exception, e:
-			log.msg('update error in db for item %s' %item['key']) 
-
+			print e
 
 	def conditionalFieldUpdate(self, query_field, q_value, field, newValue):
 		num = self.lalinaCollection.find({query_field: q_value}).count()
@@ -175,8 +183,7 @@ class databaseManager(object):
 			print 'Remaining: %s' % done
 		except Exception, e:
 			log.msg('update error in db for item') 
-		
-
+	
 	def updateByField(self, field, value, newValue):
 		num = self.lalinaCollection.find({field: value}).count()
 		print 'To update : %s' % num 

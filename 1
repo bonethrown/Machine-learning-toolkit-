@@ -190,7 +190,7 @@ class Name(object):
 		return self
 	
 	def unigram(self, name):
-		name = self.makeUnicode(name)
+		name = self.makeUnicode(self.name)
 		return  name.split()
 	def bigram(self, name):
 		input_list = self.unigram(name)
@@ -224,9 +224,6 @@ class Name(object):
 					matched.append(gram)				
 		matched = list(set(matched))
 		return matched
-	
-	
-	
 	def input_featurize(self, tokens):
 		words = [w for w in self.unigram(tokens)] 	
 		uniq = set(words)
@@ -234,7 +231,15 @@ class Name(object):
 		for word in words:
 			features[word] = (word in uniq)
 		return features
-	
+	def customFeaturize(self, word):
+		# call with name object	
+		words = []
+		words.append(word) 	
+		uniq = set(words)
+		features = dict()
+		for word in words:
+			features[word] = (word in uniq)
+		return features
 	def featurize(self):
 		# call with name object	
 		words = [w for w in self.unigram(self.name)] 	

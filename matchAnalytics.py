@@ -9,6 +9,10 @@ class Analytics(object):
 	def getCollection(self):
 		return self.manager.getCollection()
 
+
+		
+
+
 	def allFieldsType(self):
 		coll = self.getCollection()
 		sample = list(coll.find().limit(1))
@@ -88,7 +92,9 @@ class Analytics(object):
 		print 'full average is : %s' % avg
 
 	
-	
+	#use with new object class newLalinaitem
+	#def newMatchCount(self):	
+		
 
 	#count how many distinct field values there are:
 	#USe only for fields that can take a finite number of vlalues, liek Site, category

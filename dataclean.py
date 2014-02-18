@@ -1,5 +1,5 @@
 import unicodedata
-from cosme.pipes.utils.utils2 import allToString
+from utils2 import allToString
 import urllib
 from nltk import regexp_tokenize, tokenwrap, word_tokenize
 import string
@@ -8,7 +8,6 @@ import catChecker
 import nltk.classify.util
 from nltk import classify
 from nltk.classify import NaiveBayesClassifier
-from cosme.pipes.utils.utils import listMatcher
 import random
 from dataOps import databaseManager
 import re
@@ -20,34 +19,36 @@ import time
 import json
 import logging
 
-
 class Dataclean(object):
 	
-	def __init__(self, db, incoll, outcoll):
+	def __init__(self, db, incoll):
                 self.mem = []
 		self.text = TextClean()
 		self.pc = PriceVolume()
 		self.tie = TypeOperations()
 		self.indb = databaseManager(db, incoll, incoll)
-		self.outdb = databaseManager(db, outcoll, outcoll)
+		#self.outdb = databaseManager(db, outcoll, outcoll)
 		print self.indb.getCollection()
-		print self.outdb.getCollection()
+		#print self.outdb.getCollection()
 	
 ######NAMAE AND TEXT CLEANING HERE
 	def run(self):
 		
 		coll = self.indb.getCollection()
-		print coll.count()
-		
-		for item in coll.find(timeout = False):
-			item['name'] = self.text.cleaner(item['name'])	
-			item['volume'] = self.pc.cleanVolume(item['volume'])
-			self.tie.run(item)
-			self.addFields(item)
-			del item['_id']
-			self.outdb.updateLalinaItem(item)
-		print ' error : %s ' % len(self.mem)
-                print 'coppied %s' % coll.count()
+		print coll.find().skip(25441).count()	
+		for count, item in enumerate(coll.find(timeout = False).skip(25000)):
+
+			try : 
+				item['name'] = self.text.cleaner(item['name'])	
+				item['volume'] = self.text.removeAllSpaces(item['volume'])
+				self.tie.run(item)
+				self.addFields(item)
+				#del item['_id']
+				self.indb.updateLalinaItem(item)
+			except Exception, e:
+				self.mem.append(e, item['key'])
+			print count
+		print self.mem
 		self.mem = []
 
 	def addFields(self, item):
@@ -55,7 +56,9 @@ class Dataclean(object):
 			item['price_str'] = self.pc.floatPriceToString(item['price'])
 		if not 'name_url' in item:
 			item['name_url'] = self.urlquote(item['name'])
-
+		if not 'ismatched' in item:
+			item['is_matched'] = 0
+			
 	def urlquote(self, string):
                 string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
                 string = string.replace(" ","-")
@@ -78,8 +81,10 @@ class TextClean(object):
 		newName = self.cleanName(newName)
 		newName = self.pc.cleanVolume(newName)
 		newName = self.dupRemove(newName)
+		newName = self.removeMidWhiteSpaces(newName)
 		newName = self.matcher.removeMatch(newName)
 		newName = self.removeMidWhiteSpaces(newName)
+		newName = newName.strip()
 		return newName
 		
 	def removeMidWhiteSpaces(self, name):
@@ -125,7 +130,7 @@ class TextClean(object):
 		return ulist
 
 	def removeAllSpaces(self, string):
-		return "".join(string.split())
+		return "".join(string.split()).lower()
 	
 class TypeOperations(object):
 	
@@ -243,7 +248,7 @@ class PriceVolume(object):
 					return priceFloat
                         else:
                                 return priceFloat
-
+	#NOT INTENDED TO USE WITH VOLUME FILED ONLY FOR NAME FIELD CLEANING
 	def cleanVolume(self, name):
                 replaceList = regexp_tokenize(name, self.volPattern)
                 crop = name
