@@ -1,15 +1,16 @@
 import uuid
 from dataOps import databaseManager
 import string
+from random import getrandbits
 OUTDB = 'new_collection'
-PARENT= ['_id','product_id','price_per_vol','price_str','date_crawled','key','url','site','volume','price','description']
+PARENT= ['_id','product_id','price_per_vol','price_str','date_crawled','url','site','volume','price','description']
 MEMBER= ['_id','date_crawled','name_noindex','product_id',' matches']
 CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maquiagem', 'cabelo']
 class Itemgenerator(object):
 	def __init__(self, db, coll):
 		self.manager = databaseManager(db,coll,coll)
 		#self.manager = databaseManager(db,OUTDB)
-	
+	####DEPRECEATED USING EISTING KEY FOR BACKWARD COMPATIBILITTY
 	@staticmethod
 	def keyGen(item):
 		
@@ -24,7 +25,7 @@ class Itemgenerator(object):
 		name2 = item['name'][-2:]
 		name = name + name2
 		if len(name) < 4:
-			name = name +'00'
+			name = name +'00'+getrandbits(11)
 		out = cat+ brand + name
 		return out
 	
@@ -35,8 +36,6 @@ class Itemgenerator(object):
 		for key,value in crawl_item.iteritems():
 			if key not in PARENT:
 				item[key] = value
-
-			item['key'] = str(uuid.uuid4())
 
 			item['sites'] = []
 			item['sites'].append(Itemgenerator.create_firstMember(crawl_item))
@@ -72,7 +71,7 @@ class Itemgenerator(object):
 			else:
 				print 'wrong key unable'
 		else:
-			self.manager.updateLalinaItem(parent)
+			self.manager.insertItem(parent)
 				
 	def getMembers(self, parent_key):
 		coll = self.manager.getCollection()
@@ -92,7 +91,7 @@ class Itemgenerator(object):
 		coll = self.manager.getCollection()
 		try:
 			coll.update( { "key" : parent_key}, { "$push" : { "sites" : member} } )
-		except exception, e: 
+		except Exception, e: 
 			print e
 
 	def removeMember(self, parent_key, member_site):

@@ -1,12 +1,9 @@
 
 
-
 class Name(object):
 
         def __init__(self, string):
                 self.name = string.lower()
-                self.hasMatch = False
-                self.matches = []
                 self.url = ""
                 self.des = ""
         def makeUnicode(self, string):
@@ -19,9 +16,8 @@ class Name(object):
                 return " ".join([self.name,self.des])
         def get(self):
                 return self
-
         def unigram(self, name):
-                name = self.makeUnicode(self.name)
+                name = self.makeUnicode(name)
                 return  name.split()
         def bigram(self, name):
                 input_list = self.unigram(name)
@@ -33,7 +29,6 @@ class Name(object):
                 unigram = self.unigram(self.name)
                 bigram = self.bigram(self.name)
                 trigram = self.trigram(self.name)
-
                 unigram.extend(bigram)
                 unigram.extend(trigram)
 
@@ -46,7 +41,6 @@ class Name(object):
                                 lookup = term
                                 out.append(lookup)
                 return out
-
         def matched(self, synList):
                 ngrams = set(self.grams())
                 matched = []
@@ -63,15 +57,7 @@ class Name(object):
                 for word in words:
                         features[word] = (word in uniq)
                 return features
-	def customFeaturize(self, word):
-                # call with name object
-                words = []
-                words.append(word)
-                uniq = set(words)
-                features = dict()
-                for word in words:
-                        features[word] = (word in uniq)
-                return features
+
         def featurize(self):
                 # call with name object
                 words = [w for w in self.unigram(self.name)]
@@ -80,6 +66,3 @@ class Name(object):
                 for word in words:
                         features[word] = (word in uniq)
                 return features
-
-
-

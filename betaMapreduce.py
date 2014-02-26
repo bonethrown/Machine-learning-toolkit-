@@ -1,3 +1,8 @@
+
+
+
+##### V 0.2 #####
+import time
 from dataclean import Dataclean
 from operator import itemgetter
 from pymongo import Connection
@@ -26,8 +31,7 @@ IGNORE_VOLUME = True
 AVG_THRESH = 83
 USE_VOL = False
 SWAP_THRESH = 3
-MASTER = 'belezanaweb'
-MATCH_ORDER = ['sepha','sephora','magazineluiza','laffayette','dafiti','infinitabeleza','americanas','submarino','walmart','netfarma']
+MATCH_ORDER = ['belezanaweb','sepha','sephora','magazineluiza','laffayette','dafiti','infinitabeleza','americanas','submarino','walmart','netfarma']
 
 class FuzzMatcher(object):
 
@@ -37,7 +41,6 @@ class FuzzMatcher(object):
 		self.handler = databaseManager(db, collection,collection)
 		self.memory = []
 		self.hasMatch = False
-		self.gen = Itemgenerator(db, MASTER)
 
 	## THE FOLLOWING THREE METHODS ARE A NEW MATCHER THEY MATCH BY ORDER WITH THE NEW LALINAITEM OBJECT
 	# MASTER : THE PARENT SITE KNOWN AS THE NBENCHMARK COPIED INTO A DATABASE
@@ -45,14 +48,13 @@ class FuzzMatcher(object):
 	#DESIGINED TO WORK WITH CATEGORY SPLIT DATABSES VIA DATAOPS.SPLITBYCAT
 	#RUN WITH CLEANANDCATEGORIZE.PY IN MAPPERSET
 
-	def createMaster(self, db, site, is_matched_int):
-		site_coll = self.handler.create(db, site)
-		_gen = Itemgenerator(db, site)
-
-		for item in db.find( { 'site' : site, 'is_matched' : is_matched_int}):
-                        new_item = self.gen.createParent(item)
+	def createMaster(self, db_sites, coll, site, is_matched_int):
+			
+		_gen = Itemgenerator(db_sites, site)
+		for item in coll.find( { 'site' : site, 'is_matched' : is_matched_int}):
+                        new_item = _gen.createParent(item)
 			_gen.setParent(new_item)
-		print 'Confirm : %s' % _gen.manager.getCollection().count()
+		print 'Confirm : %s  %s' % (site, _gen.manager.getCollection().count())
 		#create the site colletion and return the item generator object 
 		return _gen
 
@@ -66,42 +68,47 @@ class FuzzMatcher(object):
 	def designate_match(self, item, handler):
 		item['is_matched'] = 1
 		handler.updateLalinaItem(item)
-
-	def siteMatch(self,db):
+	def siteMatch(self,coll):
 		sites = []
-		handler = self.handler.create(db)
-
+		sites.extend(MATCH_ORDER)
 		for site in MATCH_ORDER:
 			if MATCH_ORDER.index(site) == 0:
-				item_gen_obj =createMaster(db, site, 1)
+				item_gen_obj =self.createMaster('sites', coll, site, 0)
+				print 'creating: %s : %s' % (site, item_gen_obj.manager.getCollection())
 				#starting with first db take all matches = 1 
 			else:
-				item_gen_obj = createMaster(self, db, site, 0)
+				item_gen_obj = self.createMaster('sites', coll, site, 0)
+				print 'creating: %s : %s' % (site, item_gen_obj.manager.getCollection())
 			#sites to iterate less the one designated as primary
-			sites.extend(MATCH_ORDER)
 			sites.pop(sites.index(site))
-
-			master = item_gen_obj.manager.getCollection()	
-		
+			master = item_gen_obj.manager.getCollection()
+			_slave = databaseManager('neworder','test')
+			_slave.tie(coll)		
+			print 'pop tart %s' % sites	
+			print _slave.getCollection()	
 			for slave_site in sites:
+				print slave_site
+				time.sleep(2)
+				count = master.count()		
 				for cursor, first in enumerate(master.find(timeout = False)):
-					size = db.find( { 'site': site}).count()-1 
-					for idx, second in enumerate(db.find( {'site': slave_site, 'is_matched': 0} ) ):
+					size = coll.find( { 'site': slave_site, 'is_matched' : 0 }).count()-1 
+					for idx, second in enumerate(coll.find( {'site': slave_site, 'is_matched': 0} ) ):
 						isMatch, score = self.sitelessMatch(first, second)
 						if isMatch:
 							second['matchscore'] = score
 							self.memory.append(second)
 							self.hasMatch = True
 						if idx == size and self.hasMatch:
-							push = self.getBest(self.memory)
+							best_item = self.getBest(self.memory)
 							#tells that object has a match
-							self.designate_match(push, handler)
-
-							push = self.gen.createMember(push)	
-							self.gen.setMember(first['key'], push)
+							push = item_gen_obj.createMember(best_item)	
+							item_gen_obj.setMember(first['key'], push)
+							print 'matched : %s ' % first['key']	
+							self.designate_match(best_item, _slave)		
 							self.hasMatch = False
 							self.memory = []
-					print size - cursor + " " + site
+					print count - cursor
+
 		
 	def siteOrderMatch(self, primary_db, secondary_db):
 		
@@ -131,7 +138,7 @@ class FuzzMatcher(object):
 			
 	def orderLoopMatch(self):
 		for db in self.handler.catdbs:
-			self.siteOrderMatch(db)
+			self.siteMatch(db)
 		
 	def loopMatch(self):
 

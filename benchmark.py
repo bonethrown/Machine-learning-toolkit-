@@ -5,6 +5,7 @@ from mapperSet import BayesObject, Name
 CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maquiagem', 'cabelo']
 from nltk import FreqDist
 import math
+from name import Name
 
 class Benchmark(object):
 

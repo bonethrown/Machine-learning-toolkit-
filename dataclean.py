@@ -32,23 +32,20 @@ class Dataclean(object):
 		#print self.outdb.getCollection()
 	
 ######NAMAE AND TEXT CLEANING HERE
-	def run(self):
+	def run(self, with_Brand=False):
 		
 		coll = self.indb.getCollection()
-		print coll.find().skip(25441).count()	
-		for count, item in enumerate(coll.find(timeout = False).skip(25000)):
+		for count, item in enumerate(coll.find(timeout = False)):
 
 			try : 
-				item['name'] = self.text.cleaner(item['name'])	
+				item['name'] = self.text.cleaner(item['name'], with_Brand)	
 				item['volume'] = self.text.removeAllSpaces(item['volume'])
+				item['category'] = ''
 				self.tie.run(item)
-				self.addFields(item)
-				#del item['_id']
+				eelf.addFields(item)
 				self.indb.updateLalinaItem(item)
 			except Exception, e:
 				self.mem.append(e, item['key'])
-			print count
-		print self.mem
 		self.mem = []
 
 	def addFields(self, item):
@@ -71,7 +68,7 @@ class TextClean(object):
 		self.matcher = listMatcher()
 		self.pattern = r'(?x)\n  ([A-Z]\\.)+  \n | \\w+(-\\w+)*\n| \\$?\\d+(\\.\\d+)?%?\n| \\.\\.\\.\n| [][.,;"\'?():-_`]\n'
                 self.volPattern = r'''(?i) \d+ml|\d+ ml|\d+ML|\d+ML|\d+g|\d+ g|\d+gr|\d+ gramas|\d+ gr|\d+gramas'''	
-	def cleaner(self, newName):
+	def cleaner(self, newName, remove_brand = True):
 		#ORDER IMPORTTAN
 		if not isinstance(newName, unicode):
 			newName = newName.decode('utf8')
@@ -82,10 +79,12 @@ class TextClean(object):
 		newName = self.pc.cleanVolume(newName)
 		newName = self.dupRemove(newName)
 		newName = self.removeMidWhiteSpaces(newName)
-		newName = self.matcher.removeMatch(newName)
+		if remove_brand:
+			newName = self.matcher.removeMatch(newName)
 		newName = self.removeMidWhiteSpaces(newName)
 		newName = newName.strip()
 		return newName
+
 		
 	def removeMidWhiteSpaces(self, name):
                 name = re.sub(r'\s+', ' ', name)

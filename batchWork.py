@@ -4,6 +4,7 @@
 #################
 # ALL BATCH CODE REQURED A dataOps. databasemanager object passed to them 
 ###############
+from name import Name
 import urllib
 import unicodedata
 from pymongo import Connection
@@ -30,7 +31,9 @@ class Batchwork(object):
 	def __init__(self, db, coll):
 		self.manager = databaseManager(db,coll)
 
-
+	### USAGE:  i.e create an instance of a function i.e listmatch pass as first argument and pass 'name' as second argument
+	#third argument can also be 'name' if you want to clean or match the name.
+	#below is the most powerful batch function. can run anything as a batch process on an item
 	def genericBatch(self, _function,field1, field2):
 		coll = self.manager.getCollection()
 		for item in coll.find():
@@ -39,6 +42,13 @@ class Batchwork(object):
 			item[field2] = out
 			self.manager.updateLalinaItem(item)
 	#does two operations, takes two functions 1 a matcher function and 2 a function 
+
+
+	#def set_match_count(self):
+	#	matches = len(item['sites']) 
+			
+		
+
 
 	def urlquote(self, string):
 		string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')

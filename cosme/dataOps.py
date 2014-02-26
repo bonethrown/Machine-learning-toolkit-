@@ -53,9 +53,13 @@ class databaseManager(object):
 		self.remote1Lalina = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
 		self.remote1Comments = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
 
-	def assignOther(self, db):
-		self.lalinaCollection = db
-		print self.lalinaCollection	
+	def swap_collection(self, coll):
+		new = db2.getOwnDb(self.db_name, coll)
+		self.lalinaCollection = new
+
+	def tie(self, coll):
+		self.lalinaCollection = coll 
+	
 
 	def create(self, db, coll):
 		_new = db2.getOwnDb(db, coll)
@@ -75,9 +79,9 @@ class databaseManager(object):
 			except Exception, e:
 				log.msg('update error in db for item %s' %item['key']) 
 	
-	def initCatCollections(self):
+	def initCatCollections(self, db_list = CATEGORY_LIST):
 		dbs =[]
-		for cat in CATEGORY_LIST:
+		for cat in db_list:
 			dog  = cat.replace(" ","")
 			coll = self.db[dog]
 			dbs.append(coll)
@@ -167,7 +171,15 @@ class databaseManager(object):
 			print 'Remaining: %s' % done
 		except Exception, e:
 			log.msg('update error in db for item') 
-			
+		
+	def insertLalinaItem(self, item):
+		try:
+			self.lalinaCollection.update({"key" : item['key']}, item, upsert=True)
+		except Exception, e:
+			print e
+
+
+	
 	def updateLalinaItem(self, item):
 		try:
 			self.lalinaCollection.update({"key" : item['key']}, item, upsert=True)
@@ -194,6 +206,21 @@ class databaseManager(object):
 		except Exception, e:
 			log.msg('update error in db for item') 
 	
+	def updateSingleField(self, item, field, newValue):
+		try:
+			self.lalinaCollection.update({"key": item['key']}, {"$set" : {field : newValue}})
+		except Exception, e:
+			log.msg('update error in db for item') 
+
+	def insertItem(self,item):	
+		try:
+			self.lalinaCollection.insert(item)
+		except Exception, e:
+			log.msg('update error in db for item %s' %item['key']) 
+					
+
+
+	#####RELPACES WHOLE ITEM WITH FIELD	
 	def updateLalinaField(self, item, field):
 		try:
 			self.lalinaCollection.update({"key" : item['key']}, {field : item[field]})

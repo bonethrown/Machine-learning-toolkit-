@@ -1,6 +1,8 @@
 from cosme.dataOps import databaseManager
 import pymongo
 from operator import itemgetter
+
+MATCH_ORDER = [ {'belezanaweb':0}, {'sepha':0}, {'sephora':0}, {'magazineluiza':0}, {'laffayette':0}, {'dafiti':0}, {'infinitabeleza':0}, {'americanas':0}, {'submarino':0}, {'walmart':0}, {'netfarma':0} ]
 class Analytics(object):
 	
 	def __init__(self, db, coll):
@@ -10,6 +12,78 @@ class Analytics(object):
 		return self.manager.getCollection()
 
 
+	def match_distribution(self):
+		beleza = 0
+		sepha = 0
+		sephora =0
+		magazine = 0
+		laffayette = 0
+		dafiti = 0
+		infinita = 0
+		americanas = 0
+		submarino = 0
+		walmart = 0
+		netfarma = 0
+
+		coll = self.getCollection()
+		print coll.count()
+		for item in coll.find():	
+			for ele in item['sites']:
+				obj = ele['site']
+				if obj == 'belezanaweb':
+					beleza = beleza + 1
+				if obj == 'sepha':	
+					sepha = sepha + 1
+				if obj == 'sephora':
+					sephora = sephora +1
+				if obj == 'magazineluiza':
+					magazine = magazine +1
+				if obj == 'laffayette':
+					laffayette = laffayette +1
+				if obj == 'dafiti':
+					dafiti = dafiti + 1
+				if obj == 'infinitabeleza':
+					infinita = infinita + 1
+				if obj == 'americanas':
+					americanas = americanas + 1
+				if obj == 'walmart':
+					walmart = walmart + 1
+				if obj == 'submarino':
+					submarino = submarino + 1
+				if obj == 'netfarma':
+					netfarma = netfarma + 1
+		print "beleza: %s sepha: %s sephora: %s magazine: %s laff: %s dafiti: %s infinita: %s americanas: %s walmart: %s submarino: %s netfarma: %s" % (beleza, sepha, sephora, magazine, laffayette, dafiti, infinita, americanas, submarino, walmart, netfarma)
+
+	def matchCount(self):
+		coll = self.getCollection()
+		zero = 0
+		one = 0
+		two = 0
+		three = 0
+		four = 0
+		five = 0
+		six_plus = 0
+		total = coll.count()
+		for item in coll.find():
+			matches = len(item['sites'])
+			if matches == 1:
+				zero = zero + 1
+			if matches == 2:
+				one = one + 1
+			if matches == 3:
+				two = two + 1
+			if matches == 4:
+				three = three + 1
+			if matches ==5:
+				four = four + 1
+			if matches == 6:
+				five = five + 1
+			if matches >= 7:
+				six_plus = six_plus + 1
+
+		matched = one + two + three + four + five + six_plus
+		print "0: %s, 1: %s, 2: %s, 3: %s, 4: %s, 5: %s, 6+: %s matched: %s" % (float(zero)/total, float(one)/total, float(two)/total, float(three)/total, float(four)/total, float(five)/total, float(six_plus)/total, float(matched)/total)  	
+		return "0: %s, 1: %s, 2: %s, 3: %s, 4: %s, 5: %s, 6+: %s matched: %s total: %s" % (zero, one, two, three, four, five, six_plus, matched, total)  	
 		
 
 

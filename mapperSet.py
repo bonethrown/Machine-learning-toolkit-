@@ -18,13 +18,13 @@ from dataOps import databaseManager
 from dataclean import Dataclean
 import re
 from utils import listMatcher
-COMMIT = True
+from name import Name
 
 INDB = 'neworder'
 INCOLL = 'raw_January'	
 OUTDB = 'neworder'
-OUTCOLL = 'test_set'
-FINAL_COLL = 'january_proccessed'
+OUTCOLL = 'cleanout'
+FINAL_COLL = 'order_loop'
 MAP_PATH = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandmaptable.list'
 match_path = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandric.list'
 #INDB is raw db rom crawlers
@@ -42,23 +42,23 @@ CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maq
 
 class CleanAndCategorize(object):
 	
-	def __init__(self, launch_with_model = True):
-		self.bayes = BayesObject()
+	def __init__(self, launch_with_model = False):
 		self.outdb = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
 		self.indb = databaseManager(INDB, INCOLL, COMMENT_COLL)
-		self.clean = Dataclean(INDB, INCOLL, OUTCOLL)
+		self.clean = Dataclean(INDB, INCOLL)
 		self.fuzz = FuzzMatcher(OUTDB, OUTCOLL)
-		self.mapreduce = Mapreduce()
+		#self.mapreduce = Mapreduce()
+		self.bayes = BayesObject(self.outdb) #EXPECTS HANDLER 
 		self.init_Model(launch_with_model)
 		self.norm = Normalize(OUTDB, OUTCOLL)
-	def init_Model(self, toLoad = True):
+	def init_Model(self, toLoad):
 		if toLoad:
 			self.trainedmodel = self.bayes.makeModel()
 	def reload(self):
 		self.outdb = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
 		self.indb = databaseManager(INDB, INCOLL, COMMENT_COLL)
 		self.mapreduce = Mapreduce()
-		self.bayes = BayesObject()
+		self.bayes = BayesObject(self.outdb)
 	def reloadModel(self):
 		self.trainedmodel = self.bayes.makeModel()
  
@@ -74,9 +74,6 @@ class CleanAndCategorize(object):
 		self.runMatcher()
 		#### RUN MATCHER HERE ####
 
-	def run_order_loop(self):
-		self.fuzz.orderLoopMatch()
-
 	def seqMatcher(self):
 		self.clean.run()
 		print 'dumb classify'
@@ -84,6 +81,17 @@ class CleanAndCategorize(object):
 		print 'brand match'
 		self.norm.brandReduce()
 		print' chopping'
+		self.outdb.chop2cats(self.outdb.getCollection())
+		self.fuzz.orderLoopMatch()
+		self.outdb.multiMerge(FINAL_COLL, self.outdb.catdbs)
+
+	def runOrderLoopMatch(self):
+		#self.clean.run()
+		#self.dumbClassify(self.outdb)
+		self.outdb.addField('is_matched', 0)
+		self.outdb.killdbs()
+		#self.norm.brandReduce()
+		#print 'marked for order matching'
 		self.outdb.chop2cats(self.outdb.getCollection())
 		self.fuzz.orderLoopMatch()
 		self.outdb.multiMerge(FINAL_COLL, self.outdb.catdbs)
@@ -170,104 +178,20 @@ class Normalize(object):
 				nomatch.append(item['url'])
 		print 'nomatch: %s from total ; %s ' % (count, total)
 	
-class Name(object):
-	
-	def __init__(self, string):	
-		self.name = string.lower()
-		self.hasMatch = False	
-		self.matches = []
-		self.url = ""
-		self.des = ""
-	def makeUnicode(self, string):
-		if not isinstance(string, unicode):
-			string = string.encode('utf-8')
-			return string
-		else:
-			return string
-	def getNameDes(self):
-		return " ".join([self.name,self.des])	
-	def get(self):
-		return self
-	
-	def unigram(self, name):
-		name = self.makeUnicode(name)
-		return  name.split()
-	def bigram(self, name):
-		input_list = self.unigram(name)
-	  	return zip(input_list, input_list[1:])
-	def trigram(self, name):
-		input_list = self.unigram(name)
-		return zip(input_list, input_list[1:], input_list[2:])
-	def grams(self):
-		unigram = self.unigram(self.name)
-		bigram = self.bigram(self.name)
-		trigram = self.trigram(self.name)
-			
-		unigram.extend(bigram)
-		unigram.extend(trigram)
-	
-		out = []
-		for term in unigram:
-			if isinstance(term, tuple):
-				lookup = " ".join(map(unicode, term))
-				out.append(lookup)	
-			else:
-				lookup = term	
-				out.append(lookup)	
-		return out
-	def matched(self, synList):
-		ngrams = set(self.grams())
-		matched = []
-		for item in synList:
-			for gram in ngrams:
-				if item == gram:
-					matched.append(gram)				
-		matched = list(set(matched))
-		return matched
-	
-	
-	
-	def input_featurize(self, tokens):
-		words = [w for w in self.unigram(tokens)] 	
-		uniq = set(words)
-		features = dict()
-		for word in words:
-			features[word] = (word in uniq)
-		return features
-	
-	def featurize(self):
-		# call with name object	
-		words = [w for w in self.unigram(self.name)] 	
-		uniq = set(words)
-		features = dict()
-		for word in words:
-			features[word] = (word in uniq)
-		return features
-	
-class ReverseLookup(object):
-	
-	def __init__(self):
-		self.ngrammer = Ngrammer()
-		
-
-	def keyWord(self, namestr):
-		name = Name(namestr)
-		categories = self.ngrammer.categories()	
-		
-		for cat in categories:
-			doc = name.matched(self.ngrammer.getCatRow(cat))
-		# LOOP WILL RUN AND WILL MATCH THE LAST ONE IT FINDS THIS COULD BE A PROBLEM AND NEEDS VERIFICATION
-			if doc:
-				return doc
 	
 class BayesObject(object):
 
-	def __init__(self):
+	def __init__(self, handler, load_corpus = False):
 		self.matched = []
 		self.unmatched = []
-		self.handler = DatabaseHandler()
-		self.ngrammer = Ngrammer()
-		self.corpus = self.allNames()
+		self.handler = handler
+		#self.handler = DatabaseHandler()
+		self.tables = catChecker.Tables()
+		#self.ngrammer = Ngrammer()
+		self.corpus = []
+		if load_corpus:
+			self.corpus = allNames(db)
+		self.categories = CATEGORY_LIST
 	#	self.model = self.makeModel()
 	#creates the name object for each string name
 	def loadCorpus(self, arr):
@@ -278,8 +202,9 @@ class BayesObject(object):
 		return out
 
 	def allNames(self):
+		coll = self.handler.getCollection()
 		out = []
-		for item in self.handler.indb.find():
+		for item in coll.find():
 			_name = self.convertItem(item)
 			out.append(_name)
 		return out
@@ -304,6 +229,17 @@ class BayesObject(object):
 		_name.des = des
 		return _name
 	#match a single ITEM to a category
+        def getCatRow(self, category):
+                catList = []
+                arr = []
+                for item in self.tables.catTable:
+                        for key, value in item.iteritems():
+                                if key == category:
+                                        catList.extend(value)
+                                        catList.append(unicode(category))
+
+                return catList
+
 	def singleMatch(self, item):
 			
 		_name = self.convertItem(item)
@@ -312,22 +248,17 @@ class BayesObject(object):
 	#run a dumbclassification on a database
 	def batchDumbClassify(self, db):
 		
-		categories = self.ngrammer.categories()
+		categories = self.categories
 		for item in db.find():
 			name = self.convertItem(item)
 			isMatched = False
 			for cat in categories:
-				doc = name.matched(self.ngrammer.getCatRow(cat))
+				doc = name.matched(self.getCatRow(cat))
 				if doc:
 					#print "DUAL MATCH: %s, cat1: %s, cat2: %s" % (name.name, mem, cat)
 					#print 'Match name: %s, match: %s, cat: %s' % (name.name, doc, cat)
 					if not isMatched:
-						item['category'] = cat
-						self.handler.updateInDb(dict(item), db)
-						#print 'match is : %s' % cat
-						#dic = name.featurize()
-						#tup = (dic, cat)
-						#matched.append(tup)
+						self.handler.updateSingleField(item, 'category', cat)
 					isMatched = True
 			#if not isMatched:
 			
@@ -360,12 +291,12 @@ class BayesObject(object):
 		unmatched = []
 		matched = []
 		
-		categories = self.ngrammer.categories()
+		categories = self.categories
 		print 'categories are : %s' % categories
 		for name in self.corpus:
 			isMatched = False
 			for cat in categories:
-				doc = name.matched(self.ngrammer.getCatRow(cat))
+				doc = name.matched(self.getCatRow(cat))
 				if doc:
 					#print "DUAL MATCH: %s, cat1: %s, cat2: %s" % (name.name, mem, cat)
 					#print 'Match name: %s, match: %s, cat: %s' % (name.name, doc, cat)
@@ -382,10 +313,10 @@ class BayesObject(object):
 	#category match a single item expects name object
 	def matchOne(self, nameObject):
 		name = nameObject
-		categories = self.ngrammer.categories()	
+		categories = self.categories
 		
 		for cat in categories:
-			doc = name.matched(self.ngrammer.getCatRow(cat))
+			doc = name.matched(self.getCatRow(cat))
 		# LOOP WILL RUN AND WILL MATCH THE LAST ONE IT FINDS THIS COULD BE A PROBLEM AND NEEDS VERIFICATION
 			if doc:
 				return cat
@@ -917,7 +848,6 @@ class Mapreduce(object):
 		except Exception, e:
 			print 'mongo Update exception'
 
-	
 	def insertToDb(self, item, db):
 			
 		try:

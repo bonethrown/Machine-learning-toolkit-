@@ -1,16 +1,12 @@
-from pymongo import Connection
 import os,sys,urllib2
-import time
 import json
 import logging
-from fuzzywuzzy import fuzz
 import hashlib
 import logging
 from nltk import regexp_tokenize, tokenwrap, word_tokenize
 import re
 import string
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
-from fuzzywuzzy import fuzz
 from copy import deepcopy
 
 path = '/home/dev/kk_cosme/cosme/'
@@ -25,21 +21,6 @@ TESTCOLL = 'unittest'
 
 class Tables(object):
         def __init__(self):
-                self.connection = Connection()
-
-                self.indb = self.connection[INDB]
-                self.indb = self.indb[INCOLL]
-
-                outdb = Connection()
-                outdb = outdb[OUTDB]
-                self.outdb = outdb[OUTCOLL]
-		
-		testdb = Connection()
-                testdb = testdb[TESTDB]
-                self.testdb = testdb[TESTCOLL]
-                #self.catTable = self.buildCategoryTable('category.list')
-                #self.valTable = self.buildKeyTable(self.catTable)
-                #self.catExtTable = self.buildCategoryTable('category.name')
 
                 self.acc = self.buildCategoryTable(path+'acessorios.list')
                 self.cab = self.buildCategoryTable(path+'cabelo.list')
