@@ -11,23 +11,10 @@ class Itemgenerator(object):
 		self.manager = databaseManager(db,coll,coll)
 		#self.manager = databaseManager(db,OUTDB)
 	####DEPRECEATED USING EISTING KEY FOR BACKWARD COMPATIBILITTY
-	@staticmethod
-	def keyGen(item):
-		
-		cat = CATEGORY_LIST.index(item['category'])
-		cat = str(cat)
-		if not cat:
-			print 'item has no cat'
-		brand = item['brand'][:2]
-		if len(brand) < 2:
-			brand = brand + '0'
-		name = item['name'][:2]
-		name2 = item['name'][-2:]
-		name = name + name2
-		if len(name) < 4:
-			name = name +'00'+getrandbits(11)
-		out = cat+ brand + name
-		return out
+
+
+
+
 	
 	@staticmethod
 	def createParent(crawl_item):

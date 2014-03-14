@@ -2,7 +2,7 @@ from cosme.dataOps import databaseManager
 import pymongo
 from operator import itemgetter
 
-MATCH_ORDER = [ {'belezanaweb':0}, {'sepha':0}, {'sephora':0}, {'magazineluiza':0}, {'laffayette':0}, {'dafiti':0}, {'infinitabeleza':0}, {'americanas':0}, {'submarino':0}, {'walmart':0}, {'netfarma':0} ]
+MATCH_ORDER = ['belezanaweb','sepha','sephora','magazineluiza','laffayette','dafiti','infinitabeleza','americanas','submarino','walmart','netfarma']
 class Analytics(object):
 	
 	def __init__(self, db, coll):
