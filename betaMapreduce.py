@@ -20,6 +20,7 @@ from catChecker import Tables
 #secondCon = secondConnection('outDb')
 logging.basicConfig(filename='matchLog.log', level=logging.DEBUG)
 COLLECTION = 'lalina1018'
+OUT = 'sites3'
 MAINDB = 'production'
 NAME_RATIO = 92
 #standard params Name : 90, partial : 61, token : 75
@@ -32,7 +33,8 @@ AVG_THRESH = 83
 USE_VOL = False
 SWAP_THRESH = 3
 MATCH_ORDER = ['belezanaweb','sepha','sephora','magazineluiza','laffayette','dafiti','infinitabeleza','americanas','submarino','walmart','netfarma']
-
+PRIME_ORDER = ['belezanaweb','sepha','sephora','magazineluiza']
+ORDER = PRIME_ORDER
 class FuzzMatcher(object):
 
 	def __init__(self, db= MAINDB, collection= COLLECTION):
@@ -70,14 +72,14 @@ class FuzzMatcher(object):
 		handler.updateLalinaItem(item)
 	def siteMatch(self,coll):
 		sites = []
-		sites.extend(MATCH_ORDER)
-		for site in MATCH_ORDER:
-			if MATCH_ORDER.index(site) == 0:
-				item_gen_obj =self.createMaster('sites', coll, site, 0)
+		sites.extend(ORDER)
+		for site in ORDER:
+			if ORDER.index(site) == 0:
+				item_gen_obj =self.createMaster(OUT, coll, site, 0)
 				print 'creating: %s : %s' % (site, item_gen_obj.manager.getCollection())
 				#starting with first db take all matches = 1 
 			else:
-				item_gen_obj = self.createMaster('sites', coll, site, 0)
+				item_gen_obj = self.createMaster(OUT, coll, site, 0)
 				print 'creating: %s : %s' % (site, item_gen_obj.manager.getCollection())
 			#sites to iterate less the one designated as primary
 			sites.pop(sites.index(site))
@@ -109,37 +111,17 @@ class FuzzMatcher(object):
 							self.memory = []
 					print count - cursor
 
+	def orderLoopMatch(self, db_name =""):
+		if not db_name:
+			for db in self.handler.catdbs:
+				self.siteMatch(db)
+		else:
+			for db in self.handler.catdbs:
+				if db_name == db.name:
+					selected_db = db
+			self.siteMatch(selected_db)	
 		
-	def siteOrderMatch(self, primary_db, secondary_db):
-		
-		master = self.gen.manager.getCollection()
-		match_arr = []
-		for site in MATCH_ORDER:
-			for cursor, first in enumerate(master.find(timeout = False)):
-				size = db.find( { 'site': site}).count()-1 
-				for idx, second in enumerate(db.find( {'site': site} ) ):
-					
-					isMatch, score = self.sitelessMatch(first, second)
-					if isMatch:
-						second['matchscore'] = score
-						self.memory.append(second)
-						self.hasMatch = True
-					if idx == size and self.hasMatch:
-						push = self.getBest(self.memory)
-						#tells that object has a match
-						self.designate_match(push, marker_db)
-						push = self.gen.createMember(push)	
-						self.gen.setMember(first['key'], push)
-						self.hasMatch = False
-						print first['key']
-						self.memory = []
-				print size - cursor + " " + site
-
-			
-	def orderLoopMatch(self):
-		for db in self.handler.catdbs:
-			self.siteMatch(db)
-		
+	
 	def loopMatch(self):
 
 		for db in self.handler.catdbs:
@@ -150,10 +132,6 @@ class FuzzMatcher(object):
 		self.matchVolumized(self.handler.getCollection())
 			
 		print 'check test collection %s for results' % collection 
-	#def filterStopWords(self,stopFile):
-	#	stopList = self.tables.commaFileToList('stopwords.list')	
-		#filtered = res = [k for k in lst if 'ab' in k]	
-	#	return stopList
 	
 	def stopfilter(self, name):
 		name = name.decode('utf-8')
@@ -351,10 +329,6 @@ class FuzzMatcher(object):
 		scores = { 'nameratio'	: score1,
 				'partial' : score2,
 				'token' : score3}
-		#for key, value in scores.iteritems():
-		#	if value == False:
-		#		return False
-		#	else:
 		return scores
 
 	def fuzzyNameMatch(self, name1, name2):

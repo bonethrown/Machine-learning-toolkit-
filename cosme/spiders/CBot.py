@@ -1,7 +1,9 @@
+from scrapy.selector import Selector
 from scrapy.contrib.spiders import CrawlSpider ,Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
 from cosme.items import CosmeItem
+from cosme.pipes.utils import utils
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from scrapy import log
 from cosme.settings import COSME_DEBUG
@@ -24,6 +26,8 @@ class Cosme(CrawlSpider):
     #magaRe = re.compile('.?(\/pf\/pfba\/)$')
     #allowed_domains = ['pornhub.com']i
     start_urls = ["http://www.magazineluiza.com.br/perfumaria/l/pf/",
+	"http://www.magazineluiza.com.br/perfumes-importados/perfumaria/s/pf/pfpi/",
+	"http://www.magazineluiza.com.br/perfume-amadeirado/perfumaria/s/pf/pfam/",
 	"http://www.magazineluiza.com.br/chapinha/beleza-e-saude/s/cp/chap/",
 	"http://www.magazineluiza.com.br/depilador/beleza-e-saude/s/cp/depi/",
 	"http://www.magazineluiza.com.br/escovas-e-pentes/beleza-e-saude/s/cp/bsep/",
@@ -43,8 +47,6 @@ class Cosme(CrawlSpider):
 	"http://www.magazineluiza.com.br/manicure-e-cutelaria/beleza-e-saude/s/cp/bsmc/",
 	"http://www.magazineluiza.com.br/esmalte/beleza-e-saude/s/cp/cpes/",
 	"http://www.magazineluiza.com.br/produtos-para-uso-no-sol/beleza-e-saude/s/cp/cpso/",
-	"http://www.magazineluiza.com.br/perfumes-importados/perfumaria/s/pf/pfpi/",
-	"http://www.magazineluiza.com.br/perfume-amadeirado/perfumaria/s/pf/pfam/",
 	"http://www.magazineluiza.com.br/perfume-aquatico/perfumaria/s/pf/pfaq/",
 	"http://www.magazineluiza.com.br/perfume-citrico/perfumaria/s/pf/pfct/",
 	"http://www.magazineluiza.com.br/perfume-especiarado/perfumaria/s/pf/pfep/",
@@ -87,15 +89,42 @@ class Cosme(CrawlSpider):
     den_1 = re.compile(r'^((?=.*(games|busca|photos|login|php|signup|tags|upload|search|celulares|cama|auto|esportes|tablets)).*)$',re.I)
     deny_list = [den_1]
 
-    magazine_rule = Rule(SgmlLinkExtractor(allow= re_allow,unique=True, deny=deny_list),callback='parse_item',follow=True)
+    rule = Rule(SgmlLinkExtractor(allow= re_allow,unique=True, deny=deny_list),callback='parse_item',follow=True)
    
    
     rules = (
-	magazine_rule,
+	rule,
 		)
     
     xpathRegistry = XPathRegistry()
-    
+   
+
+    def get_links(self, response):
+	#link_list = self.rule.link_extractor.extract_links(response)	
+	urls = []
+	self.rule.link_extractor.extract_links(response)
+
+	for link in self.rule.link_extractor.links:
+		text = link.text
+		if utils.hasCheckVolume(text):
+			url = link.url
+			print 'link : %s' % url
+			urls.append(url.lower())
+			link.nofollow = True
+	if urls:
+		print 'original :%s ' % response.url
+		urls.append(response.url)
+	return urls
+
+    def urlcheck(self, response):
+	url_list = self.get_links(response)
+	print 'links: %s' % url_list
+	if url_list:
+		return url_list
+	else:
+		print 'no links %s' % response.url
+		return response.url
+	
 #not used for now, we will crawl all links
     def drop(self,response):
         pass
@@ -117,8 +146,7 @@ class Cosme(CrawlSpider):
 
         #Lets try using ItemLoaders built into scrapy
         #l = XPathItemLoader(item=CosmeItem(),response=response)
-
-        hxs = HtmlXPathSelector(response)
+	hxs = Selector(response)
         cosmeItem = CosmeItem()
         
         cosmeItem['site']= self.getDomain(response.url)
@@ -128,7 +156,10 @@ class Cosme(CrawlSpider):
                 
         #Traverse All our fields in our xpath
         for field in siteModule.META.keys():
-            cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-        
+            cosmeItem[field] = hxs.xpath(siteModule.META[field]).extract()
+       
+	if cosmeItem['name']:
+        	cosmeItem['url'] = self.urlcheck(response)
+		 
         yield cosmeItem
         

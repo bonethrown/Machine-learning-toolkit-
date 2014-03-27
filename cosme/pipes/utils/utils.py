@@ -2,12 +2,12 @@
 Module containing some helpful utility functions
 """
 import re,datetime,time
-from dateutil.parser import parse
+#from dateutil.parser import parse
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse
 import logging
-import numpy
+#import numpy
 from numpy import mean
 import hashlib
 import unidecode
@@ -270,8 +270,8 @@ def cleanPrice(toClean):
 
 def cleanSymbols(toClean):
  
-    badChars = ["\\r","\\t","\\n","-",":","%",",","(",")","'","!",]
-    stopWords = ["views","category","likes","added","pornstars","add","pornstar","ago","duration","votes"]
+    badChars = ["\\r","\\t","\\n","-",":","%",",","(",")","'","!","."]
+    stopWords = ["html","htm"]
     toClean = toClean.lower().strip()
     for val in badChars:
         toClean = toClean.replace(val,"")
@@ -346,9 +346,9 @@ def isEqualAvg(element, array):
 	else:
 		return False    
 # Ecpected format is "August 15, 2012"
-def convertDateClass(toConv):
-    date =  parse(toConv)
-    return date.isoformat()+"Z"
+#def convertDateClass(toConv):
+#    date =  parse(toConv)
+#    return date.isoformat()+"Z"
 
 #return the first in array
 def getFirst(array):
@@ -361,9 +361,9 @@ def getLast(array):
         return array[len(array)-1]
     return array
 
-def convertDateClassOBJ(toConv):
-    date =  parse(toConv)
-    return date
+#def convertDateClassOBJ(toConv):
+#    date =  parse(toConv)
+#    return date
 
 def extractSku(string):
     temp = re.search(r'[\d]+', string)
@@ -437,18 +437,17 @@ class listMatcher:
             fp = open(config,'r')
             print "loading file"
             for line in fp.readlines():
-                self.lookup.append(line.lower().strip())
+                self.lookup.append(cleanSymbols(line.lower()).strip().decode('utf-8'))
             fp.close()
         except Exception, e:
             print "###ERROR reading file###"
             print e 
    
-    def match(self, toMatch):
-	out = toMatch.encode('utf')
- 	return out
     def listMatch(self, toMatch):
-	toMatch = self.match(toMatch)
+	#toMatch = self.match(toMatch)
 	toMatch = toMatch.strip().lower()
+	if not isinstance(toMatch,unicode):
+		toMatch= toMatch.decode('utf-8')
 	toMatch = cleanSymbols(toMatch)
         toMatch = " "+toMatch+" "
 	for line in self.lookup: 
@@ -459,25 +458,45 @@ class listMatcher:
                 return brand.group().strip()
 
     def fuzzMatch(self, toMatch, printScore = False):
+	
 	toMatch = toMatch.lower().strip()
-	toMatch = toMatch.encode('utf-8')
-
 	for line in self.lookup: 
             score = fuzz.ratio(line, toMatch)
 	    if printScore and score >50:
 		print score
 	    if score > 70:
 			return line.strip()
-
-
+    #@staticmethod
+    #def make_unicode(name):
+#	if not isinstance(name, unicode):
+#		sentence_decode = sentence
+	
+		
     def removeMatch(self, sentence):
 	sentence = sentence.lower()
-	match = self.dualMatch(sentence)
-	if match:
+	if isinstance(sentence, unicode):
+		sentence_decode = sentence
+	else:
+		print 'not unicode'
+		sentence_decode = sentence.decode('utf-8')
 		
-		sentence = sentence.replace(match, "")
-		return sentence
+	match = self.dualMatch(sentence)
+	#print sentence_decode
+	if match:
+		out = sentence_decode.replace(match, "")
+		return out
 	return sentence
+    
+    def dualMatch(self,match):
+	m1 = self.listMatch(match)
+	if m1:
+		return m1
+	
+	m2 = self.recursiveFuzz(match)
+	if m2:
+		return m2
+	else:
+		return ''	
 
     def recursiveFuzz(self, sentence):
 	sentence = cleanSymbols(sentence)
@@ -501,9 +520,14 @@ class listMatcher:
 
 		out = []
 		for term in unigram:
+			
 			if isinstance(term, tuple):
-				lookup = " ".join(map(unicode, term))
-				out.append(lookup)
+				if not isinstance(term[0], unicode):
+					lookup = " ".join([unicode(x, 'utf8') for x in term])
+					out.append(lookup)
+				else:
+					lookup = term[0]+" "+term[1]
+					out.append(lookup)
 			else:
 				lookup = term
 				out.append(lookup)
@@ -532,11 +556,11 @@ class listMatcher:
     def dualMatch(self,match):
 	m1 = self.listMatch(match)
 	if m1:
-		return m1.decode('utf-8')
+		return m1
 	
 	m2 = self.recursiveFuzz(match)
 	if m2:
-		return m2.decode('utf-8')
+		return m2
 	else:
 		return ''	
 

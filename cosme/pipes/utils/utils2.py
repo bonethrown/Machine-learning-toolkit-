@@ -25,8 +25,12 @@ def allToString(anything):
 		return out
 
 def anyToString(anything):
+	if isinstance(anything, list):
+		for item in anything:
+			out = str(item)
+		return out
 
-	if isinstance(anything, int):
+	elif isinstance(anything, int):
 		out = str(anything)
 		return out
 

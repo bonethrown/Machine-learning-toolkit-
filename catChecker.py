@@ -35,8 +35,6 @@ class Tables(object):
                 self.brands = self.lineToList(brand_path+'brandric.list')
 		#self.valTable = self.buildKeyTable(self.catTable)
                 #print self.acc
-                #print self.cab
-
         def buildTree(self):
                 tree = []
                 tree.extend(self.acc)
@@ -47,8 +45,9 @@ class Tables(object):
                 tree.extend(self.unh)
                 tree.extend(self.per)
                 return tree
-
-	def lineToList(self, filename):
+	
+	@staticmethod
+	def lineToList(filename):
 		List = [line.rstrip() for line in open(filename)]
 		return List 
 
@@ -89,8 +88,8 @@ class Tables(object):
                                 values.append(key)
                                 values.extend(value)
                 return values
-
-        def buildCategoryTable(self, lookupfile):
+	@staticmethod
+        def buildCategoryTable(lookupfile):
                 catlist = open(lookupfile)
                 masterList = []
                 for item in catlist.readlines():
@@ -104,8 +103,21 @@ class Tables(object):
                         masterList.append(mydic)
 
                 return masterList
-        
-	def commaFileToList(self, lookupfile):
+	@staticmethod
+	def commaFileToSet(lookupfile):
+                catlist = open(lookupfile)
+                for item in catlist.readlines():
+                        item = item.split(',')
+                        arr = []
+                        for a in item:
+                                a = a.decode('utf8')
+                                a = a.rstrip()
+                                arr.append(a)
+                        masterList = set(arr)
+		return masterList
+	
+	@staticmethod
+	def commaFileToList(lookupfile):
                 catlist = open(lookupfile)
                 masterList = []
                 for item in catlist.readlines():

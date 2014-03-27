@@ -1,3 +1,4 @@
+from scrapy.selector import Selector
 from scrapy.contrib.spiders import CrawlSpider ,Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
@@ -57,8 +58,7 @@ class Cosme(CrawlSpider):
     	siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])
    	gnat = Gnat(siteModule) 
         for field in siteModule.META.keys():
-            cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
-
+		cosmeItem[field] = hxs.xpath(siteModule.META[field]).extract()
         #cosmeItem['price'] = gnat.multiPriceExtract(cosmeItem, hxs)
         #cosmeItem['volume'] = gnat.multiVolumeExtract(cosmeItem, hxs)
         #if not cosmeItem['name']:

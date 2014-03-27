@@ -1,3 +1,4 @@
+from pipeMethods import price_package
 from utils import utils, itemTools
 from scrapy import log
 from  default import AbstractSite
@@ -109,7 +110,9 @@ class SephaWeb(AbstractSite):
 				exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
 				logger.error('Error getting comments %s , Exception information: %s, %s, Stack trace: %s ' % (item['url'],
 											exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
-				
+		
+		item['price'] = price_package(item)
+		print 'big package: %s' % item['price']		
 		return item
 	
 

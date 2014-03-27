@@ -36,7 +36,7 @@ class AbstractSite:
 	if not item['volume']: 
 		item['volume'] = pipeMethods.nonXpathVolume(item['name'], item['url'])
 	
-	item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
+	item['date_crawled'] = datetime.datetime.today().isoformat()
 	return item
         #except:
         #    log.msg("Error parsing results", level=log.WARNING)

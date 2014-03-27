@@ -75,22 +75,23 @@ class CosmePipeline(object):
     def priceProcess(self, item, sitePipe, spider):
         
 	cleanItem = sitePipe.process(item, spider, self.matcher)
-
-	if item['price'] != 'NA' and itemTools.hasDiffVolume(cleanItem['volume']): 
-		
-		if  itemTools.hasDiffPrices(cleanItem):
-			itemArray = []
-			itemArray = splitPipe.itemizeByPrice(cleanItem)
-			print 'Split pipe created : %s items' % itemArray
-			for cleanItem in itemArray:
-				finalItem = splitPipe.singularityPipe(cleanItem)
-				self.postProcess(finalItem, spider)
-		else:
-			finalItem = splitPipe.singularityPipe(cleanItem)
-			self.postProcess(finalItem, spider)
-	else:
-		cleanItem = splitPipe.singularityPipe(cleanItem)
-		self.postProcess(cleanItem, spider)
+  	self.postProcess(cleanItem, spider)
+	
+	#if item['price'] != 'NA' and itemTools.hasDiffVolume(cleanItem['volume']): 
+	#	
+	#	if  itemTools.hasDiffPrices(cleanItem):
+	#		itemArray = []
+	#		itemArray = splitPipe.itemizeByPrice(cleanItem)
+	#		print 'Split pipe created : %s items' % itemArray
+	#		for cleanItem in itemArray:
+	#			finalItem = splitPipe.singularityPipe(cleanItem)
+	#			self.postProcess(finalItem, spider)
+	#	else:
+	#		finalItem = splitPipe.singularityPipe(cleanItem)
+#			self.postProcess(finalItem, spider)
+#	else:
+#		cleanItem = splitPipe.singularityPipe(cleanItem)
+  		#self.postProcess(cleanItem, spider)
 
     def commentCheck(self, item):
 	if 'comments' in item:

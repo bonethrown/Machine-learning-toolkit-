@@ -1,3 +1,6 @@
+from utils import cleanSymbols
+import time
+import catChecker
 import unicodedata
 from utils2 import allToString
 import urllib
@@ -18,97 +21,236 @@ import os,sys,urllib2
 import time
 import json
 import logging
+from fuzzywuzzy import fuzz
+
+STOP_BR_PATH = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/stopwords_br.list'
+STOP_EN_PATH = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/stopwords_en.list'
+SYN_PATH = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/synoynms_en.list'
+BRAND_SYN = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandmaptable.list'
+CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maquiagem', 'cabelo']
 
 class Dataclean(object):
 	
-	def __init__(self, db, incoll):
+	def __init__(self, db, incoll, outcoll, to_external_db = True):
                 self.mem = []
 		self.text = TextClean()
-		self.pc = PriceVolume()
+		self._filters = WordFilters()
+		#self.pc = PriceVolume()
 		self.tie = TypeOperations()
 		self.indb = databaseManager(db, incoll, incoll)
+		self.isExternal = to_external_db	
+		if to_external_db:
+			
+			self.outdb = databaseManager(db, outcoll, outcoll)
+			print 'dataclean external db: %s' % self.outdb.getCollection()
 		#self.outdb = databaseManager(db, outcoll, outcoll)
-		print self.indb.getCollection()
 		#print self.outdb.getCollection()
 	
 ######NAMAE AND TEXT CLEANING HERE
-	def run(self, with_Brand=False):
+	def test(self, name):
+		name = self._filters.run_filters(name)	
+		
+
+
+	def unitTest(self):
+		coll = self.indb.getCollection()
+		#function = self.text.removeAllSpaces
+		field1 = 'price'
+		field2 = 'vol'	
+		for count, item in enumerate(coll.find()):
+			self.genericBatch(function, item, field1,field2)
+			a = item[field1]	
+			print a[0]
+
+	def run(self):
 		
 		coll = self.indb.getCollection()
+		print 'Items to clean: %s' % coll.count()
 		for count, item in enumerate(coll.find(timeout = False)):
 
-			try : 
-				item['name'] = self.text.cleaner(item['name'], with_Brand)	
-				item['volume'] = self.text.removeAllSpaces(item['volume'])
+				self.genericBatch(self.text.removeAllSpaces, item, 'price','vol')
+				item['name'] = self._filters.run_filters(item['name'])	
+				item['name_noindex'] = self.text.cleaner(item['name_noindex'])
 				item['category'] = ''
-				self.tie.run(item)
-				eelf.addFields(item)
-				self.indb.updateLalinaItem(item)
-			except Exception, e:
-				self.mem.append(e, item['key'])
-		self.mem = []
-
-	def addFields(self, item):
-		if not 'price_str' in item:
-			item['price_str'] = self.pc.floatPriceToString(item['price'])
-		if not 'name_url' in item:
-			item['name_url'] = self.urlquote(item['name'])
-		if not 'ismatched' in item:
-			item['is_matched'] = 0
 			
+				self.tie.run(item)
+				del item['_id']
+				self.addFields(item)	
+				self.write(item)
+				self.mem.append(item['key'])
+
+		print 'items cleaned: %s' % self.outdb.getCollection().count()
+		print 'errors :%s ' % len(self.mem)
+		self.mem = []
+	def write(self, item):
+		#if self.isExternal:
+		#	print item
+			self.outdb.updateLalinaItem(item)
+		#else:
+		#	self.indb.updateLalinaItem(item)
+	
+	def genericBatch(self, _function, item, prim_field, field):
+		if isinstance(item[prim_field], list):
+			for value in item[prim_field]:
+				out =_function(value[field])
+				value[field] = out 
+	
+	def addFields(self, item):
+		try:
+			#if not 'price_str' in item:
+			#	item['price_str'] = self.pc.floatPriceToString(item['price'])
+			if not 'name_url' in item:
+				item['name_url'] = self.urlquote(item['name'])
+			if not 'ismatched' in item:
+				item['is_matched'] = 0
+			#if '_id' in item:
+			#	print 'removed' 
+			#	del item['_id']
+			
+		except Exception, e:
+			print 'field add exception : %s , %s' % (e,item)
+	
 	def urlquote(self, string):
                 string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
                 string = string.replace(" ","-")
                 string = urllib.quote(string)
                 return string
 
+
+class WordFilters(object):
+	def __init__(self):
+		#matcher removes the brand
+		self.text = TextClean()
+		self.matcher = listMatcher()
+		self.cat_list= CATEGORY_LIST
+		self.syn = catChecker.Tables.buildCategoryTable(SYN_PATH)
+		self.stop_br = catChecker.Tables.commaFileToList(STOP_BR_PATH)
+		self.stop_en = catChecker.Tables.commaFileToList(STOP_EN_PATH)
+		self.stop_en.extend(self.stop_br)
+		self.stop_en = set(self.stop_en)
+		self.brand_syn = catChecker.Tables.buildCategoryTable(BRAND_SYN)	
+		self.cat = CATEGORY_LIST
+	
+        def stopfilter(self, name, filter_list):
+                name = name.split()
+                filtered = [k for k in name if not k in filter_list]
+                out =" ".join(filtered)
+                return out
+
+	def run_filters(self, out):
+		#out = fuzz.asciidammit(out)
+		#start =time.time()
+		#initial cleaning
+		out = self.text.cleaner(out)
+		#print '1. ' + out
+		#remove stop words
+		out = self.stopfilter(out, self.stop_en)
+		#print '2. ' + oui
+		#expand synonyms
+		out = self.syn_map(out, self.syn)
+		# remove brands
+		out = self.syn_map(out, self.brand_syn)
+		#print '4. ' + out
+		out = self.dupRemove(out)
+
+		out = self.stopfilter(out, self.cat)
+		
+		out = self.matcher.removeMatch(out)	
+		#print '5. ' + out
+		out = self.text.removeMidWhiteSpaces(out)
+		
+		out = out.strip()
+		#print 'elapsed time: %s' % (end-start)
+		return out	
+
+	def syn_map(self, name, table):
+		for item in table:
+			for key, value in item.iteritems():
+				for word in value:
+					re_find = re.search(word, name)
+					if re_find:
+						re_found = re_find.group()
+						name = name.replace(re_found, key)
+		return name
+
+	def dupRemove(self, a):
+		a = ' '.join(self.unique_list(a.split()))
+		return a
+
+	def unique_list(self, l):
+		ulist = []
+		[ulist.append(x) for x in l if x not in ulist]
+		return ulist
+
+
 class TextClean(object):
 	def __init__(self):
                 self.pc = PriceVolume()
-		self.matcher = listMatcher()
+		#self.matcher = listMatcher()
 		self.pattern = r'(?x)\n  ([A-Z]\\.)+  \n | \\w+(-\\w+)*\n| \\$?\\d+(\\.\\d+)?%?\n| \\.\\.\\.\n| [][.,;"\'?():-_`]\n'
-                self.volPattern = r'''(?i) \d+ml|\d+ ml|\d+ML|\d+ML|\d+g|\d+ g|\d+gr|\d+ gramas|\d+ gr|\d+gramas'''	
+                
+		self.volPattern = r'''(?i) \d+ml|\d+ ml|\d+ML|\d+ML|\d+g|\d+ g|\d+gr|\d+ gramas|\d+ gr|\d+gramas'''	
 	def cleaner(self, newName, remove_brand = True):
 		#ORDER IMPORTTAN
-		if not isinstance(newName, unicode):
-			newName = newName.decode('utf8')
+		#if not isinstance(newName, unicode):
+		#	newName = newName.decode('utf8')
 		newName = newName.lower()
-		newName = self.quickExpand(newName)
-		newName = self.punctuationStripper(newName)
-		newName = self.cleanName(newName)
+		#newName = self.quickExpand(newName)
+		#newName = self.punctuationStripper(newName)
+		#newName = self.cleanName(newName)
+		newName = cleanSymbols(newName)	
 		newName = self.pc.cleanVolume(newName)
-		newName = self.dupRemove(newName)
-		newName = self.removeMidWhiteSpaces(newName)
-		if remove_brand:
-			newName = self.matcher.removeMatch(newName)
-		newName = self.removeMidWhiteSpaces(newName)
-		newName = newName.strip()
+		newName= self.clean_numbers(newName)	
+		#newName = self.dupRemove(newName)
+		#newName = self.removeMidWhiteSpaces(newName)
+		#newName = newName.strip()
 		return newName
 
-		
+	@staticmethod
+	def url_2_name(url):
+		url = url.split('/')
+		url = url[-1]
+		url = url.replace('-',' ')
+		return url
+
+	def clean_numbers(self, name):
+		keep = ['212','2012','2013','2014']
+		name = name.split()
+		for word in name:
+			if word.isdigit() and word not in keep:
+				name.remove(word)
+		return " ".join(name)
+
+	
 	def removeMidWhiteSpaces(self, name):
                 name = re.sub(r'\s+', ' ', name)
                 return name
 
 	def punctuationStripper(self, string):
-                phrase = string.strip()
+                start = time.time()
+		phrase = string.strip()
                 phrase = phrase.split(' ')
                 out = []
                 for item in phrase:
                         a = ''.join(e for e in item if e.isalnum())
                         out.append(a)
                 out = ' '.join(out)
-                return out
+                end = time.time()
+                print ' run time: %s' % (end-start)
+		return out
 
 	def cleanName(self, name):
+                start = time.time()
                 exclude = set(string.punctuation)
                 out = ''.join(ch for ch in name if ch not in exclude)
+                end = time.time()
+                print ' run time: %s' % (end-start)
 
                 return out
 
 	def quickExpand(self, name):
 		r = r'edt|edp|c/|p/|eau de parfum|homme'
-		expanddict = { 'p/':'para','c/':'com','edt' : 'eau de toilette', 'edp': 'eau de perfume','eau de parfum':'eau de perfume','homme':'masculino' }
+		expanddict = { 'p/':'para','c/':'com','edt' : 'eau de toilette', 'edp': 'eau de perfume','eau de parfum':'eau de perfume','homme':'masculino','edc':'eau de cologne' }
 		a = re.search(r, name)
 		if a is not None:
 			a = a.group()
@@ -132,11 +274,14 @@ class TextClean(object):
 		return "".join(string.split()).lower()
 	
 class TypeOperations(object):
+	def __init__(self):
 	
+		self.no_op= ['price']	
+
 	def run(self, item):
 		for key, value in item.iteritems():
-			item[key] = allToString(item[key])
-
+			if key not in self.no_op:
+				item[key] = allToString(item[key])
 
 	def batchNoToUni(self, field):
                 coll = self.manager.getCollection()

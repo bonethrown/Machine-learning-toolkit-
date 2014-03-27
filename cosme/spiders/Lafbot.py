@@ -1,3 +1,4 @@
+from scrapy.selector import Selector
 from scrapy.contrib.spiders import CrawlSpider ,Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
@@ -48,13 +49,13 @@ class Cosme(CrawlSpider):
         pass
 
     def parse_item(self, response):
-        hxs = HtmlXPathSelector(response)
+        hxs = Selector(response)
         cosmeItem = CosmeItem()
         cosmeItem['site'] = self.getDomain(response.url)
         cosmeItem['url'] = response.url
         siteModule = self.xpathRegistry.getXPath(cosmeItem['site'])        
         for field in siteModule.META.keys():
-            cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
+            cosmeItem[field] = hxs.xpath(siteModule.META[field]).extract()
         #self.log(str(cosmeItem),log.INFO)
         yield cosmeItem
 

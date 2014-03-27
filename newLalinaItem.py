@@ -4,17 +4,32 @@ import string
 from random import getrandbits
 OUTDB = 'new_collection'
 PARENT= ['_id','product_id','price_per_vol','price_str','date_crawled','url','site','volume','price','description']
-MEMBER= ['_id','date_crawled','name_noindex','product_id',' matches']
+MEMBER= ['brand','category','name','name_url','price','site','description','sku','image']
 CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maquiagem', 'cabelo']
 class Itemgenerator(object):
 	def __init__(self, db, coll):
 		self.manager = databaseManager(db,coll,coll)
 		#self.manager = databaseManager(db,OUTDB)
 	####DEPRECEATED USING EISTING KEY FOR BACKWARD COMPATIBILITTY
-
-
-
-
+	@staticmethod
+	def makePrice(price, ref, url):
+		#ref is short for reference is the variable the price is tied to, e.g volume in perfumes, color in lipstick, watt in hairdryers
+		price = dict()
+		price['price'] = price
+		price['ref'] = ref
+		price['url'] = url
+		return price
+	
+	#there are two cases: 
+	#1: items of different volume can have same urls handled in pipeline
+	#2: items of different ovlume can have different urls e.g magazineluiza
+	# depending on the case the bot needs to fetch all from a single url and update the price arr as a whole or get them 1 by 1 
+	def is_url_same(sites_arr):
+		check = set(sites_arr)
+		if len(check) ==1:
+			return True
+		else: 
+			return False
 	
 	@staticmethod
 	def createParent(crawl_item):
@@ -33,7 +48,7 @@ class Itemgenerator(object):
 	def createMember(crawl_item):
 		item = dict()
 		for key,value in crawl_item.iteritems():
-			if key not in MEMBER:
+			if key in MEMBER:
 				item[key] = value
 		return item
 	@staticmethod

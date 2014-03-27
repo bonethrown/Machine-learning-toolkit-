@@ -1,4 +1,5 @@
 from pipes.utils import db2, solr, utils
+import logging
 import os, sys
 from decimal import *
 import pymongo
@@ -26,6 +27,7 @@ MIRROR1_COMMENTS = 'commets_mirror1'
 TEST_LALINA = 'echo_lalina'
 TEST_COMMENT = 'echo_comment'
 CATEGORY_LIST = ['perfume', 'unha', 'corpo e banho', 'acessorios', 'homem', 'maquiagem', 'cabelo']
+SITES = ['belezanaweb','americanas','dafiti','infinitabeleza','laffayette','magazineluiza','netfarma','sepha','sephora,','submarino','walmart']
 
 
 MASTER_HOST = '137.117.83.66'
@@ -34,6 +36,7 @@ MASTER_DATABASE = 'matching'
 MASTER_COLL= 'delta'
 MASTER_COMMENTS = 'delta_comments'
 
+log = logging.getLogger(__name__)
 def nameGen( dbtype):
 	a = time.strftime("%B")
 	name = dbtype + '_'+ a
@@ -50,8 +53,8 @@ class databaseManager(object):
 		self.lalinaCollection = db2.getOwnDb(collection, db)
 		self.commentsCollection = db2.getOwnDb(comment_coll, db)
 		self.catdbs = self.initCatCollections()
-		self.remote1Lalina = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
-		self.remote1Comments = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
+	#	self.remote1Lalina = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
+	#	self.remote1Comments = db2.anyConnection(MASTER_HOST, MASTER_PORT,MASTER_DATABASE, MASTER_COLL)
 
 	def swap_collection(self, coll):
 		new = db2.getOwnDb(self.db_name, coll)
@@ -69,8 +72,7 @@ class databaseManager(object):
 		try:
 			self.remote1Lalina.update({"key" : item['key']}, item, upsert=True)
 		except Exception, e:
-			log.msg('update error in db for item %s' %item['key']) 
-	
+			print log	
 	def updateRemoteComment(self, storeItem):
 		if storeItem['comments']:
 			try:
@@ -85,7 +87,12 @@ class databaseManager(object):
 			dog  = cat.replace(" ","")
 			coll = self.db[dog]
 			dbs.append(coll)
-		return dbs	
+		return dbs
+
+	def mergeSitesDb(self, db_name):
+		dbs=self.initCatCollections(SITES)
+		self.multiMerge(db_name, dbs)		
+	
 	def databaseNameGen(self, dbtype):
 			a = datetime.datetime.utcnow()
 			b = a.date().isoformat().replace('-','')

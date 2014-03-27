@@ -102,23 +102,24 @@ class Gnat(object):
 			cosmeItem['brand'] = hxs.select(self.siteModule.get_brand2()).extract()
 		return cosmeItem['brand']
 	 def multiPriceExtract(self, cosmeItem, hxs):
+
 		if len(cosmeItem['price']) == 0: # Check for the 'por' price
 			cosmeItem['price'] = hxs.select(self.siteModule.get_price2()).extract()
 		if  len(cosmeItem['price']) == 0:
 			cosmeItem['price'] = hxs.select(self.siteModule.get_price3()).extract()
 		if  len(cosmeItem['price']) == 0:
 			cosmeItem['price'] = hxs.select(self.siteModule.get_price4()).extract()
-		if  len(cosmeItem['price']) == 0:
-			cosmeItem['price'] = hxs.select(self.siteModule.get_price5()).extract()
+#		if  len(cosmeItem['price']) == 0:
+#			cosmeItem['price'] = hxs.select(self.siteModule.get_price5()).extract()
 		return cosmeItem['price']
 
 	 def multiVolumeExtract(self, cosmeItem, hxs):
 		if not cosmeItem['volume']:
 			print 'volcheck 1'
 			cosmeItem['volume'] = hxs.select(self.siteModule.get_volume2()).extract()
-		if not cosmeItem['volume']:
-			print 'volchek 2'
-			cosmeItem['volume'] = hxs.select(self.siteModule.get_volume3()).extract()
+		#if not cosmeItem['volume']:
+		#	print 'volchek 2'
+		#	cosmeItem['volume'] = hxs.select(self.siteModule.get_volume3()).extract()
 		return cosmeItem['volume']
 	 
 	 def multiNameExtract(self, cosmeItem, hxs):

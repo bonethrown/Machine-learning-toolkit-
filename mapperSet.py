@@ -21,9 +21,9 @@ from utils import listMatcher
 from name import Name
 
 INDB = 'neworder'
-INCOLL = 'raw_January'	
-OUTDB = 'neworder'
-OUTCOLL = 'cleanout'
+INCOLL = 'raw_March'	
+OUTDB = INDB
+OUTCOLL = 'clean_March'
 FINAL_COLL = 'order_loop'
 MAP_PATH = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandmaptable.list'
 match_path = '/home/dev/kk_cosme/cosme/cosme/pipes/utils/brandric.list'
@@ -45,12 +45,12 @@ class CleanAndCategorize(object):
 	def __init__(self, launch_with_model = False):
 		self.outdb = databaseManager(OUTDB, OUTCOLL, COMMENT_COLL)	
 		self.indb = databaseManager(INDB, INCOLL, COMMENT_COLL)
-		self.clean = Dataclean(INDB, INCOLL)
+		self.clean = Dataclean(INDB, INCOLL, OUTCOLL)
 		self.fuzz = FuzzMatcher(OUTDB, OUTCOLL)
-		#self.mapreduce = Mapreduce()
 		self.bayes = BayesObject(self.outdb) #EXPECTS HANDLER 
 		self.init_Model(launch_with_model)
 		self.norm = Normalize(OUTDB, OUTCOLL)
+
 	def init_Model(self, toLoad):
 		if toLoad:
 			self.trainedmodel = self.bayes.makeModel()
@@ -86,14 +86,14 @@ class CleanAndCategorize(object):
 		self.outdb.multiMerge(FINAL_COLL, self.outdb.catdbs)
 
 	def runOrderLoopMatch(self):
-		#self.clean.run()
-		#self.dumbClassify(self.outdb)
+		self.clean.run()
+		self.dumbClassify(self.outdb)
 		self.outdb.addField('is_matched', 0)
-		self.outdb.killdbs()
-		#self.norm.brandReduce()
+		self.norm.brandReduce()
 		#print 'marked for order matching'
+		self.outdb.killdbs()
 		self.outdb.chop2cats(self.outdb.getCollection())
-		self.fuzz.orderLoopMatch()
+		self.fuzz.orderLoopMatch('perfume')
 		self.outdb.multiMerge(FINAL_COLL, self.outdb.catdbs)
 	
 	def runMatcher(self):
@@ -104,7 +104,7 @@ class CleanAndCategorize(object):
 	def dumbClassify(self, dbhandler):
 		collection = dbhandler.getCollection()
 		print 'db is: %s' % collection
-		self.bayes.batchDumbClassify(collection)
+		self.bayes.batchDumbClassify(collection, 'name_noindex')
 
 	def smartClassify(self, dbhandler):
 		collection = dbhandler.getCollection()
@@ -214,8 +214,8 @@ class BayesObject(object):
 		self.db = self._handler.getCollection()
 		print 'Bayes DB: %s ' % self.db
 	
-	def convertItem(self, item):
-		name = item['name']
+	def convertItem(self, item, field = 'name'):
+		name = item[field]
 	
 		url = item['url']
 		des = item['description']
@@ -246,11 +246,11 @@ class BayesObject(object):
 		category = self.matchOne(_name)
 		return category
 	#run a dumbclassification on a database
-	def batchDumbClassify(self, db):
+	def batchDumbClassify(self, db, field ='name'):
 		
 		categories = self.categories
 		for item in db.find():
-			name = self.convertItem(item)
+			name = self.convertItem(item, field)
 			isMatched = False
 			for cat in categories:
 				doc = name.matched(self.getCatRow(cat))

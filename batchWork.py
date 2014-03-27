@@ -34,6 +34,24 @@ class Batchwork(object):
 	### USAGE:  i.e create an instance of a function i.e listmatch pass as first argument and pass 'name' as second argument
 	#third argument can also be 'name' if you want to clean or match the name.
 	#below is the most powerful batch function. can run anything as a batch process on an item
+	def generic_query_batch(self, _function,field1, field2, query, value):
+		coll = self.manager.getCollection()
+		print coll
+		for item in coll.find({query : value } ):
+			mod = item[field1]
+			out =_function(mod)
+			item[field2] = out
+			self.manager.updateLalinaItem(item)
+
+	def gen_conditional_copy(self, field1, field2, condition):
+		coll = self.manager.getCollection()
+		print coll
+		for item in coll.find():
+			if item[field1] == condition:
+				item[field1] = item[field2]	
+				self.manager.updateLalinaItem(item)
+			
+		
 	def genericBatch(self, _function,field1, field2):
 		coll = self.manager.getCollection()
 		for item in coll.find():
@@ -42,13 +60,23 @@ class Batchwork(object):
 			item[field2] = out
 			self.manager.updateLalinaItem(item)
 	#does two operations, takes two functions 1 a matcher function and 2 a function 
-
-
-	#def set_match_count(self):
-	#	matches = len(item['sites']) 
+	def generic_Item(self, _function, kill =False):
+		coll = self.manager.getCollection()
+		for item in coll.find():
+			out =_function(item)
 			
-		
+			self.manager.updateLalinaItem(item)
+		arr = [0]
+		if kill:
+			self.manager.removeByField('is_matched',arr)
 
+	def is_match(self, item):
+		length = len(item['sites'])
+		if length > 1:
+			item['is_matched'] = 1
+			item['count'] = length				
+		else: 
+			item['count'] = length				
 
 	def urlquote(self, string):
 		string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')

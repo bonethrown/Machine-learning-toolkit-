@@ -1,14 +1,14 @@
 from scrapy.contrib.spiders import CrawlSpider ,Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
-from scrapy.selector import HtmlXPathSelector
+from scrapy.selector import Selector
 from cosme.items import CosmeItem
-
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
 from scrapy import log
 from scrapy.exceptions import CloseSpider
 from cosme.settings import COSME_DEBUG
 from legModule import getDomain
 from superSpider import Gnat
+
 class Cosme(CrawlSpider):
     name = 'Megabot'
     allowed_domains = ['belezanaweb.com.br']
@@ -27,7 +27,7 @@ class Cosme(CrawlSpider):
     
     deny_exts = ('=','site', 'include', 'ajax', 'basket', 'duvidas')
     allow_exts = (r'[\w\/-]+')
-    denylist = ('\.asp')
+    denylist = ('\.asp', '\.jpg')
     #for i in start:
     #   start_urls.append(i)
     #r'/bios/.\w+\.htm'
@@ -42,7 +42,7 @@ class Cosme(CrawlSpider):
         pass
 
     def parse_item(self, response):
-        hxs = HtmlXPathSelector(response)
+        hxs = Selector(response)
         cosmeItem = CosmeItem()
 	cosmeItem['site'] = getDomain(response.url) 
         cosmeItem['url'] = response.url
@@ -50,7 +50,7 @@ class Cosme(CrawlSpider):
         gnat = Gnat(siteModule)
         
         for field in siteModule.META.keys():
-            cosmeItem[field] = hxs.select(siteModule.META[field]).extract()
+            cosmeItem[field] = hxs.xpath(siteModule.META[field]).extract()
 
         cosmeItem['price'] = gnat.multiPriceExtract(cosmeItem, hxs)
         cosmeItem['volume'] = gnat.multiVolumeExtract(cosmeItem, hxs)

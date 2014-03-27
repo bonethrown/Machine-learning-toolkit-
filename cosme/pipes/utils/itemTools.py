@@ -2,7 +2,6 @@
 Module containing some helpful utility functions
 """
 import re,datetime,time
-from dateutil.parser import parse
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http.request import Request
 from scrapy.http.response.html import HtmlResponse

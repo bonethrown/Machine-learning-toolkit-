@@ -1,4 +1,5 @@
 from utils import utils
+from pipeMethods import price_package
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.utils.utils import get_http_response
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
@@ -54,7 +55,9 @@ class SephoraSite(AbstractSite):
 	#	if item['comments']:
 	    
            # item['comments'] = stringtools.decodeIsoComments(item['comments'])
-	            
+
+	item['price'] = price_package(item)
+	print ' big package: %s' % item['price']	            
         return item
 
     def get_comments(self, url):

@@ -1,3 +1,4 @@
+from pipeMethods import price_package
 from BeautifulSoup import BeautifulSoup
 from utils import utils
 import re
@@ -46,6 +47,8 @@ class laffayetteWeb(AbstractSite):
 				if len(temp) > 1:
 					temp = utils.getElementVolume(temp)
 					item['volume'] = temp
+			else:
+				item['volume'] = utils.extractVolume(item['volume'])
 
 		if item['category']:
 			tempCat = item['category']
@@ -68,6 +71,9 @@ class laffayetteWeb(AbstractSite):
 											exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
 				
 
+		temp = price_package(item)
+        	item['price'] = temp
+		print ' big pacakge: %s' % temp	
 		return item
 
 

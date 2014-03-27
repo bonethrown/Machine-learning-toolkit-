@@ -1,4 +1,5 @@
 from utils import utils, itemTools
+from pipeMethods import price_package
 from cosme.pipes.default import AbstractSite
 from cosme.pipes.utils.utils import get_http_response
 from cosme.spiders.xpaths.xpath_registry import XPathRegistry
@@ -15,7 +16,7 @@ class BelezanaWeb(AbstractSite):
 
     def __init__(self):
         self.siteModule = XPathRegistry().getXPath('belezanaweb')
-    
+
     def process(self, item,spider,matcher):
         if item['url']:
             item['url'] = item['url'].lower()					
@@ -23,33 +24,10 @@ class BelezanaWeb(AbstractSite):
 		item['sku'] = utils.cleanSkuArray(item['sku'], 'string')
 	if item['price'] != 'NA': 
 	
-	#	temp = item['price']
-	#	if len(temp) > 1:
-	#		volarray = []
-	#		parray = []
-	#		for item in temp:
-	#			if re.search(r'true', item):
-	#				item = item.replace("'disponivel': true,","")
-	#				dic = ast.literal_eval(item)
-	#				price = dic['preco_promo']
-	#				volume = dic['descricao']
-	#				parray.append(price)
-	#				volarray.append(volume)	
-	#			else:
-	#				item = item.replace("'disponivel': false,","")
-	#				dic = ast.literal_eval(item)
-	#				price = dic['preco_promo']
-	#				volume = dic['descricao']
-	#				parray.append(price)
-	#				volarray.append(volume)
-	#		item['price'] = utils.cleanNumberArray(parray, 'float')
-	#		item['volume'] = volarray
-	#		print 'BELEZA MULTI PASS'
-	#		print item['price']
-	#		print item['volume']	
-	#	else:
-			item['price'] =utils.cleanNumberArray(item['price'], 'float')
-	
+		item['price'] =utils.cleanNumberArray(item['price'], 'float')
+		if not len(item['price']) > 1:
+			temp = item['price'][0]
+			item['price'] = temp  	
 	if item['description']:
 		temp = item['description']
 		soup = BeautifulSoup(temp[0])
@@ -71,7 +49,6 @@ class BelezanaWeb(AbstractSite):
 		
 		temp = item['volume']
 		if isinstance(temp, list):
-			length = len(temp)
 			print "multi value volume %s" % temp
 			
 			item['volume'] = utils.getElementVolume(temp)
@@ -87,6 +64,11 @@ class BelezanaWeb(AbstractSite):
             temp = item['image'] 
             temp = temp[0]
             item['image'] = temp
+
+
+	temp = price_package(item)
+	item['price'] = temp
+
         #if item['comments']:
          #   comment_html = item['comments']
           #  try:

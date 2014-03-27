@@ -1,7 +1,7 @@
 """
 Pipelines per site are stored in their own folder for minumum chaos
 """
-
+from pipeMethods import sep_url_package
 from utils import utils
 from scrapy import log
 import datetime
@@ -31,6 +31,7 @@ class MagazineLuizaSite(AbstractSite):
         #if there isn't a price make it very expensive 
         if item['price'] != 'NA':
 		item['price'] = utils.cleanNumberArray2(item['price'], 'float')
+		item['price'] =item['price'][0]
 	
 	if item['description']:
 		temp = item['description']
@@ -47,15 +48,11 @@ class MagazineLuizaSite(AbstractSite):
 		match = matcher.dualMatch(brand)
 		item['brand'] = match
 		if not item['brand']:
-			logging.info(item['url'])
 			raise DropItem("**** **** **** Missing brand in %s . Dropping" % item) 
 	if item['sku']:
 		item['sku'] = utils.cleanSkuArray(item['sku'], 'string')			
 
     # item['brand'] = matcher.listMatch(temp)
-        if item['url']:
-            item['url'] = item['url'].lower()
-        
 
 	if item['category']:
 	    if isinstance(item['category'], list):
@@ -71,9 +68,10 @@ class MagazineLuizaSite(AbstractSite):
             #    exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
              #   logger.error('Error getting comments %s , Exception information: %s, %s, Stack trace: %s ' % (item['url'],
               #                              exceptionType, exceptionValue, traceback.extract_tb(exceptionTraceback)))
+	temp = sep_url_package(item)
+	item['price']= temp
+        print 'big package %s' % temp        
                 
-                
-        item['date_crawled'] = utils.convertDateClass(datetime.datetime.today().isoformat())
         return item
              
         
