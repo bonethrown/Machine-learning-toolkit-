@@ -8,7 +8,6 @@ from name import Name
 import urllib
 import unicodedata
 from pymongo import Connection
-from betaMapreduce import FuzzMatcher
 import os,sys,urllib2
 import time
 import json
@@ -23,9 +22,8 @@ import nltk.classify.util
 from nltk import classify
 from nltk.classify import NaiveBayesClassifier
 import random
-from dataOps import databaseManager
+from cosme.dataOps import databaseManager
 import re
-from utils import listMatcher
 
 class Batchwork(object):
 	def __init__(self, db, coll):
@@ -36,7 +34,6 @@ class Batchwork(object):
 	#below is the most powerful batch function. can run anything as a batch process on an item
 	def generic_query_batch(self, _function,field1, field2, query, value):
 		coll = self.manager.getCollection()
-		print coll
 		for item in coll.find({query : value } ):
 			mod = item[field1]
 			out =_function(mod)
@@ -45,13 +42,24 @@ class Batchwork(object):
 
 	def gen_conditional_copy(self, field1, field2, condition):
 		coll = self.manager.getCollection()
-		print coll
 		for item in coll.find():
 			if item[field1] == condition:
 				item[field1] = item[field2]	
 				self.manager.updateLalinaItem(item)
-			
 		
+	def replace_func(self,string, this, that):
+		string = str.replace(string, this, that)
+		return string
+	
+	def cond_genericBatch(self, field1, field2, condition_field, condition):
+		coll = self.manager.getCollection()
+		for item in coll.find():
+			if item[condition_field] == condition:
+				mod = item[field1]
+				out = mod.replace('akamai','www')
+				item[field2] = out
+				self.manager.updateLalinaItem(item)
+			
 	def genericBatch(self, _function,field1, field2):
 		coll = self.manager.getCollection()
 		for item in coll.find():
