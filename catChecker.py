@@ -51,7 +51,7 @@ class Tables(object):
 		List = [line.rstrip() for line in open(filename)]
 		return List 
 
-	def arrayToFile(self, name, array):
+	def arrayToFile(self, stringfield, array):
                 savedoc = open(stringfield+'map', 'wb')
 		for item in array:
 			savedoc.write("%s\n" % item.encode('utf-8'))

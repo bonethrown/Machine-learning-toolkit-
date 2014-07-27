@@ -56,7 +56,7 @@ class Batchwork(object):
 		for item in coll.find():
 			if item[condition_field] == condition:
 				mod = item[field1]
-				out = mod.replace('akamai','www')
+				out = mod.replace('akamai','obj')
 				item[field2] = out
 				self.manager.updateLalinaItem(item)
 			
